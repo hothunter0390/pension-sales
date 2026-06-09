@@ -561,6 +561,67 @@ let sortState   = { col: null, asc: true };
 const TARGET_BASE = 20;
 const ORG_ORDER   = ['1사업단','2사업단','중부사업단','3사업단','4사업단','영남사업단','EB사업단'];
 
+/* 전체 명단 (시트 미제출자도 0점으로 표시하기 위해 사용) */
+const MEMBERS = [
+  {org:'1RM',        name:'윤영욱', role:'RM'},
+  {org:'1사업단',    name:'김창모', role:'단장'},
+  {org:'1사업단',    name:'이재우', role:'팀장'},
+  {org:'1사업단',    name:'최미나', role:'팀장'},
+  {org:'1사업단',    name:'차은영', role:'팀장'},
+  {org:'1사업단',    name:'김승현', role:'팀장'},
+  {org:'2사업단',    name:'송창민', role:'단장'},
+  {org:'2사업단',    name:'조형준', role:'팀장'},
+  {org:'2사업단',    name:'이주홍', role:'팀장'},
+  {org:'2사업단',    name:'오상민', role:'팀장'},
+  {org:'2사업단',    name:'김민정', role:'팀장'},
+  {org:'중부사업단', name:'이종혁', role:'단장'},
+  {org:'중부사업단', name:'임동원', role:'팀장'},
+  {org:'중부사업단', name:'김정훈', role:'팀장'},
+  {org:'중부사업단', name:'이준희', role:'팀장'},
+  {org:'중부사업단', name:'조상기', role:'팀장'},
+  {org:'중부사업단', name:'이미영', role:'팀장'},
+  {org:'2RM',        name:'김영진', role:'RM'},
+  {org:'3사업단',    name:'유광명', role:'단장'},
+  {org:'3사업단',    name:'강현숙', role:'팀장'},
+  {org:'3사업단',    name:'신미숙', role:'팀장'},
+  {org:'3사업단',    name:'조영진', role:'팀장'},
+  {org:'3사업단',    name:'유효열', role:'팀장'},
+  {org:'4사업단',    name:'김대훈', role:'단장'},
+  {org:'4사업단',    name:'유유희', role:'팀장'},
+  {org:'4사업단',    name:'천미례', role:'팀장'},
+  {org:'4사업단',    name:'주지애', role:'팀장'},
+  {org:'영남사업단', name:'김웅기', role:'단장'},
+  {org:'영남사업단', name:'박평',   role:'팀장'},
+  {org:'영남사업단', name:'우상우', role:'팀장'},
+  {org:'영남사업단', name:'고성원', role:'팀장'},
+  {org:'영남사업단', name:'김정진', role:'팀장'},
+  {org:'EB사업단',   name:'조국환', role:'단장'},
+  {org:'EB사업단',   name:'송재호', role:'팀장'},
+  {org:'EB사업단',   name:'임종창', role:'팀장'},
+  {org:'EB사업단',   name:'송조애', role:'팀장'},
+];
+
+/* 시트 데이터 + 전체 명단 병합: 미제출자는 0점으로 채움 */
+function mergeWithRoster(sheetData) {
+  const sheetWeeks = [...new Set(sheetData.map(r => r.week))].filter(Boolean).sort().reverse();
+  if (!sheetWeeks.length) return sheetData;
+  const result = [];
+  sheetWeeks.forEach(week => {
+    MEMBERS.forEach(m => {
+      const found = sheetData.find(r => r.week === week && r.name === m.name);
+      result.push(found || {
+        week, org: m.org, name: m.name, role: m.role,
+        score:  m.role === '팀장' ? 0 : null,
+        target: m.role === '팀장' ? TARGET_BASE : null,
+        new_:   m.role === '팀장' ? 0 : null,
+        fund:   m.role === '팀장' ? 0 : null,
+        mgmt:   m.role === '팀장' ? 0 : null,
+      });
+    });
+  });
+  return result;
+}
+
 /* ──────────── CONFIG ──────────── */
 function loadConfig() {
   const cfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
@@ -642,8 +703,8 @@ async function loadData() {
       mgmt:   parseInt(r[getColIdx('mgmt',10)]) || 0,
     })).filter(r => r.name);
 
-    allData = data;
-    weeks   = [...new Set(data.map(r => r.week))].sort().reverse();
+    allData = mergeWithRoster(data);
+    weeks   = [...new Set(allData.map(r => r.week))].sort().reverse();
     buildWeekSelect();
     populateAttNames();
     renderAll();
