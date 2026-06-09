@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>법인사업부 영업활동 대시보드</title>
-<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   :root {
@@ -25,6 +25,8 @@
     --blue-bg: #eef2fb;
     --radius: 10px;
     --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 14px rgba(0,0,0,0.09), 0 2px 4px rgba(0,0,0,0.04);
   }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body {
@@ -38,20 +40,26 @@
   /* ── 레이아웃 ── */
   .layout { display: flex; min-height: 100vh; }
   .sidebar {
-    width: 220px; flex-shrink: 0;
+    width: 232px; flex-shrink: 0;
     background: var(--surface);
     border-right: 1px solid var(--border);
     padding: 24px 0;
     position: fixed; top: 0; left: 0; height: 100vh;
     display: flex; flex-direction: column;
+    z-index: 100;
   }
-  .logo {
-    padding: 0 20px 24px;
-    border-bottom: 1px solid var(--border);
-    margin-bottom: 16px;
+  .logo { padding: 0 20px 20px; border-bottom: 1px solid var(--border); margin-bottom: 12px; }
+  .logo-badge {
+    display: inline-block; font-size: 10px; font-weight: 700;
+    letter-spacing: 0.08em; background: #1e3a8a; color: #fff;
+    padding: 2px 8px; border-radius: 4px; margin-bottom: 9px;
   }
-  .logo-title { font-size: 13px; font-weight: 600; color: var(--text); line-height: 1.4; }
-  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+  .logo-title { font-size: 14px; font-weight: 700; line-height: 1.45; }
+  .logo-sub { font-size: 11px; color: var(--text3); margin-top: 3px; }
+  .nav-section-label {
+    font-size: 10px; font-weight: 600; color: var(--text3);
+    padding: 10px 20px 4px; letter-spacing: 0.08em; text-transform: uppercase;
+  }
   .nav-item {
     display: flex; align-items: center; gap: 10px;
     padding: 9px 20px; cursor: pointer;
@@ -60,77 +68,110 @@
     transition: all 0.15s;
   }
   .nav-item:hover { background: var(--surface2); color: var(--text); }
-  .nav-item.active { color: var(--text); background: var(--blue-bg); border-left-color: var(--blue); font-weight: 500; }
-  .nav-icon { font-size: 16px; }
-  .nav-section-label {
-    font-size: 10px; font-weight: 600; color: var(--text3);
-    padding: 12px 20px 4px; letter-spacing: 0.08em; text-transform: uppercase;
-  }
+  .nav-item.active { color: var(--blue); background: var(--blue-bg); border-left-color: var(--blue); font-weight: 500; }
+  .nav-icon { font-size: 15px; }
   .sidebar-footer {
-    margin-top: auto; padding: 16px 20px;
+    margin-top: auto; padding: 14px 16px;
     border-top: 1px solid var(--border);
   }
   .sync-btn {
-    width: 100%; padding: 8px; border-radius: var(--radius-sm);
+    width: 100%; padding: 8px 12px; border-radius: var(--radius-sm);
     border: 1px solid var(--border); background: var(--surface);
     color: var(--text2); font-size: 12px; cursor: pointer;
     display: flex; align-items: center; justify-content: center; gap: 6px;
-    transition: all 0.15s;
+    transition: all 0.15s; font-family: inherit;
   }
   .sync-btn:hover { background: var(--surface2); color: var(--text); }
   .sync-status { font-size: 11px; color: var(--text3); text-align: center; margin-top: 6px; }
 
-  .main { margin-left: 220px; padding: 28px 32px; flex: 1; }
+  .main { margin-left: 232px; padding: 28px 32px; flex: 1; }
 
   /* ── 헤더 ── */
   .page-header {
     display: flex; align-items: center; justify-content: space-between;
-    margin-bottom: 24px;
+    margin-bottom: 22px;
   }
-  .page-title { font-size: 18px; font-weight: 600; }
-  .page-controls { display: flex; align-items: center; gap: 10px; }
+  .page-title { font-size: 18px; font-weight: 700; }
+  .page-controls { display: flex; align-items: center; gap: 8px; }
   select {
     padding: 7px 10px; border-radius: var(--radius-sm);
     border: 1px solid var(--border); background: var(--surface);
     font-size: 13px; color: var(--text); cursor: pointer;
-    font-family: inherit;
+    font-family: inherit; box-shadow: var(--shadow);
   }
   select:focus { outline: none; border-color: var(--blue); }
 
-  /* ── 메트릭 카드 ── */
-  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 24px; }
+  /* ── 메트릭 ── */
+  .metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 22px; }
   .metric {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 18px 20px;
+    box-shadow: var(--shadow);
   }
   .metric-label { font-size: 11px; color: var(--text3); font-weight: 500; letter-spacing: 0.05em; text-transform: uppercase; margin-bottom: 8px; }
-  .metric-value { font-size: 26px; font-weight: 600; line-height: 1; }
-  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 5px; }
+  .metric-value { font-size: 28px; font-weight: 700; line-height: 1; }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 6px; }
   .metric-green .metric-value { color: var(--green); }
   .metric-red .metric-value { color: var(--red); }
+  .trend-up   { color: var(--green); }
+  .trend-down { color: var(--red); }
+
+  /* ── 사업단 카드 그리드 ── */
+  .org-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(196px, 1fr)); gap: 10px; }
+  .org-card {
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 13px 15px; background: var(--surface2);
+    transition: box-shadow 0.15s;
+  }
+  .org-card:hover { box-shadow: var(--shadow); }
+  .org-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .org-card-name { font-size: 12px; font-weight: 600; }
+  .org-card-rate { font-size: 11px; font-weight: 600; padding: 2px 7px; border-radius: 20px; }
+  .rate-high { background: var(--green-bg); color: var(--green); }
+  .rate-mid  { background: var(--amber-bg); color: var(--amber); }
+  .rate-low  { background: var(--red-bg);   color: var(--red);   }
+  .org-bar-track { background: var(--border); border-radius: 4px; height: 4px; overflow: hidden; margin-bottom: 7px; }
+  .org-bar-fill  { height: 100%; border-radius: 4px; transition: width 0.5s ease; }
+  .org-card-footer { font-size: 11px; color: var(--text3); }
 
   /* ── 섹션 ── */
   .section {
     background: var(--surface); border: 1px solid var(--border);
     border-radius: var(--radius); padding: 20px 22px; margin-bottom: 16px;
+    box-shadow: var(--shadow);
   }
   .section-header {
     display: flex; align-items: center; justify-content: space-between;
     margin-bottom: 16px;
   }
-  .section-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .section-title { font-size: 13px; font-weight: 600; }
   .section-sub { font-size: 12px; color: var(--text3); }
 
   /* ── 탭 ── */
-  .tab-row { display: flex; gap: 6px; margin-bottom: 16px; }
+  .tab-row { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; align-items: center; }
   .tab {
-    font-size: 12px; padding: 5px 12px; border-radius: 20px;
+    font-size: 12px; padding: 5px 13px; border-radius: 20px;
     border: 1px solid var(--border); background: var(--surface);
     color: var(--text2); cursor: pointer; font-family: inherit;
     transition: all 0.15s;
   }
   .tab:hover { background: var(--surface2); }
-  .tab.active { background: var(--text); color: white; border-color: var(--text); }
+  .tab.active { background: var(--text); color: #fff; border-color: var(--text); }
+  .tab-spacer { flex: 1; min-width: 8px; }
+  .search-input {
+    padding: 5px 11px; border-radius: 20px;
+    border: 1px solid var(--border); background: var(--surface);
+    font-size: 12px; font-family: inherit; width: 164px;
+    transition: width 0.2s, border-color 0.15s;
+  }
+  .search-input:focus { outline: none; border-color: var(--blue); width: 210px; }
+  .btn-sm {
+    padding: 5px 12px; border-radius: var(--radius-sm);
+    border: 1px solid var(--border); background: var(--surface);
+    font-size: 12px; color: var(--text2); cursor: pointer; font-family: inherit;
+    transition: all 0.15s; display: flex; align-items: center; gap: 5px;
+  }
+  .btn-sm:hover { background: var(--surface2); color: var(--text); }
 
   /* ── 테이블 ── */
   .table-wrap { overflow-x: auto; }
@@ -140,54 +181,52 @@
     text-align: left; padding: 8px 10px;
     border-bottom: 1px solid var(--border);
     letter-spacing: 0.04em; text-transform: uppercase;
-    white-space: nowrap;
+    white-space: nowrap; background: var(--surface);
+    position: sticky; top: 0; z-index: 1;
+    user-select: none;
   }
+  th.sortable { cursor: pointer; }
+  th.sortable:hover { color: var(--text2); }
+  th.sort-asc::after  { content: ' ▲'; font-size: 9px; opacity: 0.8; }
+  th.sort-desc::after { content: ' ▼'; font-size: 9px; opacity: 0.8; }
   tbody td { padding: 10px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
   tbody tr:last-child td { border-bottom: none; }
   tbody tr:hover td { background: var(--surface2); }
   .td-name { font-weight: 500; }
   .td-muted { color: var(--text2); }
+  .tr-fail td:first-child { border-left: 2px solid var(--red); }
 
   /* ── 배지 ── */
   .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
-  .badge-ok { background: var(--green-bg); color: var(--green); }
-  .badge-fail { background: var(--red-bg); color: var(--red); }
-  .badge-adj { background: var(--amber-bg); color: var(--amber); font-size: 10px; padding: 1px 6px; margin-left: 4px; }
+  .badge-ok   { background: var(--green-bg); color: var(--green); }
+  .badge-fail { background: var(--red-bg);   color: var(--red);   }
+  .badge-adj  { background: var(--amber-bg); color: var(--amber); font-size: 10px; padding: 1px 6px; margin-left: 4px; }
+  .badge-role { background: var(--surface2); color: var(--text2); }
 
   /* ── 프로그레스 ── */
   .progress-bar { background: var(--surface2); border-radius: 4px; height: 5px; overflow: hidden; min-width: 60px; }
   .progress-fill { height: 100%; border-radius: 4px; }
-  .fill-ok { background: var(--green); }
+  .fill-ok   { background: var(--green); }
   .fill-fail { background: var(--red); }
   .rate-cell { display: flex; align-items: center; gap: 8px; }
-  .rate-num { font-size: 12px; color: var(--text2); min-width: 34px; }
+  .rate-num  { font-size: 12px; color: var(--text2); min-width: 34px; }
 
-  /* ── 근태 관리 ── */
+  /* ── 근태 ── */
   .att-form-row {
     display: flex; gap: 8px; align-items: center;
     padding: 14px 16px; background: var(--surface2);
     border-radius: var(--radius-sm); margin-bottom: 16px; flex-wrap: wrap;
   }
-  .att-form-row select, .att-form-row input[type=date] {
-    font-size: 13px; padding: 7px 10px;
-  }
-  .btn-primary {
-    padding: 7px 16px; border-radius: var(--radius-sm);
-    border: none; background: var(--text); color: white;
-    font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 500;
-    transition: opacity 0.15s;
-  }
-  .btn-primary:hover { opacity: 0.85; }
-  .att-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .att-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(288px, 1fr)); gap: 12px; }
   .att-card {
     border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; background: var(--surface);
+    padding: 14px 16px; background: var(--surface); box-shadow: var(--shadow);
   }
   .att-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
   .att-card-name { font-size: 13px; font-weight: 600; }
-  .att-card-org { font-size: 11px; color: var(--text3); margin-left: 6px; font-weight: 400; }
+  .att-card-org  { font-size: 11px; color: var(--text3); margin-left: 6px; font-weight: 400; }
   .att-target { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: var(--amber-bg); color: var(--amber); font-weight: 500; }
-  .att-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .att-item { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .att-item:last-child { border-bottom: none; }
   .att-item-label { color: var(--text2); }
   .att-item-right { display: flex; align-items: center; gap: 8px; }
@@ -195,38 +234,69 @@
   .btn-del {
     font-size: 11px; padding: 2px 8px; border-radius: 4px;
     border: 1px solid var(--border); background: var(--surface);
-    color: var(--text3); cursor: pointer; font-family: inherit;
+    color: var(--text3); cursor: pointer; font-family: inherit; transition: all 0.15s;
   }
   .btn-del:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
-  .att-empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; grid-column: 1/-1; }
+  .att-empty { text-align: center; padding: 40px; color: var(--text3); font-size: 13px; grid-column: 1/-1; }
 
-  /* ── 기준표 ── */
-  .ref-table td, .ref-table th { font-size: 12px; }
-
-  /* ── 차트 범례 ── */
-  .legend { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
-  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
-  .legend-dot { width: 10px; height: 10px; border-radius: 2px; }
-
-  /* ── 로딩 ── */
-  .loading-overlay {
-    position: fixed; inset: 0; background: rgba(245,245,243,0.85);
-    display: flex; align-items: center; justify-content: center;
-    z-index: 999; backdrop-filter: blur(2px);
+  /* ── 버튼 ── */
+  .btn-primary {
+    padding: 7px 16px; border-radius: var(--radius-sm);
+    border: none; background: var(--text); color: #fff;
+    font-size: 13px; cursor: pointer; font-family: inherit; font-weight: 500;
+    transition: opacity 0.15s;
   }
-  .loading-box { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 32px 40px; text-align: center; }
-  .loading-spinner { width: 28px; height: 28px; border: 2px solid var(--border); border-top-color: var(--text); border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 12px; }
-  @keyframes spin { to { transform: rotate(360deg); } }
-  .loading-text { font-size: 13px; color: var(--text2); }
+  .btn-primary:hover { opacity: 0.85; }
 
   /* ── 설정 ── */
   .config-section { max-width: 560px; }
   .config-row { display: flex; flex-direction: column; gap: 6px; margin-bottom: 18px; }
   .config-label { font-size: 13px; font-weight: 500; }
   .config-desc { font-size: 12px; color: var(--text3); }
-  .config-input { padding: 8px 12px; border: 1px solid var(--border); border-radius: var(--radius-sm); font-size: 13px; font-family: inherit; background: var(--surface); color: var(--text); }
+  .config-input {
+    padding: 8px 12px; border: 1px solid var(--border);
+    border-radius: var(--radius-sm); font-size: 13px;
+    font-family: inherit; background: var(--surface); color: var(--text);
+  }
   .config-input:focus { outline: none; border-color: var(--blue); }
-  .config-saved { font-size: 12px; color: var(--green); display: none; }
+  code { font-size: 11px; background: var(--surface2); padding: 1px 5px; border-radius: 3px; font-family: monospace; }
+
+  /* ── 차트 범례 ── */
+  .legend { display: flex; gap: 16px; margin-bottom: 12px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 12px; color: var(--text2); }
+  .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
+
+  /* ── 로딩 ── */
+  .loading-overlay {
+    position: fixed; inset: 0; background: rgba(245,245,243,0.9);
+    display: flex; align-items: center; justify-content: center;
+    z-index: 999; backdrop-filter: blur(4px);
+  }
+  .loading-box {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 32px 48px;
+    text-align: center; box-shadow: var(--shadow-md);
+  }
+  .loading-spinner {
+    width: 28px; height: 28px; border: 2px solid var(--border);
+    border-top-color: var(--blue); border-radius: 50%;
+    animation: spin 0.7s linear infinite; margin: 0 auto 14px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-text { font-size: 13px; color: var(--text2); }
+
+  /* ── 토스트 ── */
+  .toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; pointer-events: none; }
+  .toast {
+    background: #1a1a18; color: #fff; font-size: 13px;
+    padding: 10px 16px; border-radius: var(--radius-sm);
+    box-shadow: var(--shadow-md); opacity: 0;
+    transform: translateY(8px); transition: all 0.22s ease;
+    max-width: 320px;
+  }
+  .toast.show { opacity: 1; transform: translateY(0); }
+  .toast.error   { background: var(--red); }
+  .toast.success { background: var(--green); }
 
   /* ── 뷰 전환 ── */
   .view { display: none; }
@@ -236,10 +306,10 @@
   input[type=checkbox] { accent-color: var(--green); width: 14px; height: 14px; cursor: pointer; }
 
   /* ── 빈 상태 ── */
-  .empty-state { text-align: center; padding: 48px 20px; color: var(--text3); }
-  .empty-state-icon { font-size: 32px; margin-bottom: 12px; }
-  .empty-state-text { font-size: 14px; }
-  .empty-state-sub { font-size: 12px; margin-top: 6px; }
+  .empty-state { text-align: center; padding: 40px 20px; color: var(--text3); }
+  .empty-icon { font-size: 26px; margin-bottom: 8px; }
+  .empty-text { font-size: 13px; font-weight: 500; }
+  .empty-sub  { font-size: 12px; margin-top: 4px; }
 </style>
 </head>
 <body>
@@ -251,10 +321,13 @@
   </div>
 </div>
 
+<div class="toast-container" id="toast-container"></div>
+
 <div class="layout">
   <!-- 사이드바 -->
   <aside class="sidebar">
     <div class="logo">
+      <div class="logo-badge">HANWHA LIFE</div>
       <div class="logo-title">법인사업부<br>영업활동 관리</div>
       <div class="logo-sub">관리자 대시보드</div>
     </div>
@@ -280,69 +353,109 @@
   <!-- 메인 -->
   <main class="main">
     <div class="page-header">
-      <div>
-        <div class="page-title" id="page-title">현황 개요</div>
-      </div>
+      <div class="page-title" id="page-title">현황 개요</div>
       <div class="page-controls">
-        <select id="week-select" onchange="renderAll()">
+        <select id="week-select" onchange="onWeekChange()">
           <option value="0">최신 주차</option>
         </select>
       </div>
     </div>
 
-    <!-- 메트릭 -->
+    <!-- 메트릭 카드 -->
     <div class="metrics" id="metrics-row">
-      <div class="metric"><div class="metric-label">전체 인원</div><div class="metric-value" id="m-total">—</div><div class="metric-sub">팀장 기준</div></div>
-      <div class="metric metric-green"><div class="metric-label">달성자</div><div class="metric-value" id="m-pass">—</div><div class="metric-sub">목표점수 이상</div></div>
-      <div class="metric metric-red"><div class="metric-label">미달자</div><div class="metric-value" id="m-fail">—</div><div class="metric-sub">목표점수 미만</div></div>
-      <div class="metric"><div class="metric-label">평균 달성률</div><div class="metric-value" id="m-avg">—</div><div class="metric-sub">주간 기준</div></div>
+      <div class="metric">
+        <div class="metric-label">팀장 전원</div>
+        <div class="metric-value" id="m-total">—</div>
+        <div class="metric-sub" id="m-total-sub">전체 인원</div>
+      </div>
+      <div class="metric metric-green">
+        <div class="metric-label">달성자</div>
+        <div class="metric-value" id="m-pass">—</div>
+        <div class="metric-sub" id="m-pass-sub">목표점수 이상</div>
+      </div>
+      <div class="metric metric-red">
+        <div class="metric-label">미달자</div>
+        <div class="metric-value" id="m-fail">—</div>
+        <div class="metric-sub" id="m-fail-sub">목표점수 미만</div>
+      </div>
+      <div class="metric">
+        <div class="metric-label">평균 달성률</div>
+        <div class="metric-value" id="m-avg">—</div>
+        <div class="metric-sub" id="m-avg-sub">주간 기준</div>
+      </div>
     </div>
 
-    <!-- 현황 개요 뷰 -->
+    <!-- ── 현황 개요 뷰 ── -->
     <div id="view-overview" class="view active">
+
+      <!-- 사업단별 요약 -->
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">사업단별 현황</span>
+          <span class="section-sub" id="overview-week-label"></span>
+        </div>
+        <div class="org-grid" id="org-grid"></div>
+      </div>
+
+      <!-- 팀장별 차트 -->
       <div class="section">
         <div class="section-header">
           <span class="section-title">팀장별 주간 점수</span>
-          <span class="section-sub" id="chart-week-label"></span>
+          <span class="section-sub">사업단 순 정렬</span>
         </div>
         <div class="legend">
           <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>달성</div>
           <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>미달</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#aaa;border:1px dashed #888"></div>개인 목표</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#bbb;border:1px dashed #999"></div>개인 목표선</div>
         </div>
-        <div style="position:relative;width:100%;height:260px">
-          <canvas id="barChart" role="img" aria-label="팀장별 주간 점수 막대 차트">팀장별 주간 점수 차트</canvas>
+        <div style="position:relative;width:100%;height:280px">
+          <canvas id="barChart"></canvas>
         </div>
       </div>
+
+      <!-- 미달자 현황 -->
       <div class="section">
         <div class="section-header">
           <span class="section-title">미달자 현황</span>
+          <span class="section-sub" id="fail-count-label"></span>
         </div>
         <div class="table-wrap">
           <table>
-            <thead><tr><th>이름</th><th>소속</th><th>점수</th><th>목표</th><th>달성률</th><th>면담여부</th></tr></thead>
+            <thead>
+              <tr><th>이름</th><th>소속</th><th>점수</th><th>목표</th><th>달성률</th><th>면담여부</th></tr>
+            </thead>
             <tbody id="fail-table"></tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- 상세 테이블 뷰 -->
+    <!-- ── 상세 테이블 뷰 ── -->
     <div id="view-table" class="view">
       <div class="section">
         <div class="tab-row">
           <button class="tab active" onclick="switchTab('all',this)">전체</button>
           <button class="tab" onclick="switchTab('fail',this)">미달자</button>
           <button class="tab" onclick="switchTab('pass',this)">달성자</button>
+          <div class="tab-spacer"></div>
+          <input type="text" class="search-input" id="search-input" placeholder="🔍 이름·소속 검색" oninput="renderMainTable(getCurrentData())">
+          <button class="btn-sm" onclick="exportCSV()">⬇ CSV</button>
         </div>
         <div class="table-wrap">
-          <table>
+          <table id="main-table-el">
             <thead>
               <tr>
-                <th>이름</th><th>소속</th><th>직책</th>
-                <th>점수</th><th>목표</th><th>달성률</th>
-                <th>신규발굴</th><th>펀드상담</th><th>단체관리</th>
-                <th>달성</th><th>면담</th>
+                <th class="sortable" onclick="sortTable('name')">이름</th>
+                <th class="sortable" onclick="sortTable('org')">소속</th>
+                <th>직책</th>
+                <th class="sortable" onclick="sortTable('score')">점수</th>
+                <th>목표</th>
+                <th class="sortable" onclick="sortTable('rate')">달성률</th>
+                <th style="text-align:center">신규발굴</th>
+                <th style="text-align:center">펀드상담</th>
+                <th style="text-align:center">단체관리</th>
+                <th>달성</th>
+                <th style="text-align:center">면담</th>
               </tr>
             </thead>
             <tbody id="main-table"></tbody>
@@ -351,12 +464,12 @@
       </div>
     </div>
 
-    <!-- 근태 관리 뷰 -->
+    <!-- ── 근태 관리 뷰 ── -->
     <div id="view-attendance" class="view">
       <div class="section">
         <div class="section-header">
           <span class="section-title">근태 등록</span>
-          <span class="section-sub">휴가/출장 입력 시 목표점수 자동 보정</span>
+          <span class="section-sub">근태 입력 시 해당 주 목표점수 자동 보정</span>
         </div>
         <div class="att-form-row">
           <select id="att-name"><option value="">이름 선택</option></select>
@@ -364,8 +477,8 @@
             <option value="4">연차 (1일) −4점</option>
             <option value="2">반차 (4시간) −2점</option>
             <option value="1">반반차 (2시간) −1점</option>
-            <option value="4_biz">출장 (1일) −4점</option>
-            <option value="2_biz">출장 반일 −2점</option>
+            <option value="4_b">출장 (1일) −4점</option>
+            <option value="2_b">출장 반일 −2점</option>
           </select>
           <input type="date" id="att-date">
           <button class="btn-primary" onclick="addAttendance()">+ 추가</button>
@@ -377,53 +490,55 @@
       <div class="section">
         <div class="section-header"><span class="section-title">보정 기준표</span></div>
         <div class="table-wrap">
-          <table class="ref-table">
-            <thead><tr><th>유형</th><th>시간</th><th>차감 점수</th><th>비고</th></tr></thead>
+          <table>
+            <thead><tr><th>유형</th><th>차감</th><th>산출 기준</th></tr></thead>
             <tbody>
-              <tr><td>연차 (1일)</td><td>8시간</td><td style="color:var(--red);font-weight:500">−4점</td><td class="td-muted">하루 4점 × 1일</td></tr>
-              <tr><td>반차 (4시간)</td><td>4시간</td><td style="color:var(--red);font-weight:500">−2점</td><td class="td-muted">하루 4점 × 0.5일</td></tr>
-              <tr><td>반반차 (2시간)</td><td>2시간</td><td style="color:var(--red);font-weight:500">−1점</td><td class="td-muted">하루 4점 × 0.25일</td></tr>
-              <tr><td>출장 (1일)</td><td>8시간</td><td style="color:var(--red);font-weight:500">−4점</td><td class="td-muted">동일 적용</td></tr>
-              <tr><td>출장 반일</td><td>4시간</td><td style="color:var(--red);font-weight:500">−2점</td><td class="td-muted">동일 적용</td></tr>
+              <tr><td>연차 (1일)</td><td style="color:var(--red);font-weight:600">−4점</td><td class="td-muted">4점/일 × 1일</td></tr>
+              <tr><td>반차 (4시간)</td><td style="color:var(--red);font-weight:600">−2점</td><td class="td-muted">4점/일 × 0.5일</td></tr>
+              <tr><td>반반차 (2시간)</td><td style="color:var(--red);font-weight:600">−1점</td><td class="td-muted">4점/일 × 0.25일</td></tr>
+              <tr><td>출장 (1일)</td><td style="color:var(--red);font-weight:600">−4점</td><td class="td-muted">동일 적용</td></tr>
+              <tr><td>출장 반일</td><td style="color:var(--red);font-weight:600">−2점</td><td class="td-muted">동일 적용</td></tr>
             </tbody>
           </table>
         </div>
       </div>
     </div>
 
-    <!-- 설정 뷰 -->
+    <!-- ── 설정 뷰 ── -->
     <div id="view-config" class="view">
       <div class="section config-section">
-        <div class="section-header"><span class="section-title">Google Sheets 연동 설정</span></div>
+        <div class="section-header"><span class="section-title">Google Sheets 연동</span></div>
         <div class="config-row">
           <label class="config-label">스프레드시트 ID</label>
-          <div class="config-desc">구글 시트 URL에서 /d/ 뒤 문자열<br><code style="font-size:11px;color:var(--text3)">https://docs.google.com/spreadsheets/d/<strong>여기</strong>/edit</code></div>
+          <div class="config-desc">URL의 <code>/d/</code> 뒤 문자열<br>
+          <code style="color:var(--text3)">https://docs.google.com/spreadsheets/d/<strong>여기</strong>/edit</code></div>
           <input class="config-input" id="cfg-sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" oninput="saveConfig()">
         </div>
         <div class="config-row">
           <label class="config-label">주간요약 탭 GID</label>
-          <div class="config-desc">시트 하단 탭 클릭 시 URL 끝 <code style="font-size:11px;color:var(--text3)">#gid=<strong>숫자</strong></code> 부분 · 첫 번째 탭이면 보통 <strong>0</strong></div>
+          <div class="config-desc">탭 클릭 시 URL 끝 <code>#gid=숫자</code> 부분 · 첫 번째 탭이면 <strong>0</strong></div>
           <input class="config-input" id="cfg-sheet-gid" placeholder="0" oninput="saveConfig()">
         </div>
-        <button class="btn-primary" onclick="loadData()" style="margin-top:4px">연결 테스트</button>
-        <div class="config-saved" id="config-saved">✓ 설정 저장됨</div>
+        <div style="display:flex;gap:8px;align-items:center;margin-top:4px">
+          <button class="btn-primary" onclick="loadData()">연결 테스트</button>
+          <span id="config-status" style="font-size:12px;color:var(--text3)"></span>
+        </div>
       </div>
-      <div class="section config-section" style="margin-top:16px">
+      <div class="section config-section" style="margin-top:14px">
         <div class="section-header"><span class="section-title">컬럼 매핑</span></div>
-        <div class="config-desc" style="margin-bottom:12px;font-size:12px;color:var(--text3)">주간요약 탭 컬럼 순서 (기본값: 주차/소속/이름/직책/점수/목표/달성률/신규/펀드/단체/달성여부)</div>
-        <table class="ref-table">
-          <thead><tr><th>항목</th><th>컬럼 번호 (A=1)</th></tr></thead>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:12px">주간요약 탭 컬럼 순서 (A=1, B=2, …)</div>
+        <table>
+          <thead><tr><th>항목</th><th style="width:90px">컬럼 번호</th></tr></thead>
           <tbody>
-            <tr><td>주차</td><td><input type="number" class="config-input" id="col-week" value="1" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>소속</td><td><input type="number" class="config-input" id="col-org" value="2" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>이름</td><td><input type="number" class="config-input" id="col-name" value="3" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>직책</td><td><input type="number" class="config-input" id="col-role" value="4" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>주간합산점수</td><td><input type="number" class="config-input" id="col-score" value="5" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>목표점수</td><td><input type="number" class="config-input" id="col-target" value="6" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>신규발굴</td><td><input type="number" class="config-input" id="col-new" value="8" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>펀드상담</td><td><input type="number" class="config-input" id="col-fund" value="9" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>단체관리</td><td><input type="number" class="config-input" id="col-mgmt" value="10" style="width:60px;padding:4px 8px"></td></tr>
-            <tr><td>달성여부</td><td><input type="number" class="config-input" id="col-pass" value="11" style="width:60px;padding:4px 8px"></td></tr>
+            <tr><td>주차</td><td><input type="number" class="config-input" id="col-week"   value="1"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>소속</td><td><input type="number" class="config-input" id="col-org"    value="2"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>이름</td><td><input type="number" class="config-input" id="col-name"   value="3"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>직책</td><td><input type="number" class="config-input" id="col-role"   value="4"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>주간합산점수</td><td><input type="number" class="config-input" id="col-score"  value="5"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>목표점수</td><td><input type="number" class="config-input" id="col-target" value="6"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>신규발굴</td><td><input type="number" class="config-input" id="col-new"    value="8"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>펀드상담</td><td><input type="number" class="config-input" id="col-fund"   value="9"  style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
+            <tr><td>단체관리</td><td><input type="number" class="config-input" id="col-mgmt"   value="10" style="width:64px;padding:4px 8px" oninput="saveConfig()"></td></tr>
           </tbody>
         </table>
       </div>
@@ -433,82 +548,67 @@
 </div>
 
 <script>
-// ── 전역 상태 ──
-let allData = [];       // 전체 원본 데이터 (모든 주차)
-let members = [];       // 팀원명단
-let weeks = [];         // 주차 목록
-let attendance = {};    // { "이름_주차": [{date, deduct, label}] }
-let interviews = {};    // { "이름_주차": boolean }
-let currentTab = 'all';
+/* ── 전역 상태 ── */
+let allData    = [];
+let weeks      = [];
+let attendance = {};
+let interviews = {};
+let currentTab  = 'all';
 let currentView = 'overview';
-let chartInst = null;
+let chartInst   = null;
+let sortState   = { col: null, asc: true };
 
 const TARGET_BASE = 20;
+const ORG_ORDER   = ['1사업단','2사업단','중부사업단','3사업단','4사업단','영남사업단','EB사업단'];
 
-// ── 설정 로드/저장 ──
+/* ──────────── CONFIG ──────────── */
 function loadConfig() {
   const cfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
-  document.getElementById('cfg-sheet-id').value = cfg.sheetId || '';
-  document.getElementById('cfg-sheet-gid').value = cfg.sheetGid || '0';
-
-
-  ['week','org','name','role','score','target','new','fund','mgmt','pass'].forEach(k => {
-    const el = document.getElementById('col-'+k);
-    if (el && cfg['col_'+k]) el.value = cfg['col_'+k];
+  document.getElementById('cfg-sheet-id').value  = cfg.sheetId  || '';
+  document.getElementById('cfg-sheet-gid').value = cfg.sheetGid !== undefined ? cfg.sheetGid : '';
+  ['week','org','name','role','score','target','new','fund','mgmt'].forEach(k => {
+    const el = document.getElementById('col-' + k);
+    if (el && cfg['col_' + k]) el.value = cfg['col_' + k];
   });
-  // 근태/면담 데이터 복원
   attendance = JSON.parse(localStorage.getItem('dashboard_attendance') || '{}');
   interviews = JSON.parse(localStorage.getItem('dashboard_interviews') || '{}');
 }
 
 function saveConfig() {
   const cfg = {
-    sheetId: document.getElementById('cfg-sheet-id').value.trim(),
+    sheetId:  document.getElementById('cfg-sheet-id').value.trim(),
     sheetGid: document.getElementById('cfg-sheet-gid').value.trim() || '0',
-
-
   };
-  ['week','org','name','role','score','target','new','fund','mgmt','pass'].forEach(k => {
-    const el = document.getElementById('col-'+k);
-    if (el) cfg['col_'+k] = parseInt(el.value) || 1;
+  ['week','org','name','role','score','target','new','fund','mgmt'].forEach(k => {
+    const el = document.getElementById('col-' + k);
+    if (el) cfg['col_' + k] = parseInt(el.value) || 1;
   });
   localStorage.setItem('dashboard_config', JSON.stringify(cfg));
-  const saved = document.getElementById('config-saved');
-  saved.style.display = 'block';
-  setTimeout(() => saved.style.display = 'none', 2000);
+  const s = document.getElementById('config-status');
+  s.textContent = '✓ 저장됨'; s.style.color = 'var(--green)';
+  setTimeout(() => { s.textContent = ''; }, 2000);
 }
 
-function getConfig() {
-  return JSON.parse(localStorage.getItem('dashboard_config') || '{}');
-}
+function getConfig()           { return JSON.parse(localStorage.getItem('dashboard_config') || '{}'); }
+function getColIdx(key, fb)    { const c = getConfig(); return (c['col_' + key] || fb) - 1; }
 
-function getColIdx(key, fallback) {
-  const cfg = getConfig();
-  return (cfg['col_'+key] || fallback) - 1;
-}
-
-// ── Google Sheets 공개 CSV 방식 (API Key 불필요) ──
+/* ──────────── DATA FETCH ──────────── */
 async function fetchSheetCSV(gid) {
   const cfg = getConfig();
   if (!cfg.sheetId) return null;
-  // 공개 시트 CSV 내보내기 URL
   const url = `https://docs.google.com/spreadsheets/d/${cfg.sheetId}/export?format=csv&gid=${gid || 0}`;
   const res = await fetch(url);
   if (!res.ok) throw new Error(`시트 불러오기 실패: ${res.status}`);
-  const text = await res.text();
-  return parseCSV(text);
+  return parseCSV(await res.text());
 }
 
 function parseCSV(text) {
-  const lines = text.trim().split('\n');
-  return lines.map(line => {
-    const cols = [];
-    let cur = '', inQ = false;
-    for (let i = 0; i < line.length; i++) {
-      const c = line[i];
-      if (c === '"') { inQ = !inQ; }
+  return text.trim().split('\n').map(line => {
+    const cols = []; let cur = '', inQ = false;
+    for (const c of line) {
+      if (c === '"') inQ = !inQ;
       else if (c === ',' && !inQ) { cols.push(cur.trim()); cur = ''; }
-      else { cur += c; }
+      else cur += c;
     }
     cols.push(cur.trim());
     return cols;
@@ -516,191 +616,283 @@ function parseCSV(text) {
 }
 
 async function loadData() {
-  setLoading(true, '구글 시트에서 데이터 불러오는 중...');
+  setLoading(true, '구글 시트에서 데이터 불러오는 중…');
   const cfg = getConfig();
 
   if (!cfg.sheetId) {
     setLoading(false);
     useDemoData();
-    document.getElementById('sync-status').textContent = '⚠ 설정 탭에서 시트 ID 입력 필요';
+    document.getElementById('sync-status').textContent = '⚠ 데모 모드 (설정에서 시트 ID 입력)';
     return;
   }
 
   try {
-    const gid = cfg.sheetGid || '0';
-    const rows = await fetchSheetCSV(gid);
+    const rows = await fetchSheetCSV(cfg.sheetGid || '0');
     if (!rows || rows.length < 2) throw new Error('데이터 없음');
 
-    // 헤더 제외
     const data = rows.slice(1).map(r => ({
-      week: r[getColIdx('week',1)] || '',
-      org:  r[getColIdx('org',2)] || '',
-      name: r[getColIdx('name',3)] || '',
-      role: r[getColIdx('role',4)] || '',
-      score:  parseFloat(r[getColIdx('score',5)]) || 0,
-      target: parseFloat(r[getColIdx('target',6)]) || TARGET_BASE,
-      new_:   parseInt(r[getColIdx('new',8)]) || 0,
-      fund:   parseInt(r[getColIdx('fund',9)]) || 0,
+      week:   r[getColIdx('week',  1)] || '',
+      org:    r[getColIdx('org',   2)] || '',
+      name:   r[getColIdx('name',  3)] || '',
+      role:   r[getColIdx('role',  4)] || '',
+      score:  parseFloat(r[getColIdx('score',  5)]) || 0,
+      target: parseFloat(r[getColIdx('target', 6)]) || TARGET_BASE,
+      new_:   parseInt(r[getColIdx('new',  8)]) || 0,
+      fund:   parseInt(r[getColIdx('fund', 9)]) || 0,
       mgmt:   parseInt(r[getColIdx('mgmt',10)]) || 0,
     })).filter(r => r.name);
 
     allData = data;
-    weeks = [...new Set(data.map(r => r.week))].reverse();
+    weeks   = [...new Set(data.map(r => r.week))].sort().reverse();
     buildWeekSelect();
     populateAttNames();
     renderAll();
 
     const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
-    document.getElementById('sync-status').textContent = `${now} 업데이트`;
+    document.getElementById('sync-status').textContent = `✓ ${now} 업데이트`;
+    setConfigStatus('✓ 연결 성공', 'var(--green)');
     setLoading(false);
+    toast('데이터를 성공적으로 불러왔습니다', 'success');
 
-  } catch(e) {
+  } catch (e) {
     setLoading(false);
     document.getElementById('sync-status').textContent = '❌ 연결 실패 — 데모 모드';
+    setConfigStatus('❌ 연결 실패 — 시트가 공개 설정인지 확인하세요', 'var(--red)');
     useDemoData();
+    toast('구글 시트 연결 실패. 데모 데이터로 표시합니다.', 'error');
     console.error(e);
   }
 }
 
-// ── 데모 데이터 (실제 명단 전체) ──
+function setConfigStatus(msg, color) {
+  const s = document.getElementById('config-status');
+  s.textContent = msg; s.style.color = color;
+}
+
+/* ──────────── DEMO DATA ──────────── */
 function useDemoData() {
   const MEMBERS = [
-    {org:'1RM',       name:'윤영욱', role:'RM'},
-    {org:'1사업단',   name:'김창모', role:'단장'},
-    {org:'1사업단',   name:'이재우', role:'팀장'},
-    {org:'1사업단',   name:'최미나', role:'팀장'},
-    {org:'1사업단',   name:'차은영', role:'팀장'},
-    {org:'1사업단',   name:'김승현', role:'팀장'},
-    {org:'2사업단',   name:'송창민', role:'단장'},
-    {org:'2사업단',   name:'조형준', role:'팀장'},
-    {org:'2사업단',   name:'이주홍', role:'팀장'},
-    {org:'2사업단',   name:'오상민', role:'팀장'},
-    {org:'2사업단',   name:'김민정', role:'팀장'},
+    {org:'1사업단',    name:'김창모', role:'단장'},
+    {org:'1사업단',    name:'이재우', role:'팀장'},
+    {org:'1사업단',    name:'최미나', role:'팀장'},
+    {org:'1사업단',    name:'차은영', role:'팀장'},
+    {org:'1사업단',    name:'김승현', role:'팀장'},
+    {org:'2사업단',    name:'송창민', role:'단장'},
+    {org:'2사업단',    name:'조형준', role:'팀장'},
+    {org:'2사업단',    name:'이주홍', role:'팀장'},
+    {org:'2사업단',    name:'오상민', role:'팀장'},
+    {org:'2사업단',    name:'김민정', role:'팀장'},
     {org:'중부사업단', name:'이종혁', role:'단장'},
     {org:'중부사업단', name:'임동원', role:'팀장'},
     {org:'중부사업단', name:'김정훈', role:'팀장'},
     {org:'중부사업단', name:'이준희', role:'팀장'},
     {org:'중부사업단', name:'조상기', role:'팀장'},
     {org:'중부사업단', name:'이미영', role:'팀장'},
-    {org:'2RM',       name:'김영진', role:'RM'},
-    {org:'3사업단',   name:'유광명', role:'단장'},
-    {org:'3사업단',   name:'강현숙', role:'팀장'},
-    {org:'3사업단',   name:'신미숙', role:'팀장'},
-    {org:'3사업단',   name:'조영진', role:'팀장'},
-    {org:'3사업단',   name:'유효열', role:'팀장'},
-    {org:'4사업단',   name:'김대훈', role:'단장'},
-    {org:'4사업단',   name:'유유희', role:'팀장'},
-    {org:'4사업단',   name:'천미례', role:'팀장'},
-    {org:'4사업단',   name:'주지애', role:'팀장'},
+    {org:'3사업단',    name:'유광명', role:'단장'},
+    {org:'3사업단',    name:'강현숙', role:'팀장'},
+    {org:'3사업단',    name:'신미숙', role:'팀장'},
+    {org:'3사업단',    name:'조영진', role:'팀장'},
+    {org:'3사업단',    name:'유효열', role:'팀장'},
+    {org:'4사업단',    name:'김대훈', role:'단장'},
+    {org:'4사업단',    name:'유유희', role:'팀장'},
+    {org:'4사업단',    name:'천미례', role:'팀장'},
+    {org:'4사업단',    name:'주지애', role:'팀장'},
     {org:'영남사업단', name:'김웅기', role:'단장'},
     {org:'영남사업단', name:'박평',   role:'팀장'},
     {org:'영남사업단', name:'우상우', role:'팀장'},
     {org:'영남사업단', name:'고성원', role:'팀장'},
     {org:'영남사업단', name:'김정진', role:'팀장'},
-    {org:'EB사업단',  name:'조국환', role:'단장'},
-    {org:'EB사업단',  name:'송재호', role:'팀장'},
-    {org:'EB사업단',  name:'임종창', role:'팀장'},
-    {org:'EB사업단',  name:'송조애', role:'팀장'},
+    {org:'EB사업단',   name:'조국환', role:'단장'},
+    {org:'EB사업단',   name:'송재호', role:'팀장'},
+    {org:'EB사업단',   name:'임종창', role:'팀장'},
+    {org:'EB사업단',   name:'송조애', role:'팀장'},
+    {org:'1RM',        name:'윤영욱', role:'RM'},
+    {org:'2RM',        name:'김영진', role:'RM'},
   ];
 
-  function rnd(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
-
-  const WEEKS = ['2026-W23', '2026-W22', '2026-W21'];
-  const DEMO = [];
+  function rnd(a, b) { return Math.floor(Math.random() * (b - a + 1)) + a; }
+  const WEEKS = ['2026-W23','2026-W22','2026-W21'];
+  const DEMO  = [];
   WEEKS.forEach(week => {
     MEMBERS.forEach(m => {
-      // 팀장만 점수/목표 부여, 단장·RM은 점수 없음
-      const isTarget = m.role === '팀장';
+      const isTL = m.role === '팀장';
       DEMO.push({
         week, org: m.org, name: m.name, role: m.role,
-        score:  isTarget ? rnd(12, 28) : null,
-        target: isTarget ? 20 : null,
-        new_:   isTarget ? rnd(1, 5) : null,
-        fund:   isTarget ? rnd(1, 5) : null,
-        mgmt:   isTarget ? rnd(1, 6) : null,
+        score:  isTL ? rnd(10, 28) : null,
+        target: isTL ? TARGET_BASE : null,
+        new_:   isTL ? rnd(0, 5) : null,
+        fund:   isTL ? rnd(0, 5) : null,
+        mgmt:   isTL ? rnd(0, 6) : null,
       });
     });
   });
 
   allData = DEMO;
-  weeks = WEEKS;
+  weeks   = WEEKS;
   buildWeekSelect();
   populateAttNames();
   renderAll();
 }
 
-// ── 주차 선택 ──
+/* ──────────── WEEK SELECT ──────────── */
 function buildWeekSelect() {
   const sel = document.getElementById('week-select');
-  sel.innerHTML = weeks.map((w,i) => `<option value="${i}">${w}${i===0?' (최신)':''}</option>`).join('');
+  sel.innerHTML = weeks.map((w, i) =>
+    `<option value="${i}">${w}${i === 0 ? ' (최신)' : ''}</option>`
+  ).join('');
 }
 
 function getCurrentWeek() {
   return weeks[parseInt(document.getElementById('week-select').value) || 0] || '';
 }
 
-// ── 근태 차감 계산 ──
+function getPrevWeek() {
+  const idx = parseInt(document.getElementById('week-select').value) || 0;
+  return weeks[idx + 1] || null;
+}
+
+function onWeekChange() {
+  populateAttNames();
+  renderAll();
+}
+
+/* ──────────── DEDUCTION ──────────── */
 function getDeduct(name, week) {
   const key = name + '_' + week;
-  if (!attendance[key]) return 0;
-  return attendance[key].reduce((s,a) => s + a.deduct, 0);
+  return (attendance[key] || []).reduce((s, a) => s + a.deduct, 0);
 }
 
-function getEffectiveTarget(name, week, baseTarget) {
-  return Math.max(0, baseTarget - getDeduct(name, week));
+function getEffTarget(name, week, base) {
+  return Math.max(0, (base || TARGET_BASE) - getDeduct(name, week));
 }
 
-// ── 현재 주차 데이터 ──
+/* ──────────── COMPUTED DATA ──────────── */
 function getCurrentData() {
   const week = getCurrentWeek();
-  return allData
-    .filter(r => r.week === week)
-    .map(r => {
-      const isTarget = r.role === '팀장';
-      if (!isTarget) {
-        return { ...r, effectiveTarget: null, rate: null, pass: null, deduct: 0 };
-      }
-      const effectiveTarget = getEffectiveTarget(r.name, week, r.target);
-      const rate = effectiveTarget > 0 ? Math.round((r.score / effectiveTarget) * 100) : 100;
-      const deduct = getDeduct(r.name, week);
-      return { ...r, effectiveTarget, rate, pass: r.score >= effectiveTarget, deduct };
-    });
+  return allData.filter(r => r.week === week).map(r => {
+    if (r.role !== '팀장') return { ...r, effectiveTarget: null, rate: null, pass: null, deduct: 0 };
+    const deduct = getDeduct(r.name, week);
+    const effectiveTarget = getEffTarget(r.name, week, r.target);
+    const rate = effectiveTarget > 0 ? Math.round((r.score / effectiveTarget) * 100) : 100;
+    return { ...r, effectiveTarget, rate, pass: r.score >= effectiveTarget, deduct };
+  });
 }
 
-// ── 메트릭 ──
+function getPrevData() {
+  const week = getPrevWeek();
+  if (!week) return [];
+  return allData.filter(r => r.week === week && r.role === '팀장').map(r => {
+    const deduct = getDeduct(r.name, week);
+    const effectiveTarget = getEffTarget(r.name, week, r.target);
+    const rate = effectiveTarget > 0 ? Math.round((r.score / effectiveTarget) * 100) : 100;
+    return { ...r, effectiveTarget, rate, pass: r.score >= effectiveTarget, deduct };
+  });
+}
+
+/* ──────────── METRICS ──────────── */
 function renderMetrics(data) {
-  const targets = data.filter(d => d.role === '팀장');
-  const pass = targets.filter(d => d.pass).length;
-  document.getElementById('m-total').textContent = data.length + '명';
-  document.getElementById('m-pass').textContent = pass + '명';
-  document.getElementById('m-fail').textContent = (targets.length - pass) + '명';
-  document.getElementById('m-avg').textContent = targets.length
-    ? Math.round(targets.reduce((s,d) => s+d.rate, 0) / targets.length) + '%'
-    : '—';
+  const tl   = data.filter(d => d.role === '팀장');
+  const pass = tl.filter(d => d.pass).length;
+  const fail = tl.length - pass;
+  const avg  = tl.length ? Math.round(tl.reduce((s, d) => s + d.rate, 0) / tl.length) : 0;
+
+  document.getElementById('m-total').textContent = tl.length + '명';
+  document.getElementById('m-pass').textContent  = pass + '명';
+  document.getElementById('m-fail').textContent  = fail + '명';
+  document.getElementById('m-avg').textContent   = avg + '%';
+
+  const prev = getPrevData();
+  if (prev.length > 0) {
+    const pp = prev.filter(d => d.pass).length;
+    const pa = Math.round(prev.reduce((s, d) => s + d.rate, 0) / prev.length);
+    document.getElementById('m-pass-sub').innerHTML = trendHtml(pass - pp, true);
+    document.getElementById('m-fail-sub').innerHTML = trendHtml(fail - (prev.length - pp), false);
+    document.getElementById('m-avg-sub').innerHTML  = trendHtml(avg - pa, true, '%p');
+    document.getElementById('m-total-sub').textContent = `팀장 ${tl.length}명`;
+  } else {
+    ['m-pass-sub','m-fail-sub','m-avg-sub'].forEach((id, i) => {
+      document.getElementById(id).textContent = ['목표점수 이상','목표점수 미만','주간 기준'][i];
+    });
+  }
 }
 
-// ── 차트 ──
+function trendHtml(diff, positiveGood, unit = '명') {
+  if (!diff) return `<span style="color:var(--text3)">→ 전주와 동일</span>`;
+  const good = positiveGood ? diff > 0 : diff < 0;
+  const cls  = good ? 'trend-up' : 'trend-down';
+  return `<span class="${cls}">${diff > 0 ? '▲' : '▼'} ${Math.abs(diff)}${unit} 전주 대비</span>`;
+}
+
+/* ──────────── ORG SUMMARY GRID ──────────── */
+function renderOrgGrid(data) {
+  const tl = data.filter(d => d.role === '팀장');
+  const map = {};
+  tl.forEach(d => {
+    if (!map[d.org]) map[d.org] = { pass: 0, total: 0, rateSum: 0 };
+    map[d.org].total++;
+    if (d.pass) map[d.org].pass++;
+    map[d.org].rateSum += d.rate;
+  });
+
+  document.getElementById('overview-week-label').textContent = getCurrentWeek();
+  document.getElementById('org-grid').innerHTML = ORG_ORDER
+    .filter(o => map[o])
+    .map(org => {
+      const o = map[org];
+      const avg = Math.round(o.rateSum / o.total);
+      const cls = avg >= 80 ? 'rate-high' : avg >= 60 ? 'rate-mid' : 'rate-low';
+      const clr = avg >= 80 ? 'var(--green)' : avg >= 60 ? '#f59e0b' : 'var(--red)';
+      return `<div class="org-card">
+        <div class="org-card-header">
+          <span class="org-card-name">${org}</span>
+          <span class="org-card-rate ${cls}">${avg}%</span>
+        </div>
+        <div class="org-bar-track">
+          <div class="org-bar-fill" style="width:${Math.min(avg,100)}%;background:${clr}"></div>
+        </div>
+        <div class="org-card-footer">${o.pass}/${o.total}명 달성</div>
+      </div>`;
+    }).join('');
+}
+
+/* ──────────── CHART ──────────── */
 function renderChart(data) {
-  const sorted = [...data].filter(d => d.role === '팀장').sort((a,b) => b.score - a.score);
+  const tl = [...data].filter(d => d.role === '팀장');
+  // 사업단 순, 사업단 내 점수 내림차순
+  const orgIdx = {};
+  ORG_ORDER.forEach((o, i) => orgIdx[o] = i);
+  tl.sort((a, b) => {
+    const oi = (orgIdx[a.org] ?? 99) - (orgIdx[b.org] ?? 99);
+    return oi !== 0 ? oi : b.score - a.score;
+  });
+
   const ctx = document.getElementById('barChart').getContext('2d');
   if (chartInst) chartInst.destroy();
+
+  const yMax = Math.ceil((Math.max(...tl.map(d => d.score), TARGET_BASE) + 4) / 5) * 5;
+
   chartInst = new Chart(ctx, {
     type: 'bar',
     data: {
-      labels: sorted.map(d => d.name),
+      labels: tl.map(d => d.name),
       datasets: [
         {
           label: '주간점수',
-          data: sorted.map(d => d.score),
-          backgroundColor: sorted.map(d => d.pass ? '#1a7a5e' : '#c0392b'),
-          borderRadius: 5, borderSkipped: false
+          data: tl.map(d => d.score),
+          backgroundColor: tl.map(d => d.pass
+            ? 'rgba(26,122,94,0.82)'
+            : 'rgba(192,57,43,0.82)'),
+          borderRadius: 4, borderSkipped: false,
         },
         {
           label: '목표',
-          data: sorted.map(d => d.effectiveTarget),
+          data: tl.map(d => d.effectiveTarget),
           type: 'line',
-          borderColor: '#aaa', borderDash: [4,3], borderWidth: 1.5,
-          pointRadius: 3, pointBackgroundColor: '#aaa', fill: false
+          borderColor: 'rgba(140,140,140,0.55)',
+          borderDash: [4, 3], borderWidth: 1.5,
+          pointRadius: 2.5,
+          pointBackgroundColor: 'rgba(140,140,140,0.55)',
+          fill: false, tension: 0,
         }
       ]
     },
@@ -708,103 +900,177 @@ function renderChart(data) {
       responsive: true, maintainAspectRatio: false,
       plugins: {
         legend: { display: false },
-        tooltip: { callbacks: { label: c => c.dataset.label === '주간점수' ? ` ${c.raw}점` : ` 목표 ${c.raw}점` } }
+        tooltip: {
+          callbacks: {
+            title: items => {
+              const d = tl[items[0].dataIndex];
+              return `${d.name}  (${d.org})`;
+            },
+            label: c => c.dataset.label === '주간점수'
+              ? ` 점수: ${c.raw}점  (목표 ${tl[c.dataIndex].effectiveTarget}점)`
+              : ` 목표: ${c.raw}점`,
+          }
+        }
       },
       scales: {
-        x: { ticks: { color: '#9b9b98', font: { size: 11, family: 'Pretendard' }, autoSkip: false }, grid: { display: false } },
-        y: { min: 0, max: 35, ticks: { color: '#9b9b98', font: { size: 11 }, stepSize: 5 }, grid: { color: 'rgba(0,0,0,0.05)' } }
+        x: {
+          ticks: {
+            color: '#9b9b98',
+            font: { size: 11, family: 'Pretendard' },
+            autoSkip: false, maxRotation: 45,
+          },
+          grid: { display: false },
+        },
+        y: {
+          min: 0, max: yMax,
+          ticks: { color: '#9b9b98', font: { size: 11 }, stepSize: 5 },
+          grid: { color: 'rgba(0,0,0,0.04)' },
+        }
       }
     }
   });
-  document.getElementById('chart-week-label').textContent = getCurrentWeek();
 }
 
-// ── 미달자 테이블 (개요 뷰) ──
+/* ──────────── FAIL TABLE ──────────── */
 function renderFailTable(data) {
-  const fails = data.filter(d => d.role === '팀장' && !d.pass);
-  const week = getCurrentWeek();
+  const week  = getCurrentWeek();
+  const fails = data.filter(d => d.role === '팀장' && !d.pass)
+                    .sort((a, b) => a.rate - b.rate);
+
+  document.getElementById('fail-count-label').textContent = fails.length ? `${fails.length}명` : '';
   document.getElementById('fail-table').innerHTML = fails.length === 0
-    ? `<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--text3)">이번 주 미달자 없음 🎉</td></tr>`
+    ? `<tr><td colspan="6"><div class="empty-state"><div class="empty-icon">🎉</div><div class="empty-text">이번 주 미달자 없음</div></div></td></tr>`
     : fails.map(d => {
-        const key = d.name + '_' + week;
-        const checked = interviews[key] ? 'checked' : '';
+        const key = `${d.name}_${week}`;
         return `<tr>
           <td class="td-name">${d.name}</td>
           <td class="td-muted">${d.org}</td>
-          <td style="font-weight:500">${d.score}점</td>
+          <td style="font-weight:600;color:var(--red)">${d.score}점</td>
           <td>${d.effectiveTarget}점${d.deduct > 0 ? `<span class="badge badge-adj">−${d.deduct}</span>` : ''}</td>
           <td>
             <div class="rate-cell">
-              <div class="progress-bar" style="flex:1"><div class="progress-fill fill-fail" style="width:${Math.min(d.rate,100)}%"></div></div>
+              <div class="progress-bar" style="flex:1">
+                <div class="progress-fill fill-fail" style="width:${Math.min(d.rate,100)}%"></div>
+              </div>
               <span class="rate-num">${d.rate}%</span>
             </div>
           </td>
-          <td><input type="checkbox" ${checked} onchange="toggleInterview('${key}',this)"></td>
+          <td><input type="checkbox" ${interviews[key] ? 'checked' : ''} onchange="toggleInterview('${key}',this)"></td>
         </tr>`;
       }).join('');
 }
 
-// ── 상세 테이블 ──
+/* ──────────── MAIN TABLE ──────────── */
+function sortTable(col) {
+  const defaultAsc = { name: true, org: true, score: false, rate: false };
+  if (sortState.col === col) sortState.asc = !sortState.asc;
+  else { sortState.col = col; sortState.asc = defaultAsc[col] ?? true; }
+
+  // 헤더 UI 업데이트
+  const colIdxMap = { name: 0, org: 1, score: 3, rate: 5 };
+  document.querySelectorAll('#main-table-el thead th').forEach((th, i) => {
+    th.classList.remove('sort-asc', 'sort-desc');
+    if (colIdxMap[sortState.col] === i) {
+      th.classList.add(sortState.asc ? 'sort-asc' : 'sort-desc');
+    }
+  });
+  renderMainTable(getCurrentData());
+}
+
 function renderMainTable(data) {
-  const week = getCurrentWeek();
-  const filtered = data.filter(d =>
-    currentTab === 'all' ? true : currentTab === 'pass' ? d.pass : !d.pass
-  );
-  document.getElementById('main-table').innerHTML = filtered.length === 0
-    ? `<tr><td colspan="11" style="text-align:center;padding:24px;color:var(--text3)">해당 데이터 없음</td></tr>`
-    : filtered.map(d => {
-        const key = d.name + '_' + week;
-        const checked = interviews[key] ? 'checked' : '';
-        const interview = !d.pass
-          ? `<input type="checkbox" ${checked} onchange="toggleInterview('${key}',this)">`
-          : `<span style="color:var(--text3);font-size:11px">—</span>`;
-        const isTarget = d.role === '팀장';
-        const scoreCell = isTarget ? `<span style="font-weight:500">${d.score}점</span>` : `<span style="color:var(--text3)">—</span>`;
-        const targetCell = isTarget ? `${d.effectiveTarget}점${d.deduct > 0 ? `<span class="badge badge-adj">−${d.deduct}</span>` : ''}` : `<span style="color:var(--text3)">—</span>`;
-        const rateCell = isTarget ? `<div class="rate-cell"><div class="progress-bar" style="flex:1"><div class="progress-fill ${d.pass?'fill-ok':'fill-fail'}" style="width:${Math.min(d.rate,100)}%"></div></div><span class="rate-num">${d.rate}%</span></div>` : `<span style="color:var(--text3)">—</span>`;
-        const passCell = isTarget ? `<span class="badge ${d.pass?'badge-ok':'badge-fail'}">${d.pass?'달성':'미달'}</span>` : `<span style="color:var(--text3)">—</span>`;
-        return `<tr>
+  const week  = getCurrentWeek();
+  const query = (document.getElementById('search-input')?.value || '').trim().toLowerCase();
+
+  let rows = data.filter(d => {
+    if (currentTab === 'pass' && !(d.role === '팀장' && d.pass))  return false;
+    if (currentTab === 'fail' && !(d.role === '팀장' && !d.pass)) return false;
+    if (query) return d.name.includes(query) || d.org.includes(query);
+    return true;
+  });
+
+  if (sortState.col) {
+    const col = sortState.col;
+    rows = [...rows].sort((a, b) => {
+      let va = col === 'rate' ? a.rate  : a[col];
+      let vb = col === 'rate' ? b.rate  : b[col];
+      const nil = sortState.asc ? Infinity : -Infinity;
+      if (va == null) va = nil;
+      if (vb == null) vb = nil;
+      if (typeof va === 'string') return sortState.asc ? va.localeCompare(vb,'ko') : vb.localeCompare(va,'ko');
+      return sortState.asc ? va - vb : vb - va;
+    });
+  }
+
+  document.getElementById('main-table').innerHTML = rows.length === 0
+    ? `<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-text">검색 결과 없음</div></div></td></tr>`
+    : rows.map(d => {
+        const isTL  = d.role === '팀장';
+        const key   = `${d.name}_${week}`;
+        const score = isTL ? `<strong>${d.score}점</strong>` : `<span class="td-muted">—</span>`;
+        const tgt   = isTL
+          ? `${d.effectiveTarget}점${d.deduct > 0 ? `<span class="badge badge-adj">−${d.deduct}</span>` : ''}`
+          : `<span class="td-muted">—</span>`;
+        const rate  = isTL
+          ? `<div class="rate-cell"><div class="progress-bar" style="flex:1"><div class="progress-fill ${d.pass?'fill-ok':'fill-fail'}" style="width:${Math.min(d.rate,100)}%"></div></div><span class="rate-num">${d.rate}%</span></div>`
+          : `<span class="td-muted">—</span>`;
+        const pass  = isTL
+          ? `<span class="badge ${d.pass?'badge-ok':'badge-fail'}">${d.pass?'달성':'미달'}</span>`
+          : `<span class="td-muted">—</span>`;
+        const intv  = isTL && !d.pass
+          ? `<input type="checkbox" ${interviews[key]?'checked':''} onchange="toggleInterview('${key}',this)">`
+          : `<span class="td-muted">—</span>`;
+        return `<tr class="${isTL ? (d.pass?'':'tr-fail') : ''}">
           <td class="td-name">${d.name}</td>
           <td class="td-muted">${d.org}</td>
-          <td class="td-muted">${d.role}</td>
-          <td>${scoreCell}</td>
-          <td>${targetCell}</td>
-          <td>${rateCell}</td>
-          <td style="text-align:center">${isTarget ? d.new_ : '—'}</td>
-          <td style="text-align:center">${isTarget ? d.fund : '—'}</td>
-          <td style="text-align:center">${isTarget ? d.mgmt : '—'}</td>
-          <td>${passCell}</td>
-          <td style="text-align:center">${interview}</td>
+          <td><span class="badge badge-role">${d.role}</span></td>
+          <td>${score}</td>
+          <td>${tgt}</td>
+          <td>${rate}</td>
+          <td style="text-align:center;color:var(--text2)">${isTL ? d.new_ : '—'}</td>
+          <td style="text-align:center;color:var(--text2)">${isTL ? d.fund : '—'}</td>
+          <td style="text-align:center;color:var(--text2)">${isTL ? d.mgmt : '—'}</td>
+          <td>${pass}</td>
+          <td style="text-align:center">${intv}</td>
         </tr>`;
       }).join('');
 }
 
-// ── 근태 카드 ──
+/* ──────────── ATTENDANCE ──────────── */
+function populateAttNames() {
+  const week  = getCurrentWeek();
+  const names = allData
+    .filter(r => r.week === week && r.role === '팀장')
+    .sort((a, b) => {
+      const oi = ORG_ORDER.indexOf(a.org) - ORG_ORDER.indexOf(b.org);
+      return oi !== 0 ? oi : a.name.localeCompare(b.name, 'ko');
+    });
+  const sel = document.getElementById('att-name');
+  const cur = sel.value;
+  sel.innerHTML = '<option value="">이름 선택</option>' +
+    names.map(m => `<option value="${m.name}" ${m.name===cur?'selected':''}>${m.name} · ${m.org}</option>`).join('');
+}
+
 function renderAttCards() {
   const week = getCurrentWeek();
-  const withAtt = [...new Set(allData.filter(r => r.week === week).map(r => r.name))]
-    .filter(name => {
-      const key = name + '_' + week;
-      return attendance[key] && attendance[key].length > 0;
-    });
+  const keys = Object.keys(attendance).filter(k => k.endsWith('_' + week) && attendance[k].length > 0);
 
   const container = document.getElementById('att-cards');
-  if (withAtt.length === 0) {
-    container.innerHTML = `<div class="att-empty">이번 주 등록된 근태 없음</div>`;
+  if (!keys.length) {
+    container.innerHTML = `<div class="att-empty"><div style="font-size:24px;margin-bottom:8px">📅</div>이번 주 등록된 근태 없음</div>`;
     return;
   }
-  container.innerHTML = withAtt.map(name => {
-    const r = allData.find(d => d.name === name && d.week === week) || {};
-    const key = name + '_' + week;
-    const items = attendance[key] || [];
-    const total = items.reduce((s,a) => s + a.deduct, 0);
-    const effTarget = Math.max(0, (r.target || TARGET_BASE) - total);
+  container.innerHTML = keys.map(key => {
+    const name  = key.replace('_' + week, '');
+    const r     = allData.find(d => d.name === name && d.week === week) || {};
+    const items = attendance[key];
+    const total = items.reduce((s, a) => s + a.deduct, 0);
+    const eff   = Math.max(0, (r.target || TARGET_BASE) - total);
     return `<div class="att-card">
       <div class="att-card-head">
         <div><span class="att-card-name">${name}</span><span class="att-card-org">${r.org||''}</span></div>
-        <span class="att-target">목표 ${effTarget}점</span>
+        <span class="att-target">목표 ${eff}점 (−${total})</span>
       </div>
-      ${items.map((a,i) => `
+      ${items.map((a, i) => `
         <div class="att-item">
           <span class="att-item-label">${a.date} · ${a.label}</span>
           <div class="att-item-right">
@@ -816,38 +1082,25 @@ function renderAttCards() {
   }).join('');
 }
 
-// ── 근태 추가/삭제 ──
-function populateAttNames() {
-  const week = getCurrentWeek();
-  const names = [...new Set(allData.filter(r => r.week === week && r.role === '팀장').map(r => r.name))];
-  const sel = document.getElementById('att-name');
-  const cur = sel.value;
-  sel.innerHTML = '<option value="">이름 선택</option>' +
-    names.map(n => {
-      const r = allData.find(d => d.name === n && d.week === week);
-      return `<option value="${n}" ${n===cur?'selected':''}>${n} (${r?.org||''})</option>`;
-    }).join('');
-}
-
 function addAttendance() {
-  const name = document.getElementById('att-name').value;
+  const name   = document.getElementById('att-name').value;
   const typeEl = document.getElementById('att-type');
-  const typeVal = typeEl.value;
-  const deduct = parseInt(typeVal);
-  const label = typeEl.options[typeEl.selectedIndex].text.split(' (')[0];
-  const date = document.getElementById('att-date').value;
-  if (!name || !date) { alert('이름과 날짜를 모두 입력해주세요'); return; }
+  const deduct = parseInt(typeEl.value);           // parseInt('4_b') → 4 ✓
+  const label  = typeEl.options[typeEl.selectedIndex].text.split(' (')[0];
+  const date   = document.getElementById('att-date').value;
+  if (!name || !date) { toast('이름과 날짜를 모두 입력해주세요', 'error'); return; }
   const week = getCurrentWeek();
-  const key = name + '_' + week;
+  const key  = `${name}_${week}`;
   if (!attendance[key]) attendance[key] = [];
   attendance[key].push({ date, deduct, label });
   localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
+  toast(`${name} · ${label} 근태 등록 완료`, 'success');
   renderAll();
 }
 
 function removeAtt(key, idx) {
   attendance[key].splice(idx, 1);
-  if (attendance[key].length === 0) delete attendance[key];
+  if (!attendance[key].length) delete attendance[key];
   localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
   renderAll();
 }
@@ -857,7 +1110,27 @@ function toggleInterview(key, el) {
   localStorage.setItem('dashboard_interviews', JSON.stringify(interviews));
 }
 
-// ── 탭/뷰 전환 ──
+/* ──────────── CSV EXPORT ──────────── */
+function exportCSV() {
+  const week = getCurrentWeek();
+  const data = getCurrentData().filter(d => d.role === '팀장');
+  const header = ['이름','소속','점수','목표','달성률','신규발굴','펀드상담','단체관리','달성여부','면담여부'];
+  const rows   = data.map(d => [
+    d.name, d.org, d.score, d.effectiveTarget, d.rate + '%',
+    d.new_, d.fund, d.mgmt,
+    d.pass ? '달성' : '미달',
+    interviews[`${d.name}_${week}`] ? '완료' : '미완료',
+  ]);
+  const csv  = [header, ...rows].map(r => r.join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = `영업활동_${week}.csv`;
+  a.click();
+  toast('CSV 파일 다운로드 시작');
+}
+
+/* ──────────── VIEW / TAB ──────────── */
 function switchTab(tab, el) {
   currentTab = tab;
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -866,6 +1139,7 @@ function switchTab(tab, el) {
 }
 
 const VIEW_TITLES = { overview: '현황 개요', table: '상세 테이블', attendance: '근태 관리', config: '설정' };
+
 function switchView(view, el) {
   currentView = view;
   document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
@@ -877,11 +1151,12 @@ function switchView(view, el) {
   if (view === 'overview') setTimeout(() => renderChart(getCurrentData()), 50);
 }
 
-// ── 전체 렌더 ──
+/* ──────────── RENDER ALL ──────────── */
 function renderAll() {
   const data = getCurrentData();
   renderMetrics(data);
   if (currentView === 'overview') {
+    renderOrgGrid(data);
     renderChart(data);
     renderFailTable(data);
   } else if (currentView === 'table') {
@@ -892,13 +1167,27 @@ function renderAll() {
   }
 }
 
-// ── 로딩 ──
+/* ──────────── TOAST ──────────── */
+function toast(msg, type = '') {
+  const el = document.createElement('div');
+  el.className = 'toast' + (type ? ' ' + type : '');
+  el.textContent = msg;
+  document.getElementById('toast-container').appendChild(el);
+  requestAnimationFrame(() => requestAnimationFrame(() => el.classList.add('show')));
+  setTimeout(() => {
+    el.classList.remove('show');
+    setTimeout(() => el.remove(), 280);
+  }, 3000);
+}
+
+/* ──────────── LOADING ──────────── */
 function setLoading(show, text) {
   document.getElementById('loading').style.display = show ? 'flex' : 'none';
   if (text) document.getElementById('loading-text').textContent = text;
 }
 
-// ── 초기화 ──
+/* ──────────── INIT ──────────── */
+document.getElementById('att-date').value = new Date().toISOString().slice(0, 10);
 loadConfig();
 loadData();
 </script>
