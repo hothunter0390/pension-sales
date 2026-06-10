@@ -743,7 +743,7 @@ async function loadData() {
     weeks   = [...new Set(allData.map(r => r.week))].sort().reverse();
     buildWeekSelect();
     populateAttNames();
-    loadEvidenceData();
+    await loadEvidenceData();
     renderAll();
 
     const now = new Date().toLocaleTimeString('ko-KR', {hour:'2-digit', minute:'2-digit'});
@@ -812,13 +812,8 @@ function renderEvidence() {
   const tbody = document.getElementById('evidence-table');
   if (!tbody) return;
 
-  // filter by current week/org tab if desired — show all for now
-  const sel  = document.getElementById('week-select');
-  const selW = sel ? sel.value : '';
-
-  const filtered = selW
-    ? evidenceData.filter(r => r.week === selW)
-    : evidenceData;
+  // 증빙자료는 전체 표시 (주차 필터 미적용)
+  const filtered = evidenceData;
 
   const cntEl = document.getElementById('evidence-count');
   if (cntEl) cntEl.textContent = `총 ${filtered.length}건`;
