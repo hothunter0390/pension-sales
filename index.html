@@ -1001,6 +1001,11 @@ function trendHtml(diff, positiveGood, unit = '명') {
 }
 
 /* ──────────── ORG SUMMARY GRID ──────────── */
+const RM_GROUPS = [
+  { label: '1RM', orgs: ['1사업단', '2사업단', '중부사업단'] },
+  { label: '2RM', orgs: ['3사업단', '4사업단', '영남사업단', 'EB사업단'] }
+];
+
 function renderOrgGrid(data) {
   const tl = data.filter(d => d.role === '팀장');
   const map = {};
@@ -1011,25 +1016,33 @@ function renderOrgGrid(data) {
     map[d.org].rateSum += d.rate;
   });
 
+  const orgCardHTML = org => {
+    const o = map[org];
+    if (!o) return '';
+    const avg = Math.round(o.rateSum / o.total);
+    const cls = avg >= 80 ? 'rate-high' : avg >= 60 ? 'rate-mid' : 'rate-low';
+    const clr = avg >= 80 ? 'var(--green)' : avg >= 60 ? '#f59e0b' : 'var(--red)';
+    return `<div class="org-card">
+      <div class="org-card-header">
+        <span class="org-card-name">${org}</span>
+        <span class="org-card-rate ${cls}">${avg}%</span>
+      </div>
+      <div class="org-bar-track">
+        <div class="org-bar-fill" style="width:${Math.min(avg,100)}%;background:${clr}"></div>
+      </div>
+      <div class="org-card-footer">${o.pass}/${o.total}명 달성</div>
+    </div>`;
+  };
+
   document.getElementById('overview-week-label').textContent = getCurrentWeek();
-  document.getElementById('org-grid').innerHTML = ORG_ORDER
-    .filter(o => map[o])
-    .map(org => {
-      const o = map[org];
-      const avg = Math.round(o.rateSum / o.total);
-      const cls = avg >= 80 ? 'rate-high' : avg >= 60 ? 'rate-mid' : 'rate-low';
-      const clr = avg >= 80 ? 'var(--green)' : avg >= 60 ? '#f59e0b' : 'var(--red)';
-      return `<div class="org-card">
-        <div class="org-card-header">
-          <span class="org-card-name">${org}</span>
-          <span class="org-card-rate ${cls}">${avg}%</span>
-        </div>
-        <div class="org-bar-track">
-          <div class="org-bar-fill" style="width:${Math.min(avg,100)}%;background:${clr}"></div>
-        </div>
-        <div class="org-card-footer">${o.pass}/${o.total}명 달성</div>
-      </div>`;
-    }).join('');
+  document.getElementById('org-grid').innerHTML = RM_GROUPS.map(group => `
+    <div style="grid-column:1/-1">
+      <div style="font-size:.75rem;font-weight:700;color:var(--text-muted);letter-spacing:.05em;
+                  margin-bottom:.5rem;padding:.25rem .5rem;background:var(--bg-alt);
+                  border-radius:6px;display:inline-block">${group.label}</div>
+    </div>
+    ${group.orgs.map(orgCardHTML).join('')}
+  `).join('');
 }
 
 /* ──────────── CHART ──────────── */
