@@ -722,7 +722,25 @@ function saveConfig() {
   setTimeout(() => { s.textContent = ''; }, 2000);
 }
 
-function getConfig()           { return JSON.parse(localStorage.getItem('dashboard_config') || '{}'); }
+// 새 컬럼 구조 기본값 (v2: 건별 입력 구조)
+const COL_DEFAULTS_V2 = { week:1, org:2, name:3, role:4, score:12, target:13, new:5, fund:6, mgmt:7 };
+const CONFIG_VERSION  = 'v2';
+
+function getConfig() {
+  const raw = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
+  // 구버전 캐시 감지: score가 5이면 v1 구조 → 자동 리셋
+  if (!raw._ver || raw._ver !== CONFIG_VERSION) {
+    Object.keys(COL_DEFAULTS_V2).forEach(k => { raw['col_' + k] = COL_DEFAULTS_V2[k]; });
+    raw._ver = CONFIG_VERSION;
+    localStorage.setItem('dashboard_config', JSON.stringify(raw));
+    // UI도 업데이트
+    Object.keys(COL_DEFAULTS_V2).forEach(k => {
+      const el = document.getElementById('col-' + k);
+      if (el) el.value = COL_DEFAULTS_V2[k];
+    });
+  }
+  return raw;
+}
 function getColIdx(key, fb)    { const c = getConfig(); return (c['col_' + key] || fb) - 1; }
 
 /* ──────────── DATA FETCH ──────────── */
@@ -936,7 +954,7 @@ function renderActlogTable() {
       <td style="padding:8px 10px"><span style="padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:#F5F3FF;color:#5B21B6">${r.method||'—'}</span></td>
       <td style="padding:8px 10px">${r.orgName||'—'}</td>
       <td style="padding:8px 10px">${r.contact||'—'}</td>
-      <td style="padding:8px 10px;font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.content||'').replace(/"/g,'&quot;')}">${r.content||'—'}</td>
+      <td style="padding:8px 10px;font-size:12px;color:var(--text2);max-width:220px;word-break:break-all;white-space:pre-wrap">${r.content||'—'}</td>
       <td style="padding:8px 10px;text-align:center;font-weight:700;color:var(--blue)">+${r.score}점</td>
     </tr>`;
   }).join('');
