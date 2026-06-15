@@ -341,8 +341,8 @@
     <div class="nav-item" onclick="switchView('attendance', this)">
       <span class="nav-icon">📅</span> 근태 관리
     </div>
-    <div class="nav-item" onclick="switchView('evidence', this)">
-      <span class="nav-icon">📎</span> 증빙자료
+    <div class="nav-item" onclick="switchView('actlog', this)">
+      <span class="nav-icon">📒</span> 활동일지
     </div>
     <div class="nav-item" onclick="switchView('config', this)">
       <span class="nav-icon">⚙️</span> 설정
@@ -507,28 +507,64 @@
       </div>
     </div>
 
-    <!-- ── 증빙자료 뷰 ── -->
-    <div id="view-evidence" class="view">
+    <!-- ── 활동일지 뷰 ── -->
+    <div id="view-actlog" class="view">
       <div class="section">
         <div class="section-header">
-          <span class="section-title">증빙자료 목록</span>
-          <span class="section-sub" id="evidence-count"></span>
+          <span class="section-title">활동일지</span>
+          <span class="section-sub" id="actlog-count"></span>
         </div>
-        <div class="tab-row">
+        <!-- 필터 -->
+        <div class="tab-row" style="flex-wrap:wrap;gap:6px;margin-bottom:12px">
+          <select id="al-week" class="search-input" style="min-width:110px;padding:6px 10px" onchange="renderActlog()">
+            <option value="">전체 주차</option>
+          </select>
+          <select id="al-org" class="search-input" style="min-width:110px;padding:6px 10px" onchange="renderActlog()">
+            <option value="">전체 사업단</option>
+          </select>
+          <select id="al-name" class="search-input" style="min-width:100px;padding:6px 10px" onchange="renderActlog()">
+            <option value="">전체 이름</option>
+          </select>
+          <select id="al-purpose" class="search-input" style="min-width:110px;padding:6px 10px" onchange="renderActlog()">
+            <option value="">전체 목적</option>
+            <option value="신규발굴">신규발굴</option>
+            <option value="펀드상담">펀드상담</option>
+            <option value="단체관리">단체관리</option>
+          </select>
+          <select id="al-method" class="search-input" style="min-width:90px;padding:6px 10px" onchange="renderActlog()">
+            <option value="">전체 방식</option>
+            <option value="방문">방문</option>
+            <option value="중식">중식</option>
+            <option value="석식">석식</option>
+            <option value="기타">기타</option>
+          </select>
+          <input type="text" id="al-search" class="search-input" placeholder="🔍 단체명·담당자·내용" oninput="renderActlog()" style="min-width:160px">
           <div class="tab-spacer"></div>
-          <input type="text" class="search-input" id="evidence-search" placeholder="🔍 이름·소속 검색" oninput="renderEvidence()">
+          <button onclick="exportActlogCSV()" style="background:var(--green);color:#fff;border:none;border-radius:6px;padding:6px 12px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit">⬇ CSV</button>
         </div>
+        <!-- 요약 -->
+        <div id="al-summary" style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px"></div>
+        <!-- 테이블 -->
         <div class="table-wrap">
           <table>
             <thead>
-              <tr>
-                <th>주차</th><th>활동일자</th><th>이름</th><th>소속</th>
-                <th>활동내역</th><th>점수</th><th style="text-align:center">증빙</th>
+              <tr style="background:var(--blue);color:#fff">
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">주차</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">날짜</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">소속</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">이름</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">활동목적</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">방식</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">단체명</th>
+                <th style="padding:10px 10px;font-size:12px;white-space:nowrap">담당자</th>
+                <th style="padding:10px 10px;font-size:12px;min-width:140px">내용</th>
+                <th style="padding:10px 10px;font-size:12px;text-align:center;white-space:nowrap">점수</th>
               </tr>
             </thead>
-            <tbody id="evidence-table"></tbody>
+            <tbody id="actlog-table"></tbody>
           </table>
         </div>
+        <div id="al-pagination" style="display:flex;align-items:center;justify-content:center;gap:6px;padding:14px 0;flex-wrap:wrap"></div>
       </div>
     </div>
 
@@ -760,6 +796,182 @@ async function loadData() {
     toast('구글 시트 연결 실패. 데모 데이터로 표시합니다.', 'error');
     console.error(e);
   }
+}
+
+/* ──────────── 활동일지 ──────────── */
+let actlogData   = [];
+let alFiltered   = [];
+let alPage       = 1;
+const AL_PAGE    = 50;
+
+async function loadActlogData() {
+  const cfg    = getConfig();
+  const logGid = cfg.logGid || '785851831';
+  const sheetId = cfg.sheetId || '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
+  try {
+    const url  = `https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv&gid=${logGid}&t=${Date.now()}`;
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const rows = parseCSV ? parseCSV(text) : csvParse(text);
+    if (rows.length < 2) return;
+
+    const header = rows[0].map(h => h.trim());
+    const isNew  = header[0] === '행ID' || header.some(h => h === '활동목적');
+
+    actlogData = rows.slice(1).map(r => {
+      if (isNew) {
+        return { actDate:r[2], week:r[3], org:r[4], name:r[5], role:r[6],
+                 purpose:r[7], method:r[8], orgName:r[9], contact:r[10],
+                 content:r[11], score: parseFloat(r[12])||0 };
+      } else {
+        return { actDate:r[1], week:r[2], org:r[3], name:r[4], role:r[5],
+                 purpose:r[6], method:'—', orgName:'—', contact:'—',
+                 content:r[10]||'', score: parseFloat(r[9])||0 };
+      }
+    }).filter(r => r.name);
+
+    // 필터 옵션
+    const weeks = [...new Set(actlogData.map(r=>r.week))].sort().reverse();
+    const orgs  = [...new Set(actlogData.map(r=>r.org))].sort();
+    const names = [...new Set(actlogData.map(r=>r.name))].sort();
+    setAlOptions('al-week',  weeks, '전체 주차');
+    setAlOptions('al-org',   orgs,  '전체 사업단');
+    setAlOptions('al-name',  names, '전체 이름');
+
+    renderActlog();
+  } catch(e) { console.warn('활동일지 로드 실패', e); }
+}
+
+function setAlOptions(id, vals, placeholder) {
+  const sel = document.getElementById(id);
+  if (!sel) return;
+  const cur = sel.value;
+  sel.innerHTML = `<option value="">${placeholder}</option>` +
+    vals.map(v => `<option value="${v}" ${v===cur?'selected':''}>${v}</option>`).join('');
+}
+
+function csvParse(text) {
+  const rows = []; let row=[], cell='', inQ=false;
+  for (let i=0;i<text.length;i++) {
+    const c=text[i];
+    if(c==='"'){inQ=!inQ;continue;}
+    if(c===','&&!inQ){row.push(cell);cell='';continue;}
+    if((c==='\n'||c==='\r')&&!inQ){row.push(cell);rows.push(row);row=[];cell='';if(c==='\r'&&text[i+1]==='\n')i++;continue;}
+    cell+=c;
+  }
+  if(cell||row.length){row.push(cell);rows.push(row);}
+  return rows.filter(r=>r.some(c=>c.trim()));
+}
+
+const AL_PB = {신규발굴:'background:#EEF2FF;color:#1E3A8A', 펀드상담:'background:#E8F5F0;color:#0F6E56', 단체관리:'background:#FEF3C7;color:#92400E'};
+
+function renderActlog() {
+  const week    = (document.getElementById('al-week')?.value)||'';
+  const org     = (document.getElementById('al-org')?.value)||'';
+  const name    = (document.getElementById('al-name')?.value)||'';
+  const purpose = (document.getElementById('al-purpose')?.value)||'';
+  const method  = (document.getElementById('al-method')?.value)||'';
+  const search  = ((document.getElementById('al-search')?.value)||'').toLowerCase().trim();
+
+  alFiltered = actlogData.filter(r => {
+    if (week    && r.week    !== week)    return false;
+    if (org     && r.org     !== org)     return false;
+    if (name    && r.name    !== name)    return false;
+    if (purpose && r.purpose !== purpose) return false;
+    if (method  && r.method  !== method)  return false;
+    if (search) {
+      const hay = `${r.orgName} ${r.contact} ${r.content}`.toLowerCase();
+      if (!hay.includes(search)) return false;
+    }
+    return true;
+  });
+
+  // 요약
+  const total  = alFiltered.length;
+  const score  = alFiltered.reduce((s,r)=>s+r.score,0);
+  const 신규   = alFiltered.filter(r=>r.purpose==='신규발굴').length;
+  const 펀드   = alFiltered.filter(r=>r.purpose==='펀드상담').length;
+  const 단체   = alFiltered.filter(r=>r.purpose==='단체관리').length;
+  const people = new Set(alFiltered.map(r=>r.name)).size;
+  const cards  = [
+    ['전체', total+'건', 'var(--blue)'],
+    ['합산점수', score+'점', 'var(--blue)'],
+    ['신규발굴', 신규+'건', 'var(--green)'],
+    ['펀드상담', 펀드+'건', 'var(--amber)'],
+    ['단체관리', 단체+'건', '#7C3AED'],
+    ['참여인원', people+'명', 'var(--text)'],
+  ];
+  const sumEl = document.getElementById('al-summary');
+  if (sumEl) sumEl.innerHTML = cards.map(([l,v,c])=>
+    `<div style="background:#fff;border:1px solid var(--border);border-radius:8px;padding:8px 14px;min-width:90px">
+       <div style="font-size:18px;font-weight:800;color:${c}">${v}</div>
+       <div style="font-size:11px;color:var(--text2)">${l}</div>
+     </div>`).join('');
+
+  const cntEl = document.getElementById('actlog-count');
+  if (cntEl) cntEl.textContent = `총 ${total}건`;
+
+  alPage = 1;
+  renderActlogTable();
+  renderAlPagination();
+}
+
+function renderActlogTable() {
+  const tbody = document.getElementById('actlog-table');
+  if (!tbody) return;
+  const start = (alPage-1)*AL_PAGE;
+  const page  = alFiltered.slice(start, start+AL_PAGE);
+  if (!page.length) {
+    tbody.innerHTML = `<tr><td colspan="10" style="text-align:center;padding:40px;color:var(--text2)">📭 데이터가 없습니다</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = page.map(r => {
+    const pbStyle = AL_PB[r.purpose]||'';
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:8px 10px;white-space:nowrap;font-size:12px;color:var(--text2)">${r.week}</td>
+      <td style="padding:8px 10px;white-space:nowrap">${r.actDate}</td>
+      <td style="padding:8px 10px">${r.org}</td>
+      <td style="padding:8px 10px;font-weight:600">${r.name}</td>
+      <td style="padding:8px 10px"><span style="padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;${pbStyle}">${r.purpose||'—'}</span></td>
+      <td style="padding:8px 10px"><span style="padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600;background:#F5F3FF;color:#5B21B6">${r.method||'—'}</span></td>
+      <td style="padding:8px 10px">${r.orgName||'—'}</td>
+      <td style="padding:8px 10px">${r.contact||'—'}</td>
+      <td style="padding:8px 10px;font-size:12px;color:var(--text2);max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${(r.content||'').replace(/"/g,'&quot;')}">${r.content||'—'}</td>
+      <td style="padding:8px 10px;text-align:center;font-weight:700;color:var(--blue)">+${r.score}점</td>
+    </tr>`;
+  }).join('');
+}
+
+function renderAlPagination() {
+  const el    = document.getElementById('al-pagination');
+  if (!el) return;
+  const total = Math.ceil(alFiltered.length / AL_PAGE);
+  if (total <= 1) { el.innerHTML = ''; return; }
+  let html = `<button onclick="goAlPage(${alPage-1})" ${alPage===1?'disabled':''} style="border:1px solid var(--border);background:#fff;border-radius:6px;padding:5px 10px;cursor:pointer">◀</button>`;
+  for (let i=Math.max(1,alPage-2);i<=Math.min(total,alPage+2);i++) {
+    html += `<button onclick="goAlPage(${i})" style="border:1px solid ${i===alPage?'var(--blue)':'var(--border)'};background:${i===alPage?'var(--blue)':'#fff'};color:${i===alPage?'#fff':'var(--text)'};border-radius:6px;padding:5px 10px;cursor:pointer">${i}</button>`;
+  }
+  html += `<button onclick="goAlPage(${alPage+1})" ${alPage===total?'disabled':''} style="border:1px solid var(--border);background:#fff;border-radius:6px;padding:5px 10px;cursor:pointer">▶</button>`;
+  el.innerHTML = html;
+}
+
+function goAlPage(n) {
+  const total = Math.ceil(alFiltered.length / AL_PAGE);
+  if (n<1||n>total) return;
+  alPage = n;
+  renderActlogTable();
+  renderAlPagination();
+}
+
+function exportActlogCSV() {
+  const header = ['주차','날짜','소속','이름','직책','활동목적','활동방식','단체명','담당자','내용','점수'];
+  const rows   = alFiltered.map(r=>[r.week,r.actDate,r.org,r.name,r.role,r.purpose,r.method,r.orgName,r.contact,r.content,r.score]);
+  const csv    = [header,...rows].map(r=>r.map(c=>`"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob   = new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a      = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = `활동일지_${new Date().toLocaleDateString('sv')}.csv`;
+  a.click();
 }
 
 /* ──────────── 증빙자료 ──────────── */
@@ -1328,7 +1540,7 @@ function switchTab(tab, el) {
   renderMainTable(getCurrentData());
 }
 
-const VIEW_TITLES = { overview: '현황 개요', table: '상세 테이블', attendance: '근태 관리', evidence: '증빙자료', config: '설정' };
+const VIEW_TITLES = { overview: '현황 개요', table: '상세 테이블', attendance: '근태 관리', actlog: '활동일지', config: '설정' };
 
 function switchView(view, el) {
   currentView = view;
@@ -1339,6 +1551,7 @@ function switchView(view, el) {
   document.getElementById('page-title').textContent = VIEW_TITLES[view];
   document.getElementById('metrics-row').style.display = view === 'config' ? 'none' : 'grid';
   if (view === 'overview')  setTimeout(() => renderChart(getCurrentData()), 50);
+  if (view === 'actlog')    { if (!actlogData.length) loadActlogData(); else renderActlog(); }
   if (view === 'evidence')  renderEvidence();
 }
 
