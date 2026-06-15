@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>활동 입력 | 한화생명 법인사업부</title>
+<title>활동 포털 | 한화생명 법인사업부</title>
 <style>
   :root {
     --blue: #1E3A8A;
@@ -15,6 +15,8 @@
     --amber-bg: #FEF3C7;
     --red: #991B1B;
     --red-bg: #FEE2E2;
+    --purple: #5B21B6;
+    --purple-bg: #F5F3FF;
     --gray: #6B7280;
     --gray-bg: #F3F4F6;
     --border: #E5E7EB;
@@ -27,355 +29,395 @@
     background: #F8FAFC;
     color: var(--text);
     min-height: 100dvh;
+    padding-bottom: 72px; /* 하단 탭 높이 */
   }
 
+  /* ── 헤더 ── */
   .header {
     background: var(--blue);
     color: #fff;
-    padding: 16px 20px 14px;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
   }
-  .header-logo { font-size: 18px; font-weight: 700; }
-  .header-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+  .header-logo { font-size: 16px; font-weight: 700; }
+  .header-sub  { font-size: 11px; opacity: 0.7; margin-top: 2px; }
 
+  /* ── 신원 바 ── */
   .identity-bar {
     background: #fff;
     border-bottom: 1px solid var(--border);
-    padding: 10px 20px;
+    padding: 8px 16px;
     display: flex;
-    gap: 8px;
+    gap: 6px;
     flex-wrap: wrap;
     align-items: center;
   }
-  .chip {
-    display: inline-flex;
-    align-items: center;
-    background: var(--blue-bg);
-    color: var(--blue);
-    border-radius: 100px;
-    padding: 4px 10px;
-    font-size: 12px;
-    font-weight: 600;
-  }
-  .chip-name { background: var(--blue); color: #fff; font-size: 13px; }
-  .id-missing { font-size: 13px; color: var(--red); background: var(--red-bg); border-radius: 8px; padding: 8px 14px; }
+  .chip { display:inline-flex; align-items:center; background:var(--blue-bg); color:var(--blue); border-radius:100px; padding:3px 10px; font-size:12px; font-weight:600; }
+  .chip-name { background:var(--blue); color:#fff; font-size:13px; }
+  .id-missing { font-size:13px; color:var(--red); background:var(--red-bg); border-radius:8px; padding:8px 14px; }
 
-  .container { padding: 20px 16px 48px; max-width: 480px; margin: 0 auto; }
-  .section { margin-bottom: 20px; }
+  /* ── 하단 탭 바 ── */
+  .tab-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    height: 64px;
+    background: #fff;
+    border-top: 1px solid var(--border);
+    display: flex;
+    z-index: 200;
+    box-shadow: 0 -2px 10px rgba(0,0,0,0.06);
+  }
+  .tab-btn {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 3px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray);
+    cursor: pointer;
+    transition: color 0.15s;
+    -webkit-tap-highlight-color: transparent;
+    padding-bottom: 4px;
+  }
+  .tab-btn .icon { font-size: 22px; line-height: 1; }
+  .tab-btn.active { color: var(--blue); }
+  .tab-btn.active .tab-indicator { background: var(--blue); }
+  .tab-indicator { width: 32px; height: 3px; border-radius: 2px; background: transparent; position: absolute; top: 0; transition: background 0.15s; }
+
+  /* ── 공통 컨테이너 ── */
+  .page { display: none; padding: 16px 16px 24px; max-width: 480px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ── 섹션 ── */
+  .section { margin-bottom: 18px; }
   .section-label {
-    font-size: 12px; font-weight: 700; color: var(--gray);
+    font-size: 11px; font-weight: 700; color: var(--gray);
     text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
   }
-  .section-label span { text-transform: none; letter-spacing: 0; font-weight: 400; }
+  .section-label span { text-transform:none; letter-spacing:0; font-weight:400; }
 
-  .date-input {
+  /* ── 입력 요소 ── */
+  .date-input, .text-input, .text-area {
     width: 100%; border: 2px solid var(--border); border-radius: var(--radius);
-    padding: 12px 14px; font-size: 16px; font-family: inherit;
+    padding: 12px 14px; font-size: 15px; font-family: inherit;
     background: #fff; color: var(--text); outline: none; transition: border-color 0.15s;
   }
-  .date-input:focus { border-color: var(--blue-light); }
+  .date-input:focus, .text-input:focus, .text-area:focus { border-color: var(--blue-light); }
+  .text-area { resize: none; min-height: 80px; }
+  ::placeholder { color: #C9CDD4; }
 
+  /* ── 버튼 그룹 ── */
   .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-select {
     flex: 1; min-width: 60px; padding: 12px 6px;
     border: 2px solid var(--border); border-radius: var(--radius);
     background: #fff; font-family: inherit; font-size: 14px; font-weight: 600;
-    color: var(--gray); cursor: pointer; text-align: center;
-    transition: all 0.15s; line-height: 1.3; -webkit-tap-highlight-color: transparent;
+    color: var(--gray); cursor: pointer; text-align: center; transition: all 0.15s;
+    line-height: 1.3; -webkit-tap-highlight-color: transparent;
   }
   .btn-select:active { transform: scale(0.96); }
   .btn-sub { font-size: 11px; font-weight: 400; display: block; margin-top: 2px; }
+  .btn-select.ap0 { background:var(--blue-bg); border-color:var(--blue); color:var(--blue); }
+  .btn-select.ap1 { background:var(--green-bg); border-color:var(--green); color:var(--green); }
+  .btn-select.ap2 { background:var(--amber-bg); border-color:#D97706; color:var(--amber); }
+  .btn-select.am  { background:var(--purple-bg); border-color:#7C3AED; color:var(--purple); }
 
-  .btn-select.ap0 { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
-  .btn-select.ap1 { background: var(--green-bg); border-color: var(--green); color: var(--green); }
-  .btn-select.ap2 { background: var(--amber-bg); border-color: #D97706; color: var(--amber); }
-  .btn-select.am  { background: #F5F3FF; border-color: #7C3AED; color: #5B21B6; }
-
-  .text-input, .text-area {
-    width: 100%; border: 2px solid var(--border); border-radius: var(--radius);
-    padding: 12px 14px; font-size: 15px; font-family: inherit;
-    background: #fff; color: var(--text); outline: none; transition: border-color 0.15s;
-  }
-  .text-input:focus, .text-area:focus { border-color: var(--blue-light); }
-  .text-area { resize: none; min-height: 80px; }
-  ::placeholder { color: #C9CDD4; }
-
+  /* ── 점수 프리뷰 ── */
   .score-preview {
     border-radius: var(--radius); padding: 14px 18px;
     display: flex; align-items: center; justify-content: space-between;
     background: var(--gray-bg); transition: background 0.2s;
   }
-  .score-preview.active {
-    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
-  }
-  .score-preview .lbl { font-size: 13px; color: var(--gray); }
-  .score-preview.active .lbl { color: rgba(255,255,255,0.8); }
-  .score-preview .val { font-size: 30px; font-weight: 800; color: var(--gray); display:flex;align-items:baseline;gap:4px; }
-  .score-preview.active .val { color: #fff; }
-  .score-preview .val span { font-size: 15px; font-weight: 400; }
-  .score-icon { font-size: 30px; }
+  .score-preview.active { background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%); }
+  .sp-label { font-size: 13px; color: var(--gray); }
+  .score-preview.active .sp-label { color: rgba(255,255,255,0.8); }
+  .sp-val { font-size: 30px; font-weight: 800; color: var(--gray); display:flex;align-items:baseline;gap:4px; }
+  .score-preview.active .sp-val { color: #fff; }
+  .sp-val span { font-size:14px; font-weight:400; }
+  .sp-icon { font-size: 28px; }
 
+  /* ── 제출 버튼 ── */
   .btn-submit {
-    width: 100%; padding: 16px;
+    width: 100%; padding: 15px;
     background: var(--blue); color: #fff;
     border: none; border-radius: var(--radius);
-    font-size: 17px; font-weight: 700; font-family: inherit;
+    font-size: 16px; font-weight: 700; font-family: inherit;
     cursor: pointer; transition: all 0.15s;
     display: flex; align-items: center; justify-content: center; gap: 8px;
     -webkit-tap-highlight-color: transparent;
   }
-  .btn-submit:hover { background: var(--blue-light); }
   .btn-submit:active { transform: scale(0.98); }
   .btn-submit:disabled { background: #9CA3AF; cursor: not-allowed; }
+  .spinner { width:18px;height:18px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite; }
+  @keyframes spin { to { transform:rotate(360deg); } }
 
-  .spinner {
-    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4);
-    border-top-color: #fff; border-radius: 50%;
-    animation: spin 0.7s linear infinite;
+  /* ── 성공 뷰 ── */
+  #success-view { display:none; }
+  .success-card { background:var(--green-bg);border:2px solid var(--green);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px; }
+  .success-icon { font-size:36px;margin-bottom:6px; }
+  .success-title { font-size:17px;font-weight:700;color:var(--green);margin-bottom:3px; }
+  .success-sub { font-size:13px;color:var(--gray); }
+  .btn-more { width:100%;padding:13px;background:#fff;color:var(--blue);border:2px solid var(--blue);border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent; }
+  .btn-more:active { transform:scale(0.98); }
+
+  /* ── 카드 공통 ── */
+  .card { background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:14px; }
+  .card-header { padding:12px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border); }
+
+  /* ── 내 기록 탭 ── */
+  .week-nav { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
+  .week-nav-btn { background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;font-family:inherit; }
+  .week-nav-btn:active { background:var(--gray-bg); }
+  .week-nav-label { font-size:14px;font-weight:700;color:var(--text); }
+
+  /* 주간 점수 카드 */
+  .score-card {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    color: #fff;
+    margin-bottom: 14px;
   }
-  @keyframes spin { to { transform: rotate(360deg); } }
+  .score-card-top { display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px; }
+  .score-card-label { font-size:12px;opacity:0.8;margin-bottom:2px; }
+  .score-card-value { font-size:36px;font-weight:800;line-height:1; }
+  .score-card-target { font-size:13px;opacity:0.7; }
+  .score-card-badge { background:rgba(255,255,255,0.2);border-radius:100px;padding:4px 12px;font-size:12px;font-weight:700; }
+  .score-card-badge.reached { background:rgba(255,255,255,0.9);color:var(--green); }
+  .prog-bg { background:rgba(255,255,255,0.25);border-radius:100px;height:8px;overflow:hidden; }
+  .prog-fill { height:8px;border-radius:100px;background:#fff;transition:width 0.5s; }
+  .prog-label { font-size:11px;opacity:0.7;margin-top:5px;text-align:right; }
 
-  #success-view { display: none; }
-  .success-card {
-    background: var(--green-bg); border: 2px solid var(--green);
-    border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 20px;
-  }
-  .success-icon { font-size: 38px; margin-bottom: 8px; }
-  .success-title { font-size: 18px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
-  .success-sub { font-size: 13px; color: var(--gray); }
+  /* 활동 통계 */
+  .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
+  .stat-item { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:10px 12px;text-align:center; }
+  .stat-val { font-size:22px;font-weight:800;margin-bottom:2px; }
+  .stat-label { font-size:11px;color:var(--gray); }
+  .stat-item.blue .stat-val { color:var(--blue); }
+  .stat-item.green .stat-val { color:var(--green); }
+  .stat-item.amber .stat-val { color:var(--amber); }
 
-  .detail-card {
-    background: #fff; border-radius: var(--radius); padding: 14px 16px;
-    margin-bottom: 20px; border: 1px solid var(--border);
-  }
-  .detail-card h3 { font-size: 12px; color: var(--gray); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
-  .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
-  .detail-row:last-child { border-bottom: none; }
-  .dk { color: var(--gray); }
-  .dv { font-weight: 600; }
+  /* 활동 목록 */
+  .act-list { }
+  .act-item { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:12px 14px;margin-bottom:8px; }
+  .act-item-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
+  .act-date { font-size:12px;color:var(--gray); }
+  .act-score { font-size:14px;font-weight:800;color:var(--blue); }
+  .act-badges { display:flex;gap:5px;flex-wrap:wrap;margin-bottom:4px; }
+  .pb { display:inline-block;padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600; }
+  .pb0 { background:var(--blue-bg);color:var(--blue); }
+  .pb1 { background:var(--green-bg);color:var(--green); }
+  .pb2 { background:var(--amber-bg);color:var(--amber); }
+  .mb { display:inline-block;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600; }
+  .act-detail { font-size:12px;color:var(--gray);margin-top:3px; }
+  .no-data { text-align:center;padding:32px 20px;color:var(--gray);font-size:13px; }
+  .no-data .no-icon { font-size:32px;margin-bottom:8px; }
 
-  .weekly-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
-  .weekly-head {
-    background: var(--blue); color: #fff; padding: 12px 16px;
-    font-size: 13px; font-weight: 700;
-    display: flex; justify-content: space-between; align-items: center;
-  }
-  .week-badge {
-    background: rgba(255,255,255,0.2); border-radius: 100px;
-    padding: 3px 10px; font-size: 13px; font-weight: 800;
-  }
-  .summary-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
-  .summary-tbl th { background: var(--gray-bg); padding: 8px 12px; text-align: left; font-size: 11px; color: var(--gray); border-bottom: 1px solid var(--border); }
-  .summary-tbl td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
-  .summary-tbl tr:last-child td { border-bottom: none; }
-  .pb { display:inline-block; padding:2px 8px; border-radius:100px; font-size:11px; font-weight:600; }
-  .pb0 { background:var(--blue-bg); color:var(--blue); }
-  .pb1 { background:var(--green-bg); color:var(--green); }
-  .pb2 { background:var(--amber-bg); color:var(--amber); }
-  .mb { display:inline-block; background:#F5F3FF; color:#5B21B6; padding:2px 8px; border-radius:100px; font-size:11px; font-weight:600; }
+  /* 로딩 */
+  .loading-wrap { text-align:center;padding:32px;color:var(--gray);font-size:13px; }
+  .ls { display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px; }
 
-  .no-data { text-align:center; padding:20px; color:var(--gray); font-size:13px; }
-  .loading-wrap { text-align:center; padding:20px; color:var(--gray); font-size:13px; }
-  .ls { display:inline-block; width:18px;height:18px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin 0.7s linear infinite; margin-bottom:6px; }
-
-  .prog-wrap { padding: 10px 16px 14px; }
-  .prog-bg { background: var(--border); border-radius: 100px; height: 7px; overflow: hidden; }
-  .prog-fill { height: 7px; border-radius: 100px; transition: width 0.5s; }
-  .prog-lbl { font-size: 11px; color: var(--gray); margin-top: 4px; text-align: right; }
-
-  .btn-more {
-    width: 100%; padding: 14px;
-    background: #fff; color: var(--blue);
-    border: 2px solid var(--blue); border-radius: var(--radius);
-    font-size: 16px; font-weight: 700; font-family: inherit;
-    cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent;
-  }
-  .btn-more:hover { background: var(--blue-bg); }
-  .btn-more:active { transform: scale(0.98); }
+  /* 방금 제출 상세 */
+  .detail-card { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:14px; }
+  .detail-card h3 { font-size:11px;color:var(--gray);font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.4px; }
+  .detail-row { display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px; }
+  .detail-row:last-child { border-bottom:none; }
+  .dk { color:var(--gray); }
+  .dv { font-weight:600; }
 </style>
 </head>
 <body>
 
+<!-- 헤더 -->
 <div class="header">
-  <div class="header-logo">🏢 법인사업부 활동 입력</div>
-  <div class="header-sub">한화생명 영업팀장 전용</div>
+  <div>
+    <div class="header-logo">🏢 법인사업부 활동 포털</div>
+    <div class="header-sub">한화생명 영업팀장 전용</div>
+  </div>
 </div>
 
+<!-- 신원 바 -->
 <div id="identity-bar" class="identity-bar"></div>
 
-<div class="container">
+<!-- ── 탭 1: 입력 ── -->
+<div id="page-input" class="page active">
+
   <!-- 입력 폼 -->
   <div id="form-view">
     <div class="section">
       <div class="section-label">📅 활동일자</div>
       <input type="date" id="act-date" class="date-input">
     </div>
-
     <div class="section">
       <div class="section-label">🎯 활동목적 (WHY)</div>
-      <div class="btn-group" id="purpose-group">
-        <button class="btn-select" data-purpose="신규발굴" data-score="3" data-idx="0" onclick="selectPurpose(this)">
-          신규발굴<span class="btn-sub">+3점</span>
-        </button>
-        <button class="btn-select" data-purpose="펀드상담" data-score="2" data-idx="1" onclick="selectPurpose(this)">
-          펀드상담<span class="btn-sub">+2점</span>
-        </button>
-        <button class="btn-select" data-purpose="단체관리" data-score="1" data-idx="2" onclick="selectPurpose(this)">
-          단체관리<span class="btn-sub">+1점</span>
-        </button>
+      <div class="btn-group">
+        <button class="btn-select" data-purpose="신규발굴" data-score="3" data-idx="0" onclick="selectPurpose(this)">신규발굴<span class="btn-sub">+3점</span></button>
+        <button class="btn-select" data-purpose="펀드상담" data-score="2" data-idx="1" onclick="selectPurpose(this)">펀드상담<span class="btn-sub">+2점</span></button>
+        <button class="btn-select" data-purpose="단체관리" data-score="1" data-idx="2" onclick="selectPurpose(this)">단체관리<span class="btn-sub">+1점</span></button>
       </div>
     </div>
-
     <div class="section">
       <div class="section-label">🍽 활동방식 (HOW)</div>
-      <div class="btn-group" id="method-group">
+      <div class="btn-group">
         <button class="btn-select" data-method="방문" onclick="selectMethod(this)">방문</button>
         <button class="btn-select" data-method="중식" onclick="selectMethod(this)">중식</button>
         <button class="btn-select" data-method="석식" onclick="selectMethod(this)">석식</button>
         <button class="btn-select" data-method="기타" onclick="selectMethod(this)">기타</button>
       </div>
     </div>
-
     <div class="section">
       <div class="section-label">🏢 단체명 <span>(선택)</span></div>
       <input type="text" id="org-name" class="text-input" placeholder="예: 삼성화재, 현대차 노조" maxlength="50">
     </div>
-
     <div class="section">
       <div class="section-label">👤 담당자 <span>(선택 · 여러 명이면 쉼표로 구분)</span></div>
       <input type="text" id="contact" class="text-input" placeholder="예: 홍길동, 김철수" maxlength="100">
     </div>
-
     <div class="section">
       <div class="section-label">📝 내용메모 <span>(선택)</span></div>
       <textarea id="content" class="text-area" placeholder="활동 내용, 특이사항 등 간단히 메모" maxlength="200"></textarea>
     </div>
-
     <div class="section">
       <div id="score-preview" class="score-preview">
         <div>
-          <div class="lbl">이 활동의 점수</div>
-          <div class="val"><span id="score-val">-</span><span id="score-unit">점</span></div>
+          <div class="sp-label">이 활동의 점수</div>
+          <div class="sp-val"><span id="score-val">-</span><span>점</span></div>
         </div>
-        <div class="score-icon" id="score-icon">🎯</div>
+        <div class="sp-icon" id="score-icon">🎯</div>
       </div>
     </div>
-
-    <button class="btn-submit" id="submit-btn" onclick="submitForm()" disabled>
-      제출하기
-    </button>
-    <div style="font-size:11px;color:var(--gray);text-align:center;margin-top:8px">
-      1건씩 제출 · 제출 후 추가 입력 가능
-    </div>
+    <button class="btn-submit" id="submit-btn" onclick="submitForm()" disabled>제출하기</button>
+    <div style="font-size:11px;color:var(--gray);text-align:center;margin-top:8px">1건씩 제출 · 제출 후 추가 입력 가능</div>
   </div>
 
-  <!-- 제출 완료 뷰 -->
+  <!-- 성공 뷰 -->
   <div id="success-view">
     <div class="success-card">
       <div class="success-icon">✅</div>
       <div class="success-title">활동이 기록되었습니다</div>
       <div class="success-sub" id="success-sub"></div>
     </div>
-
     <div class="detail-card">
       <h3>📋 방금 제출한 내용</h3>
       <div id="submitted-rows"></div>
     </div>
-
-    <div class="weekly-card">
-      <div class="weekly-head">
-        <span id="week-label">이번주 활동 현황</span>
-        <span class="week-badge" id="week-score">로딩중...</span>
-      </div>
-      <div id="weekly-content">
-        <div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>
-      </div>
-      <div class="prog-wrap" id="prog-wrap" style="display:none">
-        <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
-        <div class="prog-lbl" id="prog-lbl"></div>
-      </div>
-    </div>
-
-    <button class="btn-more" onclick="resetForm()">➕ 활동 추가 입력</button>
+    <button class="btn-more" onclick="resetForm()" style="margin-bottom:10px">➕ 활동 추가 입력</button>
+    <button class="btn-more" onclick="switchTab('records')" style="background:var(--blue-bg);color:var(--blue);border-color:var(--blue-bg)">📋 내 기록 보기</button>
   </div>
+</div>
+
+<!-- ── 탭 2: 내 기록 ── -->
+<div id="page-records" class="page">
+  <div class="week-nav">
+    <button class="week-nav-btn" onclick="changeWeek(-1)">◀ 이전</button>
+    <span class="week-nav-label" id="week-nav-label">이번 주</span>
+    <button class="week-nav-btn" id="next-week-btn" onclick="changeWeek(1)">다음 ▶</button>
+  </div>
+  <div id="records-content">
+    <div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>
+  </div>
+</div>
+
+<!-- ── 하단 탭 바 ── -->
+<div class="tab-bar">
+  <button class="tab-btn active" id="tab-input" onclick="switchTab('input')">
+    <div class="tab-indicator"></div>
+    <span class="icon">✏️</span>
+    <span>입력</span>
+  </button>
+  <button class="tab-btn" id="tab-records" onclick="switchTab('records')">
+    <div class="tab-indicator"></div>
+    <span class="icon">📋</span>
+    <span>내 기록</span>
+  </button>
 </div>
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIYOlk1xXVCuGZAstkjSApzPSB4fo9RCGi0ABtBQ5GTSxkcdnkKPFd2dAzOHKIoN9d/exec';
-const SHEET_ID  = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
-const LOG_GID   = '785851831';
+const SHEET_ID   = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
+const LOG_GID    = '785851831';
 
 const params = new URLSearchParams(location.search);
 const NAME = decodeURIComponent(params.get('name') || '');
 const ORG  = decodeURIComponent(params.get('org')  || '');
 const ROLE = decodeURIComponent(params.get('role') || '');
 
-// Identity
+// 신원 바
 const bar = document.getElementById('identity-bar');
 if (!NAME) {
-  bar.innerHTML = '<span class="id-missing">⚠️ 개인 링크로 접속해 주세요 (URL에 이름 정보 없음)</span>';
+  bar.innerHTML = '<span class="id-missing">⚠️ 개인 링크로 접속해 주세요</span>';
 } else {
   bar.innerHTML = `<span class="chip chip-name">👤 ${NAME}</span><span class="chip">${ORG}</span><span class="chip">${ROLE}</span>`;
 }
 
-// Default date
-function todayStr() {
-  return new Date().toLocaleDateString('sv');
-}
+// 날짜
+function todayStr() { return new Date().toLocaleDateString('sv'); }
 document.getElementById('act-date').value = todayStr();
 
-// Week string YYYY-WW (ISO-ish, Mon start)
+// 주차 계산
 function getWeekStr(dateStr) {
-  const d = new Date(dateStr + 'T00:00:00');
+  const d    = new Date(dateStr + 'T00:00:00');
   const jan1 = new Date(d.getFullYear(), 0, 1);
-  const dow = (jan1.getDay() + 6) % 7;
+  const dow  = (jan1.getDay() + 6) % 7;
   const dayN = Math.floor((d - jan1) / 86400000) + 1;
   const wk   = Math.ceil((dayN + dow) / 7);
   return String(d.getFullYear()).slice(2) + '-' + String(wk).padStart(2,'0');
 }
+function currentWeekStr() { return getWeekStr(todayStr()); }
 
-// State
+// 탭 전환
+let currentTab = 'input';
+function switchTab(tab) {
+  currentTab = tab;
+  document.getElementById('page-input').classList.toggle('active', tab === 'input');
+  document.getElementById('page-records').classList.toggle('active', tab === 'records');
+  document.getElementById('tab-input').classList.toggle('active', tab === 'input');
+  document.getElementById('tab-records').classList.toggle('active', tab === 'records');
+  if (tab === 'records') loadRecords();
+}
+
+// ── 입력 폼 ──
 let selPurpose = null, selScore = 0, selIdx = -1, selMethod = null;
+const ICONS = ['🎯','💼','🏢'];
 
 function selectPurpose(btn) {
-  document.querySelectorAll('#purpose-group .btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2'));
+  document.querySelectorAll('[data-purpose]').forEach(b => b.classList.remove('ap0','ap1','ap2'));
   selPurpose = btn.dataset.purpose;
   selScore   = +btn.dataset.score;
   selIdx     = +btn.dataset.idx;
   btn.classList.add('ap' + selIdx);
-  updateScore();
-  checkReady();
+  updateScore(); checkReady();
 }
-
 function selectMethod(btn) {
-  document.querySelectorAll('#method-group .btn-select').forEach(b => b.classList.remove('am'));
+  document.querySelectorAll('[data-method]').forEach(b => b.classList.remove('am'));
   selMethod = btn.dataset.method;
   btn.classList.add('am');
   checkReady();
 }
-
-const ICONS = ['🎯','💼','🏢'];
-
 function updateScore() {
-  const el  = document.getElementById('score-preview');
-  const val = document.getElementById('score-val');
+  const el = document.getElementById('score-preview');
   if (selPurpose) {
     el.classList.add('active');
-    val.textContent = '+' + selScore;
+    document.getElementById('score-val').textContent = '+' + selScore;
     document.getElementById('score-icon').textContent = ICONS[selIdx] || '📊';
   } else {
     el.classList.remove('active');
-    val.textContent = '-';
+    document.getElementById('score-val').textContent = '-';
     document.getElementById('score-icon').textContent = '🎯';
   }
 }
-
 function checkReady() {
   document.getElementById('submit-btn').disabled = !(NAME && selPurpose && selMethod);
 }
-
-function genId() {
-  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
-}
+function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 let lastPayload = null;
 
@@ -387,7 +429,7 @@ async function submitForm() {
 
   const dateStr = document.getElementById('act-date').value || todayStr();
   const payload = {
-    type:       'activity_v2',
+    type: 'activity_v2',
     rowId:      genId(),
     submitTime: new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'}),
     actDate:    dateStr,
@@ -406,8 +448,8 @@ async function submitForm() {
 
   try {
     await fetch(SCRIPT_URL, {
-      method: 'POST', mode: 'no-cors',
-      headers: {'Content-Type':'application/json'},
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
     showSuccess();
@@ -421,95 +463,158 @@ async function submitForm() {
 function showSuccess() {
   document.getElementById('form-view').style.display = 'none';
   document.getElementById('success-view').style.display = 'block';
-
   const d = lastPayload;
-  document.getElementById('success-sub').textContent =
-    `${d.actDate} · ${d.purpose} · ${d.method} · +${d.score}점`;
-
-  const pbClass = ['pb0','pb1','pb2'];
+  document.getElementById('success-sub').textContent = `${d.actDate} · ${d.purpose} · ${d.method} · +${d.score}점`;
+  const pbC = ['pb0','pb1','pb2'];
   document.getElementById('submitted-rows').innerHTML = [
-    ['활동목적', `<span class="pb ${pbClass[selIdx]}">${d.purpose}</span>`],
+    ['활동목적', `<span class="pb ${pbC[selIdx]}">${d.purpose}</span>`],
     ['활동방식', `<span class="mb">${d.method}</span>`],
     ['단체명',   d.orgName  || '—'],
     ['담당자',   d.contact  || '—'],
     ['내용',     d.content  || '—'],
     ['점수',     `<strong>+${d.score}점</strong>`],
-    ['주차',     d.week],
   ].map(([k,v]) => `<div class="detail-row"><span class="dk">${k}</span><span class="dv">${v}</span></div>`).join('');
-
-  document.getElementById('week-label').textContent = `${d.week}주 활동 현황`;
-  loadWeekly(d.week);
+  // 캐시 무효화 (새 데이터 반영)
+  cachedRows = null;
 }
 
-async function loadWeekly(weekStr) {
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`;
+function resetForm() {
+  selPurpose = null; selScore = 0; selIdx = -1; selMethod = null;
+  document.querySelectorAll('.btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2','am'));
+  document.getElementById('org-name').value = '';
+  document.getElementById('contact').value = '';
+  document.getElementById('content').value = '';
+  document.getElementById('act-date').value = todayStr();
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').innerHTML = '제출하기';
+  updateScore();
+  document.getElementById('form-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── 내 기록 탭 ──
+let cachedRows = null;
+let viewWeekOffset = 0; // 0 = 이번주, -1 = 저번주, ...
+
+function getOffsetWeekStr(offset) {
+  const d = new Date();
+  d.setDate(d.getDate() + offset * 7);
+  return getWeekStr(d.toLocaleDateString('sv'));
+}
+
+function changeWeek(dir) {
+  viewWeekOffset += dir;
+  // 미래는 막기
+  if (viewWeekOffset > 0) { viewWeekOffset = 0; return; }
+  document.getElementById('next-week-btn').disabled = viewWeekOffset >= 0;
+  loadRecords();
+}
+
+async function loadRecords() {
+  const weekStr = getOffsetWeekStr(viewWeekOffset);
+  const label = viewWeekOffset === 0 ? '이번 주' : viewWeekOffset === -1 ? '지난 주' : `${weekStr}주`;
+  document.getElementById('week-nav-label').textContent = label;
+  document.getElementById('next-week-btn').disabled = viewWeekOffset >= 0;
+
+  const el = document.getElementById('records-content');
+  el.innerHTML = '<div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>';
+
+  if (!NAME) {
+    el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>개인 링크로 접속해 주세요</div>';
+    return;
+  }
+
   try {
-    const resp = await fetch(url);
-    const text = await resp.text();
-    const rows = parseCSV(text);
-    if (rows.length < 2) { weekNoData(); return; }
+    if (!cachedRows) {
+      const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`);
+      const text = await resp.text();
+      cachedRows = parseCSV(text);
+    }
+
+    const rows  = cachedRows;
+    if (rows.length < 2) { el.innerHTML = noDataHTML(); return; }
 
     const header = rows[0].map(h => h.trim());
-    // New format detection: col 0 = 행ID, col 7 = 활동목적
-    const isNew = header[0] === '행ID' || header.some(h => h === '활동목적');
+    const isNew  = header[0] === '행ID' || header.some(h => h === '활동목적');
 
     let myRows;
     if (isNew) {
-      // A:행ID B:제출시각 C:활동일자 D:주차 E:소속 F:이름 G:직책 H:활동목적 I:활동방식 J:단체명 K:내용 L:점수
+      // A:행ID B:제출시각 C:활동일자 D:주차 E:소속 F:이름 G:직책 H:활동목적 I:활동방식 J:단체명 K:담당자 L:내용 M:점수
       myRows = rows.slice(1).filter(r => r[5] === NAME && r[3] === weekStr);
     } else {
-      // Old format: 제출시각(0) 활동일자(1) 주차(2) 소속(3) 이름(4) 직책(5) 활동유형(6) 건수(7) 단위점수(8) 합산점수(9)
       myRows = rows.slice(1).filter(r => r[4] === NAME && r[2] === weekStr);
     }
 
-    if (!myRows.length) {
-      document.getElementById('weekly-content').innerHTML =
-        '<div class="no-data">방금 제출한 내용이 잠시 후 반영됩니다 ⏳</div>';
-      document.getElementById('week-score').textContent = `+${lastPayload.score}점`;
-      return;
-    }
-
-    let total = 0;
-    const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
-    const trows = myRows.map(r => {
-      let date, purpose, method, score;
-      if (isNew) {
-        date = r[2]; purpose = r[7]; method = r[8]; score = parseFloat(r[11]) || 0;
-      } else {
-        date = r[1]; purpose = r[6]; method = '—'; score = parseFloat(r[9]) || parseFloat(r[8]) || 0;
-      }
+    // 점수 집계
+    let total = 0, 신규 = 0, 펀드 = 0, 단체 = 0;
+    myRows.forEach(r => {
+      const score   = parseFloat(isNew ? r[12] : r[9]) || 0;
+      const purpose = isNew ? r[7] : r[6];
       total += score;
-      return `<tr>
-        <td>${date}</td>
-        <td><span class="pb ${pbMap[purpose]||''}">${purpose||'—'}</span></td>
-        <td><span class="mb">${method}</span></td>
-        <td style="font-weight:700;color:var(--blue)">+${score}점</td>
-      </tr>`;
-    }).join('');
-
-    document.getElementById('weekly-content').innerHTML = `
-      <table class="summary-tbl">
-        <thead><tr><th>일자</th><th>활동목적</th><th>방식</th><th>점수</th></tr></thead>
-        <tbody>${trows}</tbody>
-      </table>`;
+      if (purpose === '신규발굴') 신규++;
+      else if (purpose === '펀드상담') 펀드++;
+      else if (purpose === '단체관리') 단체++;
+    });
 
     const target = 20;
-    const pct = Math.min(100, Math.round(total / target * 100));
-    document.getElementById('week-score').textContent = `${total}/${target}점`;
-    document.getElementById('prog-fill').style.width = pct + '%';
-    document.getElementById('prog-fill').style.background =
-      pct >= 100 ? 'var(--green)' : pct >= 60 ? '#F59E0B' : 'var(--blue-light)';
-    document.getElementById('prog-lbl').textContent = `주간 목표 달성률 ${pct}%`;
-    document.getElementById('prog-wrap').style.display = 'block';
+    const pct    = Math.min(100, Math.round(total / target * 100));
+    const reached = total >= target;
+
+    // 활동 목록 (최신순)
+    const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
+    const itemsHTML = [...myRows].reverse().map(r => {
+      const date    = isNew ? r[2] : r[1];
+      const purpose = isNew ? r[7] : r[6];
+      const method  = isNew ? r[8] : '—';
+      const orgName = isNew ? r[9] : '—';
+      const contact = isNew ? r[10] : '—';
+      const cont    = isNew ? r[11] : '—';
+      const score   = parseFloat(isNew ? r[12] : r[9]) || 0;
+      const extras  = [orgName, contact, cont].filter(v => v && v !== '—').join(' · ');
+      return `<div class="act-item">
+        <div class="act-item-top">
+          <span class="act-date">📅 ${date}</span>
+          <span class="act-score">+${score}점</span>
+        </div>
+        <div class="act-badges">
+          <span class="pb ${pbMap[purpose]||''}">${purpose||'—'}</span>
+          ${method !== '—' ? `<span class="mb">${method}</span>` : ''}
+        </div>
+        ${extras ? `<div class="act-detail">📌 ${extras}</div>` : ''}
+      </div>`;
+    }).join('') || `<div class="no-data"><div class="no-icon">📭</div>이 주에 기록된 활동이 없습니다</div>`;
+
+    el.innerHTML = `
+      <div class="score-card">
+        <div class="score-card-top">
+          <div>
+            <div class="score-card-label">주간 합산 점수</div>
+            <div class="score-card-value">${total}<span style="font-size:16px;font-weight:400;opacity:0.7"> / ${target}점</span></div>
+          </div>
+          <span class="score-card-badge ${reached ? 'reached' : ''}">${reached ? '✅ 달성' : `${pct}%`}</span>
+        </div>
+        <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
+        <div class="prog-label">목표 ${target}점 중 ${total}점 달성</div>
+      </div>
+
+      <div class="stat-grid">
+        <div class="stat-item blue"><div class="stat-val">${신규}</div><div class="stat-label">신규발굴</div></div>
+        <div class="stat-item green"><div class="stat-val">${펀드}</div><div class="stat-label">펀드상담</div></div>
+        <div class="stat-item amber"><div class="stat-val">${단체}</div><div class="stat-label">단체관리</div></div>
+      </div>
+
+      <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:8px">활동 내역 (${myRows.length}건)</div>
+      <div class="act-list">${itemsHTML}</div>
+    `;
 
   } catch(e) {
-    weekNoData();
+    el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>데이터를 불러오지 못했습니다<br><small>잠시 후 다시 시도해 주세요</small></div>';
   }
 }
 
-function weekNoData() {
-  document.getElementById('weekly-content').innerHTML = '<div class="no-data">현황을 불러오지 못했습니다</div>';
-  document.getElementById('week-score').textContent = '—';
+function noDataHTML() {
+  return '<div class="no-data"><div class="no-icon">📭</div>기록된 활동이 없습니다</div>';
 }
 
 function parseCSV(text) {
@@ -529,21 +634,8 @@ function parseCSV(text) {
   return rows.filter(r => r.some(c => c.trim()));
 }
 
-function resetForm() {
-  selPurpose = null; selScore = 0; selIdx = -1; selMethod = null;
-  document.querySelectorAll('.btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2','am'));
-  document.getElementById('org-name').value = '';
-  document.getElementById('contact').value = '';
-  document.getElementById('content').value = '';
-  document.getElementById('act-date').value = todayStr();
-  document.getElementById('submit-btn').disabled = true;
-  document.getElementById('submit-btn').innerHTML = '제출하기';
-  document.getElementById('prog-wrap').style.display = 'none';
-  updateScore();
-  document.getElementById('form-view').style.display = 'block';
-  document.getElementById('success-view').style.display = 'none';
-  window.scrollTo({top:0,behavior:'smooth'});
-}
+// 페이지 로드 시 내 기록 탭이면 바로 로드
+if (params.get('tab') === 'records') switchTab('records');
 </script>
 </body>
 </html>
