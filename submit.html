@@ -2,235 +2,548 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>영업활동 제출 — 한화생명 법인사업부</title>
-<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>활동 입력 | 한화생명 법인사업부</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: 'Pretendard', -apple-system, sans-serif;
-  background: #f5f5f3;
-  min-height: 100vh;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding: 2rem 1rem 4rem;
-}
-.card {
-  background: #fff;
-  border-radius: 16px;
-  padding: 28px 24px;
-  max-width: 480px;
-  width: 100%;
-  box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-}
-.logo { font-size: 12px; color: #aaa; letter-spacing: .04em; margin-bottom: 10px; }
-h1 { font-size: 20px; font-weight: 600; color: #111; margin-bottom: 3px; }
-.week-label { font-size: 13px; color: #999; margin-bottom: 20px; }
-.chips { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px; }
-.chip {
-  background: #e8f4ef;
-  color: #1a7a5e;
-  font-size: 13px;
-  font-weight: 500;
-  padding: 5px 13px;
-  border-radius: 20px;
-}
-hr { border: none; border-top: 1px solid #f0f0ee; margin: 20px 0; }
-.field { margin-bottom: 16px; }
-.field label {
-  display: block;
-  font-size: 13px;
-  color: #555;
-  margin-bottom: 7px;
-  font-weight: 500;
-}
-.field input[type=number],
-.field input[type=date] {
-  width: 100%;
-  padding: 11px 14px;
-  border: 1px solid #e0e0de;
-  border-radius: 10px;
-  font-size: 16px;
-  font-family: inherit;
-  color: #111;
-  background: #fafaf9;
-  -webkit-appearance: none;
-}
-.field input:focus {
-  outline: none;
-  border-color: #1a7a5e;
-  background: #fff;
-  box-shadow: 0 0 0 3px rgba(26,122,94,.1);
-}
-.score-box {
-  background: #f5f5f3;
-  border-radius: 12px;
-  padding: 14px 18px;
-  margin: 20px 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-.score-box .label { font-size: 14px; color: #666; }
-.score-box .target { font-size: 12px; color: #aaa; margin-top: 2px; }
-.score-val { font-size: 24px; font-weight: 700; color: #c03a2b; transition: color .2s; }
-.score-val.good { color: #1a7a5e; }
-.btn {
-  width: 100%;
-  padding: 14px;
-  background: #1a7a5e;
-  color: #fff;
-  border: none;
-  border-radius: 12px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  font-family: inherit;
-  transition: opacity .15s;
-}
-.btn:hover { opacity: .9; }
-.btn:disabled { background: #ccc; cursor: not-allowed; opacity: 1; }
-.error-msg { color: #c03a2b; font-size: 13px; margin-top: 12px; text-align: center; }
+  :root {
+    --blue: #1E3A8A;
+    --blue-light: #3B5FC0;
+    --blue-bg: #EEF2FF;
+    --green: #0F6E56;
+    --green-bg: #E8F5F0;
+    --amber: #92400E;
+    --amber-bg: #FEF3C7;
+    --red: #991B1B;
+    --red-bg: #FEE2E2;
+    --gray: #6B7280;
+    --gray-bg: #F3F4F6;
+    --border: #E5E7EB;
+    --text: #111827;
+    --radius: 12px;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+    background: #F8FAFC;
+    color: var(--text);
+    min-height: 100dvh;
+  }
 
-/* 완료 화면 */
-.success {
-  text-align: center;
-  padding: 32px 0;
-}
-.success .icon {
-  width: 64px; height: 64px;
-  background: #e8f4ef;
-  border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 16px;
-  font-size: 30px;
-}
-.success h2 { font-size: 20px; font-weight: 600; color: #111; margin-bottom: 8px; }
-.success .score-big { font-size: 36px; font-weight: 700; color: #1a7a5e; margin: 8px 0; }
-.success p { font-size: 14px; color: #888; line-height: 1.6; }
+  .header {
+    background: var(--blue);
+    color: #fff;
+    padding: 16px 20px 14px;
+  }
+  .header-logo { font-size: 18px; font-weight: 700; }
+  .header-sub { font-size: 12px; opacity: 0.75; margin-top: 2px; }
+
+  .identity-bar {
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 10px 20px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .chip {
+    display: inline-flex;
+    align-items: center;
+    background: var(--blue-bg);
+    color: var(--blue);
+    border-radius: 100px;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 600;
+  }
+  .chip-name { background: var(--blue); color: #fff; font-size: 13px; }
+  .id-missing { font-size: 13px; color: var(--red); background: var(--red-bg); border-radius: 8px; padding: 8px 14px; }
+
+  .container { padding: 20px 16px 48px; max-width: 480px; margin: 0 auto; }
+  .section { margin-bottom: 20px; }
+  .section-label {
+    font-size: 12px; font-weight: 700; color: var(--gray);
+    text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
+  }
+  .section-label span { text-transform: none; letter-spacing: 0; font-weight: 400; }
+
+  .date-input {
+    width: 100%; border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; font-size: 16px; font-family: inherit;
+    background: #fff; color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+  .date-input:focus { border-color: var(--blue-light); }
+
+  .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
+  .btn-select {
+    flex: 1; min-width: 60px; padding: 12px 6px;
+    border: 2px solid var(--border); border-radius: var(--radius);
+    background: #fff; font-family: inherit; font-size: 14px; font-weight: 600;
+    color: var(--gray); cursor: pointer; text-align: center;
+    transition: all 0.15s; line-height: 1.3; -webkit-tap-highlight-color: transparent;
+  }
+  .btn-select:active { transform: scale(0.96); }
+  .btn-sub { font-size: 11px; font-weight: 400; display: block; margin-top: 2px; }
+
+  .btn-select.ap0 { background: var(--blue-bg); border-color: var(--blue); color: var(--blue); }
+  .btn-select.ap1 { background: var(--green-bg); border-color: var(--green); color: var(--green); }
+  .btn-select.ap2 { background: var(--amber-bg); border-color: #D97706; color: var(--amber); }
+  .btn-select.am  { background: #F5F3FF; border-color: #7C3AED; color: #5B21B6; }
+
+  .text-input, .text-area {
+    width: 100%; border: 2px solid var(--border); border-radius: var(--radius);
+    padding: 12px 14px; font-size: 15px; font-family: inherit;
+    background: #fff; color: var(--text); outline: none; transition: border-color 0.15s;
+  }
+  .text-input:focus, .text-area:focus { border-color: var(--blue-light); }
+  .text-area { resize: none; min-height: 80px; }
+  ::placeholder { color: #C9CDD4; }
+
+  .score-preview {
+    border-radius: var(--radius); padding: 14px 18px;
+    display: flex; align-items: center; justify-content: space-between;
+    background: var(--gray-bg); transition: background 0.2s;
+  }
+  .score-preview.active {
+    background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
+  }
+  .score-preview .lbl { font-size: 13px; color: var(--gray); }
+  .score-preview.active .lbl { color: rgba(255,255,255,0.8); }
+  .score-preview .val { font-size: 30px; font-weight: 800; color: var(--gray); display:flex;align-items:baseline;gap:4px; }
+  .score-preview.active .val { color: #fff; }
+  .score-preview .val span { font-size: 15px; font-weight: 400; }
+  .score-icon { font-size: 30px; }
+
+  .btn-submit {
+    width: 100%; padding: 16px;
+    background: var(--blue); color: #fff;
+    border: none; border-radius: var(--radius);
+    font-size: 17px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.15s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .btn-submit:hover { background: var(--blue-light); }
+  .btn-submit:active { transform: scale(0.98); }
+  .btn-submit:disabled { background: #9CA3AF; cursor: not-allowed; }
+
+  .spinner {
+    width: 18px; height: 18px; border: 2px solid rgba(255,255,255,0.4);
+    border-top-color: #fff; border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  #success-view { display: none; }
+  .success-card {
+    background: var(--green-bg); border: 2px solid var(--green);
+    border-radius: var(--radius); padding: 20px; text-align: center; margin-bottom: 20px;
+  }
+  .success-icon { font-size: 38px; margin-bottom: 8px; }
+  .success-title { font-size: 18px; font-weight: 700; color: var(--green); margin-bottom: 4px; }
+  .success-sub { font-size: 13px; color: var(--gray); }
+
+  .detail-card {
+    background: #fff; border-radius: var(--radius); padding: 14px 16px;
+    margin-bottom: 20px; border: 1px solid var(--border);
+  }
+  .detail-card h3 { font-size: 12px; color: var(--gray); font-weight: 700; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+  .detail-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border); font-size: 14px; }
+  .detail-row:last-child { border-bottom: none; }
+  .dk { color: var(--gray); }
+  .dv { font-weight: 600; }
+
+  .weekly-card { background: #fff; border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; margin-bottom: 20px; }
+  .weekly-head {
+    background: var(--blue); color: #fff; padding: 12px 16px;
+    font-size: 13px; font-weight: 700;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .week-badge {
+    background: rgba(255,255,255,0.2); border-radius: 100px;
+    padding: 3px 10px; font-size: 13px; font-weight: 800;
+  }
+  .summary-tbl { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .summary-tbl th { background: var(--gray-bg); padding: 8px 12px; text-align: left; font-size: 11px; color: var(--gray); border-bottom: 1px solid var(--border); }
+  .summary-tbl td { padding: 9px 12px; border-bottom: 1px solid var(--border); }
+  .summary-tbl tr:last-child td { border-bottom: none; }
+  .pb { display:inline-block; padding:2px 8px; border-radius:100px; font-size:11px; font-weight:600; }
+  .pb0 { background:var(--blue-bg); color:var(--blue); }
+  .pb1 { background:var(--green-bg); color:var(--green); }
+  .pb2 { background:var(--amber-bg); color:var(--amber); }
+  .mb { display:inline-block; background:#F5F3FF; color:#5B21B6; padding:2px 8px; border-radius:100px; font-size:11px; font-weight:600; }
+
+  .no-data { text-align:center; padding:20px; color:var(--gray); font-size:13px; }
+  .loading-wrap { text-align:center; padding:20px; color:var(--gray); font-size:13px; }
+  .ls { display:inline-block; width:18px;height:18px; border:2px solid var(--border); border-top-color:var(--blue); border-radius:50%; animation:spin 0.7s linear infinite; margin-bottom:6px; }
+
+  .prog-wrap { padding: 10px 16px 14px; }
+  .prog-bg { background: var(--border); border-radius: 100px; height: 7px; overflow: hidden; }
+  .prog-fill { height: 7px; border-radius: 100px; transition: width 0.5s; }
+  .prog-lbl { font-size: 11px; color: var(--gray); margin-top: 4px; text-align: right; }
+
+  .btn-more {
+    width: 100%; padding: 14px;
+    background: #fff; color: var(--blue);
+    border: 2px solid var(--blue); border-radius: var(--radius);
+    font-size: 16px; font-weight: 700; font-family: inherit;
+    cursor: pointer; transition: all 0.15s; -webkit-tap-highlight-color: transparent;
+  }
+  .btn-more:hover { background: var(--blue-bg); }
+  .btn-more:active { transform: scale(0.98); }
 </style>
 </head>
 <body>
-<div class="card" id="app">
-  <div class="logo">한화생명 법인사업부</div>
-  <h1>영업활동 제출</h1>
-  <div class="week-label" id="week-label">주차 계산 중...</div>
-  <div class="chips" id="chips"></div>
-  <hr>
-  <form id="main-form">
-    <div class="field">
-      <label>활동 일자 *</label>
-      <input type="date" id="actDate" required>
+
+<div class="header">
+  <div class="header-logo">🏢 법인사업부 활동 입력</div>
+  <div class="header-sub">한화생명 영업팀장 전용</div>
+</div>
+
+<div id="identity-bar" class="identity-bar"></div>
+
+<div class="container">
+  <!-- 입력 폼 -->
+  <div id="form-view">
+    <div class="section">
+      <div class="section-label">📅 활동일자</div>
+      <input type="date" id="act-date" class="date-input">
     </div>
-    <div class="field">
-      <label>1) 신규 사업장 및 고객 발굴 건수 *</label>
-      <input type="number" id="countNew" min="0" value="0" required oninput="calcScore()">
-    </div>
-    <div class="field">
-      <label>2) 펀드 상담 및 제안 건수 *</label>
-      <input type="number" id="countFund" min="0" value="0" required oninput="calcScore()">
-    </div>
-    <div class="field">
-      <label>3) 기존 단체 관리 건수 *</label>
-      <input type="number" id="countMgmt" min="0" value="0" required oninput="calcScore()">
-    </div>
-    <div class="score-box">
-      <div>
-        <div class="label">예상 합산점수</div>
-        <div class="target">주간 목표: 20점</div>
+
+    <div class="section">
+      <div class="section-label">🎯 활동목적 (WHY)</div>
+      <div class="btn-group" id="purpose-group">
+        <button class="btn-select" data-purpose="신규발굴" data-score="3" data-idx="0" onclick="selectPurpose(this)">
+          신규발굴<span class="btn-sub">+3점</span>
+        </button>
+        <button class="btn-select" data-purpose="펀드상담" data-score="2" data-idx="1" onclick="selectPurpose(this)">
+          펀드상담<span class="btn-sub">+2점</span>
+        </button>
+        <button class="btn-select" data-purpose="단체관리" data-score="1" data-idx="2" onclick="selectPurpose(this)">
+          단체관리<span class="btn-sub">+1점</span>
+        </button>
       </div>
-      <div class="score-val" id="score-val">0점</div>
     </div>
-    <button type="submit" class="btn" id="submit-btn">제출하기</button>
-    <div class="error-msg" id="error-msg"></div>
-  </form>
+
+    <div class="section">
+      <div class="section-label">🍽 활동방식 (HOW)</div>
+      <div class="btn-group" id="method-group">
+        <button class="btn-select" data-method="방문" onclick="selectMethod(this)">방문</button>
+        <button class="btn-select" data-method="중식" onclick="selectMethod(this)">중식</button>
+        <button class="btn-select" data-method="석식" onclick="selectMethod(this)">석식</button>
+        <button class="btn-select" data-method="기타" onclick="selectMethod(this)">기타</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-label">🏢 단체명 <span>(선택)</span></div>
+      <input type="text" id="org-name" class="text-input" placeholder="예: 삼성화재, 현대차 노조" maxlength="50">
+    </div>
+
+    <div class="section">
+      <div class="section-label">👤 담당자 <span>(선택 · 여러 명이면 쉼표로 구분)</span></div>
+      <input type="text" id="contact" class="text-input" placeholder="예: 홍길동, 김철수" maxlength="100">
+    </div>
+
+    <div class="section">
+      <div class="section-label">📝 내용메모 <span>(선택)</span></div>
+      <textarea id="content" class="text-area" placeholder="활동 내용, 특이사항 등 간단히 메모" maxlength="200"></textarea>
+    </div>
+
+    <div class="section">
+      <div id="score-preview" class="score-preview">
+        <div>
+          <div class="lbl">이 활동의 점수</div>
+          <div class="val"><span id="score-val">-</span><span id="score-unit">점</span></div>
+        </div>
+        <div class="score-icon" id="score-icon">🎯</div>
+      </div>
+    </div>
+
+    <button class="btn-submit" id="submit-btn" onclick="submitForm()" disabled>
+      제출하기
+    </button>
+    <div style="font-size:11px;color:var(--gray);text-align:center;margin-top:8px">
+      1건씩 제출 · 제출 후 추가 입력 가능
+    </div>
+  </div>
+
+  <!-- 제출 완료 뷰 -->
+  <div id="success-view">
+    <div class="success-card">
+      <div class="success-icon">✅</div>
+      <div class="success-title">활동이 기록되었습니다</div>
+      <div class="success-sub" id="success-sub"></div>
+    </div>
+
+    <div class="detail-card">
+      <h3>📋 방금 제출한 내용</h3>
+      <div id="submitted-rows"></div>
+    </div>
+
+    <div class="weekly-card">
+      <div class="weekly-head">
+        <span id="week-label">이번주 활동 현황</span>
+        <span class="week-badge" id="week-score">로딩중...</span>
+      </div>
+      <div id="weekly-content">
+        <div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>
+      </div>
+      <div class="prog-wrap" id="prog-wrap" style="display:none">
+        <div class="prog-bg"><div class="prog-fill" id="prog-fill"></div></div>
+        <div class="prog-lbl" id="prog-lbl"></div>
+      </div>
+    </div>
+
+    <button class="btn-more" onclick="resetForm()">➕ 활동 추가 입력</button>
+  </div>
 </div>
 
 <script>
-// ★ Apps Script Web App 배포 후 아래 URL로 교체 ★
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIYOlk1xXVCuGZAstkjSApzPSB4fo9RCGi0ABtBQ5GTSxkcdnkKPFd2dAzOHKIoN9d/exec';
+const SHEET_ID  = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
+const LOG_GID   = '785851831';
 
-// URL 파라미터 읽기
 const params = new URLSearchParams(location.search);
-const name = params.get('name') || '미지정';
-const org  = params.get('org')  || '';
-const role = params.get('role') || '팀장';
+const NAME = decodeURIComponent(params.get('name') || '');
+const ORG  = decodeURIComponent(params.get('org')  || '');
+const ROLE = decodeURIComponent(params.get('role') || '');
 
-// 이름/소속/직책 칩 표시
-const chipsEl = document.getElementById('chips');
-[name, org, role].filter(Boolean).forEach(t => {
-  const s = document.createElement('span');
-  s.className = 'chip';
-  s.textContent = t;
-  chipsEl.appendChild(s);
-});
-
-// 오늘 날짜 기본값
-const today = new Date();
-const todayStr = today.toLocaleDateString('sv-SE'); // YYYY-MM-DD
-document.getElementById('actDate').value = todayStr;
-
-// 주차 계산
-function getWeekStr(d) {
-  const date = new Date(d);
-  date.setHours(0,0,0,0);
-  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
-  const w1 = new Date(date.getFullYear(), 0, 4);
-  const wn = 1 + Math.round(((date - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
-  return `${date.getFullYear()}-W${String(wn).padStart(2,'0')}`;
-}
-document.getElementById('week-label').textContent = getWeekStr(today) + ' 주차';
-
-// 점수 계산
-function calcScore() {
-  const a = parseInt(document.getElementById('countNew').value)  || 0;
-  const b = parseInt(document.getElementById('countFund').value) || 0;
-  const c = parseInt(document.getElementById('countMgmt').value) || 0;
-  const score = a * 3 + b * 2 + c;
-  const el = document.getElementById('score-val');
-  el.textContent = score + '점';
-  el.className = 'score-val' + (score >= 20 ? ' good' : '');
+// Identity
+const bar = document.getElementById('identity-bar');
+if (!NAME) {
+  bar.innerHTML = '<span class="id-missing">⚠️ 개인 링크로 접속해 주세요 (URL에 이름 정보 없음)</span>';
+} else {
+  bar.innerHTML = `<span class="chip chip-name">👤 ${NAME}</span><span class="chip">${ORG}</span><span class="chip">${ROLE}</span>`;
 }
 
-// 제출
-document.getElementById('main-form').addEventListener('submit', async ev => {
-  ev.preventDefault();
+// Default date
+function todayStr() {
+  return new Date().toLocaleDateString('sv');
+}
+document.getElementById('act-date').value = todayStr();
+
+// Week string YYYY-WW (ISO-ish, Mon start)
+function getWeekStr(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const dow = (jan1.getDay() + 6) % 7;
+  const dayN = Math.floor((d - jan1) / 86400000) + 1;
+  const wk   = Math.ceil((dayN + dow) / 7);
+  return String(d.getFullYear()).slice(2) + '-' + String(wk).padStart(2,'0');
+}
+
+// State
+let selPurpose = null, selScore = 0, selIdx = -1, selMethod = null;
+
+function selectPurpose(btn) {
+  document.querySelectorAll('#purpose-group .btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2'));
+  selPurpose = btn.dataset.purpose;
+  selScore   = +btn.dataset.score;
+  selIdx     = +btn.dataset.idx;
+  btn.classList.add('ap' + selIdx);
+  updateScore();
+  checkReady();
+}
+
+function selectMethod(btn) {
+  document.querySelectorAll('#method-group .btn-select').forEach(b => b.classList.remove('am'));
+  selMethod = btn.dataset.method;
+  btn.classList.add('am');
+  checkReady();
+}
+
+const ICONS = ['🎯','💼','🏢'];
+
+function updateScore() {
+  const el  = document.getElementById('score-preview');
+  const val = document.getElementById('score-val');
+  if (selPurpose) {
+    el.classList.add('active');
+    val.textContent = '+' + selScore;
+    document.getElementById('score-icon').textContent = ICONS[selIdx] || '📊';
+  } else {
+    el.classList.remove('active');
+    val.textContent = '-';
+    document.getElementById('score-icon').textContent = '🎯';
+  }
+}
+
+function checkReady() {
+  document.getElementById('submit-btn').disabled = !(NAME && selPurpose && selMethod);
+}
+
+function genId() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2,6);
+}
+
+let lastPayload = null;
+
+async function submitForm() {
+  if (!NAME || !selPurpose || !selMethod) return;
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
-  btn.textContent = '제출 중...';
-  document.getElementById('error-msg').textContent = '';
+  btn.innerHTML = '<div class="spinner"></div> 제출 중...';
 
-  const countNew  = parseInt(document.getElementById('countNew').value)  || 0;
-  const countFund = parseInt(document.getElementById('countFund').value) || 0;
-  const countMgmt = parseInt(document.getElementById('countMgmt').value) || 0;
-  const totalScore = countNew * 3 + countFund * 2 + countMgmt;
-
-  const data = { name, org, role,
-    actDate: document.getElementById('actDate').value,
-    countNew, countFund, countMgmt };
+  const dateStr = document.getElementById('act-date').value || todayStr();
+  const payload = {
+    type:       'activity_v2',
+    rowId:      genId(),
+    submitTime: new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'}),
+    actDate:    dateStr,
+    week:       getWeekStr(dateStr),
+    org:        ORG,
+    name:       NAME,
+    role:       ROLE,
+    purpose:    selPurpose,
+    method:     selMethod,
+    orgName:    document.getElementById('org-name').value.trim(),
+    contact:    document.getElementById('contact').value.trim(),
+    content:    document.getElementById('content').value.trim(),
+    score:      selScore
+  };
+  lastPayload = payload;
 
   try {
     await fetch(SCRIPT_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams(data).toString()
+      method: 'POST', mode: 'no-cors',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(payload)
     });
-
-    document.getElementById('app').innerHTML = `
-      <div class="success">
-        <div class="icon">✅</div>
-        <h2>제출 완료!</h2>
-        <div class="score-big">${totalScore}점</div>
-        <p>${name} 팀장님의 활동이 기록되었습니다.<br>수고하셨습니다! 🎉</p>
-      </div>`;
+    showSuccess();
   } catch(e) {
     btn.disabled = false;
-    btn.textContent = '제출하기';
-    document.getElementById('error-msg').textContent = '오류가 발생했습니다. 다시 시도해주세요.';
+    btn.innerHTML = '제출하기';
+    alert('오류가 발생했습니다. 다시 시도해 주세요.');
   }
-});
+}
+
+function showSuccess() {
+  document.getElementById('form-view').style.display = 'none';
+  document.getElementById('success-view').style.display = 'block';
+
+  const d = lastPayload;
+  document.getElementById('success-sub').textContent =
+    `${d.actDate} · ${d.purpose} · ${d.method} · +${d.score}점`;
+
+  const pbClass = ['pb0','pb1','pb2'];
+  document.getElementById('submitted-rows').innerHTML = [
+    ['활동목적', `<span class="pb ${pbClass[selIdx]}">${d.purpose}</span>`],
+    ['활동방식', `<span class="mb">${d.method}</span>`],
+    ['단체명',   d.orgName  || '—'],
+    ['담당자',   d.contact  || '—'],
+    ['내용',     d.content  || '—'],
+    ['점수',     `<strong>+${d.score}점</strong>`],
+    ['주차',     d.week],
+  ].map(([k,v]) => `<div class="detail-row"><span class="dk">${k}</span><span class="dv">${v}</span></div>`).join('');
+
+  document.getElementById('week-label').textContent = `${d.week}주 활동 현황`;
+  loadWeekly(d.week);
+}
+
+async function loadWeekly(weekStr) {
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`;
+  try {
+    const resp = await fetch(url);
+    const text = await resp.text();
+    const rows = parseCSV(text);
+    if (rows.length < 2) { weekNoData(); return; }
+
+    const header = rows[0].map(h => h.trim());
+    // New format detection: col 0 = 행ID, col 7 = 활동목적
+    const isNew = header[0] === '행ID' || header.some(h => h === '활동목적');
+
+    let myRows;
+    if (isNew) {
+      // A:행ID B:제출시각 C:활동일자 D:주차 E:소속 F:이름 G:직책 H:활동목적 I:활동방식 J:단체명 K:내용 L:점수
+      myRows = rows.slice(1).filter(r => r[5] === NAME && r[3] === weekStr);
+    } else {
+      // Old format: 제출시각(0) 활동일자(1) 주차(2) 소속(3) 이름(4) 직책(5) 활동유형(6) 건수(7) 단위점수(8) 합산점수(9)
+      myRows = rows.slice(1).filter(r => r[4] === NAME && r[2] === weekStr);
+    }
+
+    if (!myRows.length) {
+      document.getElementById('weekly-content').innerHTML =
+        '<div class="no-data">방금 제출한 내용이 잠시 후 반영됩니다 ⏳</div>';
+      document.getElementById('week-score').textContent = `+${lastPayload.score}점`;
+      return;
+    }
+
+    let total = 0;
+    const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
+    const trows = myRows.map(r => {
+      let date, purpose, method, score;
+      if (isNew) {
+        date = r[2]; purpose = r[7]; method = r[8]; score = parseFloat(r[11]) || 0;
+      } else {
+        date = r[1]; purpose = r[6]; method = '—'; score = parseFloat(r[9]) || parseFloat(r[8]) || 0;
+      }
+      total += score;
+      return `<tr>
+        <td>${date}</td>
+        <td><span class="pb ${pbMap[purpose]||''}">${purpose||'—'}</span></td>
+        <td><span class="mb">${method}</span></td>
+        <td style="font-weight:700;color:var(--blue)">+${score}점</td>
+      </tr>`;
+    }).join('');
+
+    document.getElementById('weekly-content').innerHTML = `
+      <table class="summary-tbl">
+        <thead><tr><th>일자</th><th>활동목적</th><th>방식</th><th>점수</th></tr></thead>
+        <tbody>${trows}</tbody>
+      </table>`;
+
+    const target = 20;
+    const pct = Math.min(100, Math.round(total / target * 100));
+    document.getElementById('week-score').textContent = `${total}/${target}점`;
+    document.getElementById('prog-fill').style.width = pct + '%';
+    document.getElementById('prog-fill').style.background =
+      pct >= 100 ? 'var(--green)' : pct >= 60 ? '#F59E0B' : 'var(--blue-light)';
+    document.getElementById('prog-lbl').textContent = `주간 목표 달성률 ${pct}%`;
+    document.getElementById('prog-wrap').style.display = 'block';
+
+  } catch(e) {
+    weekNoData();
+  }
+}
+
+function weekNoData() {
+  document.getElementById('weekly-content').innerHTML = '<div class="no-data">현황을 불러오지 못했습니다</div>';
+  document.getElementById('week-score').textContent = '—';
+}
+
+function parseCSV(text) {
+  const rows = []; let row = [], cell = '', inQ = false;
+  for (let i = 0; i < text.length; i++) {
+    const c = text[i];
+    if (c === '"') { inQ = !inQ; continue; }
+    if (c === ',' && !inQ) { row.push(cell); cell = ''; continue; }
+    if ((c === '\n' || c === '\r') && !inQ) {
+      row.push(cell); rows.push(row); row = []; cell = '';
+      if (c === '\r' && text[i+1] === '\n') i++;
+      continue;
+    }
+    cell += c;
+  }
+  if (cell || row.length) { row.push(cell); rows.push(row); }
+  return rows.filter(r => r.some(c => c.trim()));
+}
+
+function resetForm() {
+  selPurpose = null; selScore = 0; selIdx = -1; selMethod = null;
+  document.querySelectorAll('.btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2','am'));
+  document.getElementById('org-name').value = '';
+  document.getElementById('contact').value = '';
+  document.getElementById('content').value = '';
+  document.getElementById('act-date').value = todayStr();
+  document.getElementById('submit-btn').disabled = true;
+  document.getElementById('submit-btn').innerHTML = '제출하기';
+  document.getElementById('prog-wrap').style.display = 'none';
+  updateScore();
+  document.getElementById('form-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
+  window.scrollTo({top:0,behavior:'smooth'});
+}
 </script>
 </body>
 </html>
