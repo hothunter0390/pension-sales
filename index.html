@@ -303,61 +303,97 @@
   .log-sum-card.green .log-sum-val { color: var(--green); }
   .log-sum-card.amber .log-sum-val { color: var(--amber); }
 
+  /* ── 모바일 전용 개요 카드 ── */
+  .mobile-hero { display: none; }
+  .hero-rate {
+    background: linear-gradient(135deg, #1e4fa3 0%, #3b5fc0 100%);
+    border-radius: var(--radius); padding: 20px;
+    color: #fff; margin-bottom: 12px; text-align: center;
+  }
+  .hero-rate-num { font-size: 52px; font-weight: 700; line-height: 1; }
+  .hero-rate-label { font-size: 13px; opacity: 0.8; margin-top: 4px; }
+  .hero-prog-bg { background: rgba(255,255,255,0.25); border-radius: 100px; height: 8px; margin-top: 14px; overflow: hidden; }
+  .hero-prog-fill { height: 8px; border-radius: 100px; background: #fff; transition: width 0.5s; }
+  .hero-sub { display: flex; justify-content: center; gap: 20px; margin-top: 10px; font-size: 13px; }
+  .hero-sub-item { opacity: 0.9; }
+  .hero-sub-item strong { font-weight: 700; font-size: 16px; }
+
+  .org-summary { margin-bottom: 12px; }
+  .org-row {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px;
+  }
+  .org-row-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+  .org-name { font-size: 13px; font-weight: 600; }
+  .org-stat { font-size: 12px; color: var(--text2); }
+  .org-bar-bg { background: var(--surface2); border-radius: 100px; height: 6px; overflow: hidden; }
+  .org-bar-fill { height: 6px; border-radius: 100px; transition: width 0.4s; }
+
+  .mobile-fail-list { }
+  .mobile-fail-item {
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 10px 14px; margin-bottom: 8px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .mfi-name { font-size: 13px; font-weight: 600; min-width: 48px; }
+  .mfi-org { font-size: 11px; color: var(--text3); }
+  .mfi-right { margin-left: auto; text-align: right; }
+  .mfi-score { font-size: 13px; font-weight: 700; color: var(--red); }
+  .mfi-rate { font-size: 11px; color: var(--text3); }
+  .mfi-bar { flex: 1; }
+
   /* ═══════════════════════════════════════
      모바일 반응형 (@media max-width: 768px)
   ═══════════════════════════════════════ */
   @media (max-width: 768px) {
-    /* 사이드바 숨기기, 하단 탭바 표시 */
     .sidebar { display: none; }
     .bottom-nav { display: flex; }
 
-    /* 메인 여백 조정 */
     .main {
       margin-left: 0;
-      padding: 16px 14px;
-      padding-bottom: 72px; /* 하단 탭바 높이 */
+      padding: 14px 12px;
+      padding-bottom: 72px;
     }
 
-    /* 헤더 */
-    .page-title { font-size: 16px; }
+    .page-header { margin-bottom: 14px; }
+    .page-title { font-size: 15px; }
 
-    /* 메트릭: 4열 → 2열 */
-    .metrics { grid-template-columns: repeat(2, 1fr); gap: 10px; margin-bottom: 16px; }
-    .metric { padding: 14px 14px; }
-    .metric-value { font-size: 22px; }
+    /* 메트릭 숨기고 hero로 대체 */
+    .metrics { display: none !important; }
+    .mobile-hero { display: block; }
 
-    /* 섹션 패딩 줄이기 */
-    .section { padding: 14px 14px; }
+    /* 데스크탑 개요 섹션 숨기기 (차트, 미달테이블) */
+    #desktop-overview { display: none; }
 
-    /* 차트 높이 줄이기 */
-    #chart-container { height: 200px !important; }
+    /* 모바일 개요 표시 */
+    #mobile-overview { display: block !important; }
 
-    /* 필터 줄바꿈 허용 */
-    .filter-row select { min-width: 0; flex: 1; font-size: 12px; }
-    .filter-row input { min-width: 100%; }
+    .section { padding: 12px 12px; }
 
-    /* 근태 카드: 1열 */
+    #chart-container { height: 180px !important; }
+
+    .filter-row { gap: 6px; }
+    .filter-row select { min-width: 0; flex: 1; font-size: 12px; padding: 5px 6px; }
+    .filter-row input { min-width: 100%; font-size: 12px; }
+
     .att-cards { grid-template-columns: 1fr; }
     .att-form-row { flex-direction: column; align-items: stretch; }
     .att-form-row select, .att-form-row input { width: 100%; }
     .att-form-row .btn-primary { width: 100%; padding: 10px; text-align: center; }
 
-    /* 설정 */
     .config-section { max-width: 100%; }
 
-    /* 로그 요약 */
-    .log-summary { gap: 8px; }
-    .log-sum-card { padding: 8px 12px; min-width: 70px; }
-    .log-sum-val { font-size: 18px; }
+    .log-summary { gap: 6px; }
+    .log-sum-card { padding: 8px 10px; min-width: 60px; }
+    .log-sum-val { font-size: 16px; }
+    .log-sum-lbl { font-size: 10px; }
 
-    /* 테이블 최소 너비 보장 */
-    .table-wrap table { min-width: 600px; }
-    .table-wrap.log-table table { min-width: 700px; }
+    .table-wrap table { min-width: 560px; }
+    .table-wrap.log-table table { min-width: 680px; }
   }
 
   @media (max-width: 480px) {
-    .metrics { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-    .page-controls select { font-size: 12px; padding: 6px 8px; }
+    .page-controls select { font-size: 12px; padding: 5px 7px; }
   }
 </style>
 </head>
@@ -422,30 +458,68 @@
 
     <!-- ── 현황 개요 뷰 ── -->
     <div id="view-overview" class="view active">
-      <div class="section">
-        <div class="section-header">
-          <span class="section-title">팀장별 주간 점수</span>
-          <span class="section-sub" id="chart-week-label"></span>
+
+      <!-- 모바일 전용 hero 요약 -->
+      <div class="mobile-hero">
+        <div class="hero-rate">
+          <div class="hero-rate-num" id="hero-pct">—%</div>
+          <div class="hero-rate-label">팀 평균 달성률</div>
+          <div class="hero-prog-bg"><div class="hero-prog-fill" id="hero-prog" style="width:0%"></div></div>
+          <div class="hero-sub">
+            <div class="hero-sub-item">달성 <strong id="hero-pass">—</strong>명</div>
+            <div class="hero-sub-item" style="opacity:0.6">|</div>
+            <div class="hero-sub-item">미달 <strong id="hero-fail">—</strong>명</div>
+            <div class="hero-sub-item" style="opacity:0.6">|</div>
+            <div class="hero-sub-item">전체 <strong id="hero-total">—</strong>명</div>
+          </div>
         </div>
-        <div class="legend">
-          <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>달성</div>
-          <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>미달</div>
-          <div class="legend-item"><div class="legend-dot" style="background:#aaa;border:1px dashed #888"></div>개인 목표</div>
+
+        <!-- 사업단별 현황 -->
+        <div class="section" style="margin-bottom:12px">
+          <div class="section-header" style="margin-bottom:10px">
+            <span class="section-title">사업단별 달성 현황</span>
+            <span class="section-sub" id="mobile-week-label"></span>
+          </div>
+          <div class="org-summary" id="org-summary"></div>
         </div>
-        <div id="chart-container" style="position:relative;width:100%;height:260px">
-          <canvas id="barChart" role="img" aria-label="팀장별 주간 점수 막대 차트"></canvas>
+
+        <!-- 모바일 미달자 -->
+        <div class="section">
+          <div class="section-header" style="margin-bottom:10px">
+            <span class="section-title">미달자 현황</span>
+            <button class="btn-csv" onclick="exportOverviewCSV()" style="font-size:11px;padding:5px 10px">⬇ CSV</button>
+          </div>
+          <div class="mobile-fail-list" id="mobile-fail-list"></div>
         </div>
       </div>
-      <div class="section">
-        <div class="section-header">
-          <span class="section-title">미달자 현황</span>
-          <button class="btn-csv" onclick="exportOverviewCSV()">⬇ 미달자 CSV</button>
+
+      <!-- 데스크탑 전용 (차트 + 테이블) -->
+      <div id="desktop-overview">
+        <div class="section">
+          <div class="section-header">
+            <span class="section-title">팀장별 주간 점수</span>
+            <span class="section-sub" id="chart-week-label"></span>
+          </div>
+          <div class="legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>달성</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>미달</div>
+            <div class="legend-item"><div class="legend-dot" style="background:#aaa;border:1px dashed #888"></div>개인 목표</div>
+          </div>
+          <div id="chart-container" style="position:relative;width:100%;height:260px">
+            <canvas id="barChart" role="img" aria-label="팀장별 주간 점수 막대 차트"></canvas>
+          </div>
         </div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>이름</th><th>소속</th><th>점수</th><th>목표</th><th>달성률</th><th>면담여부</th></tr></thead>
-            <tbody id="fail-table"></tbody>
-          </table>
+        <div class="section">
+          <div class="section-header">
+            <span class="section-title">미달자 현황</span>
+            <button class="btn-csv" onclick="exportOverviewCSV()">⬇ 미달자 CSV</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>이름</th><th>소속</th><th>점수</th><th>목표</th><th>달성률</th><th>면담여부</th></tr></thead>
+              <tbody id="fail-table"></tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>
@@ -1124,6 +1198,74 @@ function renderChart(data) {
   document.getElementById('chart-week-label').textContent = getCurrentWeek();
 }
 
+// ── 모바일 hero + 사업단 요약 + 미달자 ──
+function renderMobileOverview(data) {
+  const targets = data.filter(d => d.role === '팀장');
+  const pass    = targets.filter(d => d.pass).length;
+  const fail    = targets.length - pass;
+  const avg     = targets.length ? Math.round(targets.reduce((s, d) => s + d.rate, 0) / targets.length) : 0;
+  const week    = getCurrentWeek();
+
+  // hero
+  document.getElementById('hero-pct').textContent   = avg + '%';
+  document.getElementById('hero-pass').textContent  = pass;
+  document.getElementById('hero-fail').textContent  = fail;
+  document.getElementById('hero-total').textContent = targets.length;
+  document.getElementById('hero-prog').style.width  = Math.min(avg, 100) + '%';
+  document.getElementById('mobile-week-label').textContent = week;
+
+  // 사업단별 달성 현황
+  const orgs = {};
+  targets.forEach(d => {
+    if (!orgs[d.org]) orgs[d.org] = { pass: 0, total: 0 };
+    orgs[d.org].total++;
+    if (d.pass) orgs[d.org].pass++;
+  });
+  const orgEl = document.getElementById('org-summary');
+  orgEl.innerHTML = Object.entries(orgs).map(([org, v]) => {
+    const pct = Math.round(v.pass / v.total * 100);
+    const color = pct === 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="org-row">
+      <div class="org-row-top">
+        <span class="org-name">${org}</span>
+        <span class="org-stat" style="color:${color};font-weight:600">${v.pass}/${v.total}명 달성</span>
+      </div>
+      <div class="org-bar-bg">
+        <div class="org-bar-fill" style="width:${pct}%;background:${color}"></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // 모바일 미달자 리스트
+  const fails = targets.filter(d => !d.pass).sort((a, b) => a.rate - b.rate);
+  const mfl = document.getElementById('mobile-fail-list');
+  if (!fails.length) {
+    mfl.innerHTML = `<div style="text-align:center;padding:20px;color:var(--text3);font-size:13px">미달자 없음 🎉</div>`;
+    return;
+  }
+  mfl.innerHTML = fails.map(d => {
+    const key = d.name + '_' + week;
+    return `<div class="mobile-fail-item">
+      <div>
+        <div class="mfi-name">${d.name}</div>
+        <div class="mfi-org">${d.org}</div>
+      </div>
+      <div class="mfi-bar">
+        <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--text3);margin-bottom:3px">
+          <span>${d.score}점</span><span>목표 ${d.effectiveTarget}점</span>
+        </div>
+        <div class="org-bar-bg">
+          <div class="org-bar-fill" style="width:${Math.min(d.rate,100)}%;background:var(--red)"></div>
+        </div>
+      </div>
+      <div class="mfi-right">
+        <div class="mfi-score">${d.rate}%</div>
+        <input type="checkbox" ${interviews[key] ? 'checked' : ''} onchange="toggleInterview('${key}',this)" title="면담여부">
+      </div>
+    </div>`;
+  }).join('');
+}
+
 // ── 미달자 테이블 ──
 function renderFailTable(data) {
   const fails = data.filter(d => d.role === '팀장' && !d.pass);
@@ -1295,6 +1437,7 @@ function renderAll() {
   const data = getCurrentData();
   renderMetrics(data);
   if (currentView === 'overview') {
+    renderMobileOverview(data);
     renderChart(data);
     renderFailTable(data);
   } else if (currentView === 'table') {
