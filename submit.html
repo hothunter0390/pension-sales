@@ -218,6 +218,14 @@
   .pb2 { background:var(--amber-bg);color:var(--amber); }
   .mb { display:inline-block;background:var(--purple-bg);color:var(--purple);padding:2px 8px;border-radius:100px;font-size:11px;font-weight:600; }
   .act-detail { font-size:12px;color:var(--gray);margin-top:3px; }
+  .act-actions { display:flex;gap:6px;margin-top:8px;border-top:1px solid var(--border);padding-top:8px; }
+  .btn-edit { flex:1;padding:7px;background:var(--blue-bg);color:var(--blue);border:1px solid var(--blue);border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent; }
+  .btn-edit:active { opacity:0.8; }
+  .btn-del-act { flex:1;padding:7px;background:var(--red-bg);color:var(--red);border:1px solid var(--red);border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent; }
+  .btn-del-act:active { opacity:0.8; }
+  /* 수정 모드 배너 */
+  .edit-mode-banner { background:var(--amber-bg);border:1.5px solid #D97706;border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;display:none;font-size:13px;color:var(--amber);font-weight:600;display:flex;justify-content:space-between;align-items:center; }
+  .btn-cancel-edit { background:none;border:1px solid var(--amber);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--amber);cursor:pointer;font-family:inherit;font-weight:600; }
   .no-data { text-align:center;padding:32px 20px;color:var(--gray);font-size:13px; }
   .no-data .no-icon { font-size:32px;margin-bottom:8px; }
 
@@ -252,6 +260,11 @@
 
   <!-- 입력 폼 -->
   <div id="form-view">
+    <!-- 수정 모드 배너 -->
+    <div class="edit-mode-banner" id="edit-banner" style="display:none">
+      <span>✏️ 수정 모드 — 내용 변경 후 저장하세요</span>
+      <button class="btn-cancel-edit" onclick="cancelEdit()">취소</button>
+    </div>
     <div class="section">
       <div class="section-label">📅 활동일자</div>
       <input type="date" id="act-date" class="date-input">
@@ -295,7 +308,7 @@
       </div>
     </div>
     <button class="btn-submit" id="submit-btn" onclick="submitForm()" disabled>제출하기</button>
-    <div style="font-size:11px;color:var(--gray);text-align:center;margin-top:8px">1건씩 제출 · 제출 후 추가 입력 가능</div>
+    <div style="font-size:11px;color:var(--gray);text-align:center;margin-top:8px" id="submit-hint">1건씩 제출 · 제출 후 추가 입력 가능</div>
   </div>
 
   <!-- 성공 뷰 -->
@@ -320,6 +333,10 @@
     <button class="week-nav-btn" onclick="changeWeek(-1)">◀ 이전</button>
     <span class="week-nav-label" id="week-nav-label">이번 주</span>
     <button class="week-nav-btn" id="next-week-btn" onclick="changeWeek(1)">다음 ▶</button>
+  </div>
+  <div style="display:flex;gap:8px;margin-bottom:14px">
+    <button onclick="downloadMyCSV('week')" style="flex:1;padding:10px;background:#fff;color:var(--blue);border:1.5px solid var(--blue);border-radius:var(--radius);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">⬇ 이번주 다운로드</button>
+    <button onclick="downloadMyCSV('all')"  style="flex:1;padding:10px;background:#fff;color:var(--gray);border:1.5px solid var(--border);border-radius:var(--radius);font-size:13px;font-weight:700;font-family:inherit;cursor:pointer">⬇ 전체 다운로드</button>
   </div>
   <div id="records-content">
     <div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>
@@ -420,17 +437,19 @@ function checkReady() {
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 let lastPayload = null;
+let editMode  = false;
+let editRowId = null;
 
 async function submitForm() {
   if (!NAME || !selPurpose || !selMethod) return;
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
-  btn.innerHTML = '<div class="spinner"></div> 제출 중...';
+  btn.innerHTML = '<div class="spinner"></div> ' + (editMode ? '저장 중...' : '제출 중...');
 
   const dateStr = document.getElementById('act-date').value || todayStr();
   const payload = {
-    type: 'activity_v2',
-    rowId:      genId(),
+    type:       editMode ? 'activity_update' : 'activity_v2',
+    rowId:      editMode ? editRowId : genId(),
     submitTime: new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'}),
     actDate:    dateStr,
     week:       getWeekStr(dateStr),
@@ -452,10 +471,12 @@ async function submitForm() {
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(payload)
     });
+    editMode  = false;
+    editRowId = null;
     showSuccess();
   } catch(e) {
     btn.disabled = false;
-    btn.innerHTML = '제출하기';
+    btn.innerHTML = editMode ? '수정 저장' : '제출하기';
     alert('오류가 발생했습니다. 다시 시도해 주세요.');
   }
 }
@@ -479,6 +500,13 @@ function showSuccess() {
 }
 
 function resetForm() {
+  // 수정 모드 초기화
+  editMode  = false;
+  editRowId = null;
+  document.getElementById('edit-banner').style.display = 'none';
+  document.getElementById('submit-btn').innerHTML = '제출하기';
+  document.getElementById('submit-hint').textContent = '1건씩 제출 · 제출 후 추가 입력 가능';
+
   selPurpose = null; selScore = 0; selIdx = -1; selMethod = null;
   document.querySelectorAll('.btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2','am'));
   document.getElementById('org-name').value = '';
@@ -486,11 +514,80 @@ function resetForm() {
   document.getElementById('content').value = '';
   document.getElementById('act-date').value = todayStr();
   document.getElementById('submit-btn').disabled = true;
-  document.getElementById('submit-btn').innerHTML = '제출하기';
   updateScore();
   document.getElementById('form-view').style.display = 'block';
   document.getElementById('success-view').style.display = 'none';
   window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function cancelEdit() {
+  resetForm();
+}
+
+// ── 수정 / 삭제 ──
+function editActivity(data) {
+  // 폼에 기존 값 채우기
+  editMode  = true;
+  editRowId = data.rowId;
+
+  // 날짜
+  document.getElementById('act-date').value = data.actDate || todayStr();
+
+  // 활동목적
+  selPurpose = null; selScore = 0; selIdx = -1;
+  document.querySelectorAll('[data-purpose]').forEach(b => {
+    b.classList.remove('ap0','ap1','ap2');
+    if (b.dataset.purpose === data.purpose) {
+      selPurpose = data.purpose;
+      selScore   = +b.dataset.score;
+      selIdx     = +b.dataset.idx;
+      b.classList.add('ap' + selIdx);
+    }
+  });
+
+  // 활동방식
+  selMethod = null;
+  document.querySelectorAll('[data-method]').forEach(b => {
+    b.classList.remove('am');
+    if (b.dataset.method === data.method) {
+      selMethod = data.method;
+      b.classList.add('am');
+    }
+  });
+
+  // 텍스트
+  document.getElementById('org-name').value = data.orgName || '';
+  document.getElementById('contact').value  = data.contact  || '';
+  document.getElementById('content').value  = data.content  || '';
+
+  // 수정 모드 UI
+  document.getElementById('edit-banner').style.display = 'flex';
+  document.getElementById('submit-btn').innerHTML = '✅ 수정 저장';
+  document.getElementById('submit-hint').textContent = '변경된 내용으로 기록이 업데이트됩니다';
+
+  updateScore();
+  checkReady();
+
+  // 입력 탭으로 이동
+  switchTab('input');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+async function deleteActivity(rowId, weekStr) {
+  if (!confirm('이 활동 기록을 삭제하시겠습니까?')) return;
+
+  try {
+    await fetch(SCRIPT_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ type: 'activity_delete', rowId, week: weekStr, name: NAME, org: ORG })
+    });
+    cachedRows = null; // 캐시 무효화
+    loadRecords();
+    alert('삭제되었습니다.');
+  } catch(e) {
+    alert('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
+  }
 }
 
 // ── 내 기록 탭 ──
@@ -564,6 +661,7 @@ async function loadRecords() {
     // 활동 목록 (최신순)
     const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
     const itemsHTML = [...myRows].reverse().map(r => {
+      const rowId   = isNew ? r[0] : '';
       const date    = isNew ? r[2] : r[1];
       const purpose = isNew ? r[7] : r[6];
       const method  = isNew ? r[8] : '—';
@@ -572,6 +670,12 @@ async function loadRecords() {
       const cont    = isNew ? r[11] : '—';
       const score   = parseFloat(isNew ? r[12] : r[9]) || 0;
       const extras  = [orgName, contact, cont].filter(v => v && v !== '—').join(' · ');
+
+      // 수정 버튼용 데이터 (JSON에서 특수문자 이스케이프)
+      const editDataAttr = isNew
+        ? `data-edit='${JSON.stringify({rowId,actDate:date,purpose,method,orgName,contact,content:cont,score}).replace(/'/g,"&apos;")}'`
+        : '';
+
       return `<div class="act-item">
         <div class="act-item-top">
           <span class="act-date">📅 ${date}</span>
@@ -582,6 +686,10 @@ async function loadRecords() {
           ${method !== '—' ? `<span class="mb">${method}</span>` : ''}
         </div>
         ${extras ? `<div class="act-detail">📌 ${extras}</div>` : ''}
+        ${isNew && rowId ? `<div class="act-actions">
+          <button class="btn-edit" ${editDataAttr} onclick="editActivity(JSON.parse(this.dataset.edit))">✏️ 수정</button>
+          <button class="btn-del-act" onclick="deleteActivity('${rowId.replace(/'/g,"\\'")}','${weekStr}')">🗑️ 삭제</button>
+        </div>` : ''}
       </div>`;
     }).join('') || `<div class="no-data"><div class="no-icon">📭</div>이 주에 기록된 활동이 없습니다</div>`;
 
@@ -611,6 +719,35 @@ async function loadRecords() {
   } catch(e) {
     el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>데이터를 불러오지 못했습니다<br><small>잠시 후 다시 시도해 주세요</small></div>';
   }
+}
+
+function downloadMyCSV(scope) {
+  if (!cachedRows || cachedRows.length < 2) {
+    alert('먼저 기록을 불러온 후 다운로드해 주세요.');
+    return;
+  }
+  const header = cachedRows[0].map(h => h.trim());
+  const isNew  = header[0] === '행ID' || header.some(h => h === '활동목적');
+  const weekStr = getOffsetWeekStr(viewWeekOffset);
+
+  let rows = cachedRows.slice(1).filter(r => isNew ? r[5] === NAME : r[4] === NAME);
+  if (scope === 'week') rows = rows.filter(r => (isNew ? r[3] : r[2]) === weekStr);
+
+  if (!rows.length) { alert('다운로드할 데이터가 없습니다.'); return; }
+
+  const csvHeader = ['활동일자','주차','소속','이름','활동목적','활동방식','단체명','담당자','내용','점수'];
+  const csvRows = rows.map(r => isNew
+    ? [r[2], r[3], r[4], r[5], r[7], r[8], r[9], r[10], r[11], r[12]]
+    : [r[1], r[2], r[3], r[4], r[6], '—',  '—',  '—',   r[10], r[9]]
+  );
+  const csv  = [csvHeader, ...csvRows].map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
+  const a    = document.createElement('a');
+  a.href     = URL.createObjectURL(blob);
+  a.download = scope === 'week'
+    ? `${NAME}_활동기록_${weekStr}주.csv`
+    : `${NAME}_활동기록_전체.csv`;
+  a.click();
 }
 
 function noDataHTML() {
