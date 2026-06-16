@@ -917,10 +917,10 @@ function buildWeeklySummary(activities, roster, weekList, currentWeek) {
   weekList.forEach(week => {
     const weekActs = activities.filter(a => a.week === week);
     const activePeople = new Set(weekActs.map(a => a.name));
-    // 현재 주차: 전체 팀원 표시 / 과거 주차: 활동 제출자만
+    // 팀장만 표시 (단장·RM 제외) / 현재주차: 전체 팀장 / 과거주차: 활동 제출자만
     const members = week === currentWeek
-      ? roster
-      : roster.filter(m => activePeople.has(m.name));
+      ? roster.filter(m => m.role === '팀장')
+      : roster.filter(m => m.role === '팀장' && activePeople.has(m.name));
     members.forEach(member => {
       const acts = weekActs.filter(a => a.name === member.name);
       result.push({
@@ -1234,7 +1234,6 @@ function getEffectiveTarget(name, week, base) {
 function getCurrentData() {
   const week = getCurrentWeek();
   return allData.filter(r => r.week === week).map(r => {
-    if (r.role !== '팀장') return { ...r, effectiveTarget: null, rate: null, pass: null, deduct: 0 };
     const effectiveTarget = getEffectiveTarget(r.name, week, r.target);
     const deduct = getDeduct(r.name, week);
     const rate = effectiveTarget > 0 ? Math.round((r.score / effectiveTarget) * 100) : 100;
@@ -1246,7 +1245,7 @@ function getCurrentData() {
 function renderMetrics(data) {
   const targets = data.filter(d => d.role === '팀장');
   const pass = targets.filter(d => d.pass).length;
-  document.getElementById('m-total').textContent = targets.length + '명';
+  document.getElementById('m-total').textContent = data.length + '명';
   document.getElementById('m-pass').textContent  = pass + '명';
   document.getElementById('m-fail').textContent  = (targets.length - pass) + '명';
   document.getElementById('m-avg').textContent   = targets.length
@@ -1255,7 +1254,7 @@ function renderMetrics(data) {
 
 // ── 차트 ──
 function renderChart(data) {
-  const sorted = [...data].filter(d => d.role === '팀장').sort((a, b) => b.score - a.score);
+  const sorted = [...data].filter(d => d.role === '팀장');
   const ctx = document.getElementById('barChart').getContext('2d');
   if (chartInst) chartInst.destroy();
   chartInst = new Chart(ctx, {
