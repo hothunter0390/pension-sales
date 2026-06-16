@@ -288,7 +288,9 @@
     </div>
     <div class="section">
       <div class="section-label">🏢 단체명 <span>(선택)</span></div>
-      <input type="text" id="org-name" class="text-input" placeholder="예: 삼성화재, 현대차 노조" maxlength="50">
+      <input type="text" id="org-name" class="text-input" placeholder="예: 삼성화재, 현대차 노조" maxlength="50"
+        autocomplete="off" oninput="onOrgInput()" onfocus="onOrgInput()" onblur="onOrgBlur()" onkeydown="onOrgKey(event)">
+      <div id="org-dropdown" style="display:none;position:absolute;z-index:100;background:#fff;border:1px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,0.10);width:calc(100% - 32px);max-height:200px;overflow-y:auto;margin-top:2px"></div>
     </div>
     <div class="section">
       <div class="section-label">👤 담당자 <span>(선택 · 여러 명이면 쉼표로 구분)</span></div>
@@ -435,6 +437,70 @@ function checkReady() {
   document.getElementById('submit-btn').disabled = !(NAME && selPurpose && selMethod);
 }
 function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+// ── 단체명 자동완성 ──
+let orgNames = [];       // 활동원장에서 불러온 단체명 목록
+let orgFocusIdx = -1;
+
+async function loadOrgNames() {
+  try {
+    const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`);
+    const text = await resp.text();
+    const rows = parseCSV(text).slice(1);
+    const set  = new Set();
+    rows.forEach(r => { const v = (r[9] || '').trim(); if (v) set.add(v); });
+    orgNames = [...set].sort((a,b) => a.localeCompare(b, 'ko'));
+  } catch(e) { orgNames = []; }
+}
+
+function onOrgInput() {
+  const q   = document.getElementById('org-name').value.trim();
+  const box = document.getElementById('org-dropdown');
+  const matches = q
+    ? orgNames.filter(n => n.includes(q)).slice(0, 8)
+    : orgNames.slice(0, 8);
+  if (!matches.length) { box.style.display = 'none'; return; }
+  orgFocusIdx = -1;
+  box.innerHTML = matches.map((n, i) => {
+    const hi = q ? n.replace(q, `<strong style="color:var(--blue)">${q}</strong>`) : n;
+    return `<div data-idx="${i}" data-val="${n.replace(/"/g,'&quot;')}"
+      style="padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border)"
+      onmousedown="selectOrg('${n.replace(/'/g,"\\'")}')">🏢 ${hi}</div>`;
+  }).join('');
+  box.style.display = 'block';
+}
+
+function selectOrg(val) {
+  document.getElementById('org-name').value = val;
+  document.getElementById('org-dropdown').style.display = 'none';
+}
+
+function onOrgBlur() {
+  setTimeout(() => { document.getElementById('org-dropdown').style.display = 'none'; }, 150);
+}
+
+function onOrgKey(e) {
+  const box   = document.getElementById('org-dropdown');
+  const items = box.querySelectorAll('[data-idx]');
+  if (!items.length) return;
+  if (e.key === 'ArrowDown') {
+    orgFocusIdx = Math.min(orgFocusIdx + 1, items.length - 1);
+    items.forEach((el, i) => el.style.background = i === orgFocusIdx ? 'var(--blue-bg)' : '');
+    e.preventDefault();
+  } else if (e.key === 'ArrowUp') {
+    orgFocusIdx = Math.max(orgFocusIdx - 1, 0);
+    items.forEach((el, i) => el.style.background = i === orgFocusIdx ? 'var(--blue-bg)' : '');
+    e.preventDefault();
+  } else if (e.key === 'Enter' && orgFocusIdx >= 0) {
+    selectOrg(items[orgFocusIdx].dataset.val);
+    e.preventDefault();
+  } else if (e.key === 'Escape') {
+    box.style.display = 'none';
+  }
+}
+
+// 페이지 로드 시 단체명 미리 로드
+loadOrgNames();
 
 let lastPayload = null;
 let editMode  = false;
