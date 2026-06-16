@@ -664,12 +664,17 @@ let logPage = 1;
 const LOG_PAGE_SIZE = 50;
 const TARGET_BASE = 20;
 
+// ── 기본값 (하드코딩 — 어느 기기에서도 자동 연결) ──
+const DEFAULT_SHEET_ID  = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
+const DEFAULT_SHEET_GID = '1592444558';
+const DEFAULT_LOG_GID   = '785851831';
+
 // ── 설정 로드/저장 ──
 function loadConfig() {
   const cfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
-  document.getElementById('cfg-sheet-id').value = cfg.sheetId || '';
-  document.getElementById('cfg-sheet-gid').value = cfg.sheetGid || '0';
-  document.getElementById('cfg-log-gid').value = cfg.logGid || '';
+  document.getElementById('cfg-sheet-id').value  = cfg.sheetId  || DEFAULT_SHEET_ID;
+  document.getElementById('cfg-sheet-gid').value = cfg.sheetGid || DEFAULT_SHEET_GID;
+  document.getElementById('cfg-log-gid').value   = cfg.logGid   || DEFAULT_LOG_GID;
   ['week','org','name','role','score','target','new','fund','mgmt','pass'].forEach(k => {
     const el = document.getElementById('col-' + k);
     if (el && cfg['col_' + k]) el.value = cfg['col_' + k];
@@ -695,7 +700,12 @@ function saveConfig() {
 }
 
 function getConfig() {
-  return JSON.parse(localStorage.getItem('dashboard_config') || '{}');
+  const cfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
+  // 저장된 값 없으면 기본값(하드코딩) 사용
+  if (!cfg.sheetId)  cfg.sheetId  = DEFAULT_SHEET_ID;
+  if (!cfg.sheetGid) cfg.sheetGid = DEFAULT_SHEET_GID;
+  if (!cfg.logGid)   cfg.logGid   = DEFAULT_LOG_GID;
+  return cfg;
 }
 
 function getColIdx(key, fallback) {
