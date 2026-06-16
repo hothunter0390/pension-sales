@@ -445,6 +445,9 @@
     <div class="nav-item" id="snav-log" onclick="switchView('log','sidebar')">
       <span class="nav-icon">📒</span> 활동일지
     </div>
+    <div class="nav-item" id="snav-orgs" onclick="switchView('orgs','sidebar')">
+      <span class="nav-icon">🏢</span> 단체별현황
+    </div>
     <div class="nav-item" id="snav-attendance" onclick="switchView('attendance','sidebar')">
       <span class="nav-icon">📅</span> 근태 관리
     </div>
@@ -609,7 +612,7 @@
             <option value="석식">석식</option>
             <option value="기타">기타</option>
           </select>
-          <input type="text" id="lf-search" placeholder="🔍 단체명 / 담당자 / 내용" oninput="applyLogFilter()">
+          <input type="text" id="lf-search" placeholder="🔍 단체명 / 제도 / 내용" oninput="applyLogFilter()">
           <button style="padding:6px 12px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface);color:var(--text2);cursor:pointer;font-family:inherit;font-size:12px" onclick="clearLogFilter()">초기화</button>
         </div>
 
@@ -619,7 +622,7 @@
             <thead>
               <tr>
                 <th>주차</th><th>날짜</th><th>소속</th><th>이름</th>
-                <th>활동목적</th><th>방식</th><th>단체명</th><th>담당자</th>
+                <th>단체구분</th><th>제도</th><th>단체명</th><th>활동목적</th><th>방식</th>
                 <th>내용</th><th>점수</th>
               </tr>
             </thead>
@@ -627,6 +630,28 @@
           </table>
         </div>
         <div class="log-pagination" id="log-pagination" style="display:flex;align-items:center;justify-content:center;gap:8px;padding:14px 0"></div>
+      </div>
+    </div>
+
+    <!-- ── 단체별현황 뷰 ── -->
+    <div id="view-orgs" class="view">
+      <div class="section">
+        <div class="section-header">
+          <span class="section-title">단체별 누적 활동 현황</span>
+          <button class="btn-csv" onclick="exportOrgCSV()">⬇ CSV</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>단체명</th><th>총활동</th><th>신규발굴</th><th>펀드상담</th><th>단체관리</th>
+                <th>방문</th><th>중식</th><th>석식</th><th>기타</th>
+                <th>영업팀장</th><th>최근활동일</th>
+              </tr>
+            </thead>
+            <tbody id="org-table"></tbody>
+          </table>
+        </div>
       </div>
     </div>
 
@@ -678,48 +703,23 @@
         <div class="config-row">
           <label class="config-label">스프레드시트 ID</label>
           <div class="config-desc">URL의 <code>/d/</code> 뒤 문자열<br><code style="font-size:11px;color:var(--text3)">https://docs.google.com/spreadsheets/d/<strong>여기</strong>/edit</code></div>
-          <input class="config-input" id="cfg-sheet-id" placeholder="1BxiMVs0XRA5nFMdKvBdBZjgmUUqptlbs74OgVE2upms" oninput="saveConfig()">
+          <input class="config-input" id="cfg-sheet-id" placeholder="13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U" oninput="saveConfig()">
         </div>
 
         <div class="config-row">
-          <label class="config-label">주간요약 탭 GID</label>
-          <div class="config-desc">시트 탭 클릭 시 URL 끝 <code>#gid=<strong>숫자</strong></code> · 첫 번째 탭이면 <strong>0</strong></div>
-          <input class="config-input" id="cfg-sheet-gid" placeholder="0" oninput="saveConfig()">
-        </div>
-
-        <div class="config-row">
-          <label class="config-label">활동원장 탭 GID <span style="font-size:11px;color:var(--green);font-weight:400">활동일지 탭에 필요</span></label>
+          <label class="config-label">활동원장 탭 GID</label>
           <div class="config-desc">건별 활동 내역이 쌓이는 시트 탭의 GID</div>
           <input class="config-input" id="cfg-log-gid" placeholder="785851831" oninput="saveConfig()">
         </div>
 
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-          <button class="btn-primary" onclick="loadData()">주간요약 연결 테스트</button>
-          <button class="btn-primary" style="background:var(--green)" onclick="loadLogData()">활동원장 연결 테스트</button>
+        <div class="config-row">
+          <label class="config-label">팀원명단 탭 GID</label>
+          <div class="config-desc">팀원 이름·직책이 있는 시트 탭의 GID (직책 정보 연동용)</div>
+          <input class="config-input" id="cfg-roster-gid" placeholder="310906424" oninput="saveConfig()">
         </div>
-        <div class="config-saved" id="config-saved">✓ 설정 저장됨</div>
-      </div>
 
-      <div class="section config-section" style="margin-top:0">
-        <div class="section-header"><span class="section-title">컬럼 매핑 (주간요약)</span></div>
-        <div class="config-desc" style="margin-bottom:12px;font-size:12px;color:var(--text3)">주간요약 탭 컬럼 순서 (A=1, B=2…) · 기본값: 주차/소속/이름/직책/합산점수/목표점수/달성률/신규발굴/펀드상담/단체관리/달성여부</div>
-        <div class="table-wrap">
-          <table class="ref-table">
-            <thead><tr><th>항목</th><th>컬럼 번호</th></tr></thead>
-            <tbody>
-              <tr><td>주차</td><td><input type="number" class="config-input" id="col-week" value="1" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>소속</td><td><input type="number" class="config-input" id="col-org" value="2" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>이름</td><td><input type="number" class="config-input" id="col-name" value="3" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>직책</td><td><input type="number" class="config-input" id="col-role" value="4" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>주간합산점수</td><td><input type="number" class="config-input" id="col-score" value="5" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>목표점수</td><td><input type="number" class="config-input" id="col-target" value="6" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>신규발굴</td><td><input type="number" class="config-input" id="col-new" value="8" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>펀드상담</td><td><input type="number" class="config-input" id="col-fund" value="9" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>단체관리</td><td><input type="number" class="config-input" id="col-mgmt" value="10" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-              <tr><td>달성여부</td><td><input type="number" class="config-input" id="col-pass" value="11" style="width:60px;padding:4px 8px" oninput="saveConfig()"></td></tr>
-            </tbody>
-          </table>
-        </div>
+        <button class="btn-primary" onclick="loadData()">🔄 데이터 연결 테스트</button>
+        <div class="config-saved" id="config-saved">✓ 설정 저장됨</div>
       </div>
     </div>
   </main>
@@ -736,6 +736,9 @@
   <button class="bottom-nav-btn" id="bnav-log" onclick="switchView('log','bottom')">
     <span class="bn-icon">📒</span><span>활동일지</span>
   </button>
+  <button class="bottom-nav-btn" id="bnav-orgs" onclick="switchView('orgs','bottom')">
+    <span class="bn-icon">🏢</span><span>단체현황</span>
+  </button>
   <button class="bottom-nav-btn" id="bnav-attendance" onclick="switchView('attendance','bottom')">
     <span class="bn-icon">📅</span><span>근태</span>
   </button>
@@ -746,10 +749,11 @@
 
 <script>
 // ── 전역 상태 ──
-let allData = [];
-let allLogData = [];
+let allData = [];        // 주간요약 (활동원장에서 실시간 계산)
+let allLogData = [];     // 활동원장 raw 데이터
 let filteredLog = [];
 let weeks = [];
+let rosterMap = {};      // name → {org, role}
 let attendance = {};
 let interviews = {};
 let currentDetailTab = 'all';
@@ -759,35 +763,39 @@ let logPage = 1;
 const LOG_PAGE_SIZE = 50;
 const TARGET_BASE = 20;
 
-// ── 기본값 (하드코딩 — 어느 기기에서도 자동 연결) ──
-const DEFAULT_SHEET_ID  = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
-const DEFAULT_SHEET_GID = '1592444558';
-const DEFAULT_LOG_GID   = '785851831';
+// ── 기본값 ──
+const DEFAULT_SHEET_ID   = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
+const DEFAULT_LOG_GID    = '785851831';   // 활동원장
+const DEFAULT_ROSTER_GID = '310906424';   // 팀원명단
+
+// ── 주차 계산 ──
+function getWeekStr(dateStr) {
+  const d = new Date(String(dateStr || '').slice(0,10) + 'T00:00:00');
+  if (isNaN(d.getTime())) return '';
+  const jan1 = new Date(d.getFullYear(), 0, 1);
+  const dow  = (jan1.getDay() + 6) % 7;
+  const dayN = Math.floor((d - jan1) / 86400000) + 1;
+  const wk   = Math.ceil((dayN + dow) / 7);
+  return String(d.getFullYear()).slice(2) + '-' + String(wk).padStart(2, '0');
+}
+function todayStr() { return new Date().toLocaleDateString('sv'); }
 
 // ── 설정 로드/저장 ──
 function loadConfig() {
   const cfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
-  document.getElementById('cfg-sheet-id').value  = cfg.sheetId  || DEFAULT_SHEET_ID;
-  document.getElementById('cfg-sheet-gid').value = cfg.sheetGid || DEFAULT_SHEET_GID;
-  document.getElementById('cfg-log-gid').value   = cfg.logGid   || DEFAULT_LOG_GID;
-  ['week','org','name','role','score','target','new','fund','mgmt','pass'].forEach(k => {
-    const el = document.getElementById('col-' + k);
-    if (el && cfg['col_' + k]) el.value = cfg['col_' + k];
-  });
+  document.getElementById('cfg-sheet-id').value   = cfg.sheetId    || DEFAULT_SHEET_ID;
+  document.getElementById('cfg-log-gid').value    = cfg.logGid     || DEFAULT_LOG_GID;
+  document.getElementById('cfg-roster-gid').value = cfg.rosterGid  || DEFAULT_ROSTER_GID;
   attendance = JSON.parse(localStorage.getItem('dashboard_attendance') || '{}');
   interviews = JSON.parse(localStorage.getItem('dashboard_interviews') || '{}');
 }
 
 function saveConfig() {
   const cfg = {
-    sheetId:  document.getElementById('cfg-sheet-id').value.trim(),
-    sheetGid: document.getElementById('cfg-sheet-gid').value.trim() || '0',
-    logGid:   document.getElementById('cfg-log-gid').value.trim(),
+    sheetId:   document.getElementById('cfg-sheet-id').value.trim(),
+    logGid:    document.getElementById('cfg-log-gid').value.trim()    || DEFAULT_LOG_GID,
+    rosterGid: document.getElementById('cfg-roster-gid').value.trim() || DEFAULT_ROSTER_GID,
   };
-  ['week','org','name','role','score','target','new','fund','mgmt','pass'].forEach(k => {
-    const el = document.getElementById('col-' + k);
-    if (el) cfg['col_' + k] = parseInt(el.value) || 1;
-  });
   localStorage.setItem('dashboard_config', JSON.stringify(cfg));
   const saved = document.getElementById('config-saved');
   saved.style.display = 'block';
@@ -796,16 +804,10 @@ function saveConfig() {
 
 function getConfig() {
   const cfg = JSON.parse(localStorage.getItem('dashboard_config') || '{}');
-  // 저장된 값 없으면 기본값(하드코딩) 사용
-  if (!cfg.sheetId)  cfg.sheetId  = DEFAULT_SHEET_ID;
-  if (!cfg.sheetGid) cfg.sheetGid = DEFAULT_SHEET_GID;
-  if (!cfg.logGid)   cfg.logGid   = DEFAULT_LOG_GID;
+  if (!cfg.sheetId)   cfg.sheetId   = DEFAULT_SHEET_ID;
+  if (!cfg.logGid)    cfg.logGid    = DEFAULT_LOG_GID;
+  if (!cfg.rosterGid) cfg.rosterGid = DEFAULT_ROSTER_GID;
   return cfg;
-}
-
-function getColIdx(key, fallback) {
-  const cfg = getConfig();
-  return (cfg['col_' + key] || fallback) - 1;
 }
 
 // ── CSV 파서 ──
@@ -835,9 +837,9 @@ async function fetchSheetCSV(gid) {
   return parseCSV(await res.text());
 }
 
-// ── 주간요약 데이터 로드 ──
+// ── 데이터 로드 (활동원장 + 팀원명단 → 모든 집계 JS 계산) ──
 async function loadData() {
-  setLoading(true, '주간요약 데이터 불러오는 중...');
+  setLoading(true, '데이터 불러오는 중...');
   const cfg = getConfig();
   if (!cfg.sheetId) {
     setLoading(false);
@@ -846,24 +848,58 @@ async function loadData() {
     return;
   }
   try {
-    const rows = await fetchSheetCSV(cfg.sheetGid || '0');
-    if (!rows || rows.length < 2) throw new Error('데이터 없음');
-    const data = rows.slice(1).map(r => ({
-      week:   r[getColIdx('week', 1)]   || '',
-      org:    r[getColIdx('org', 2)]    || '',
-      name:   r[getColIdx('name', 3)]   || '',
-      role:   r[getColIdx('role', 4)]   || '',
-      score:  parseFloat(r[getColIdx('score', 5)])  || 0,
-      target: parseFloat(r[getColIdx('target', 6)]) || TARGET_BASE,
-      new_:   parseInt(r[getColIdx('new', 8)])   || 0,
-      fund:   parseInt(r[getColIdx('fund', 9)])  || 0,
-      mgmt:   parseInt(r[getColIdx('mgmt', 10)]) || 0,
-    })).filter(r => r.name);
-    allData = data;
-    weeks = [...new Set(data.map(r => r.week))].reverse();
+    // 1. 팀원명단 로드 (컬럼: RM소속, 사업단, 이름, 직책, ...)
+    const rosterRows = await fetchSheetCSV(cfg.rosterGid);
+    let roster = [];
+    if (rosterRows && rosterRows.length > 1) {
+      roster = rosterRows.slice(1).map(r => ({
+        rm: r[0], org: r[1], name: r[2], role: r[3]
+      })).filter(r => r.name && r.role !== 'RM');
+      // 중복 제거
+      const seen = new Set();
+      roster = roster.filter(m => { if (seen.has(m.name)) return false; seen.add(m.name); return true; });
+    }
+    rosterMap = {};
+    roster.forEach(m => { rosterMap[m.name] = m; });
+
+    // 2. 활동원장 로드 v3
+    // 컬럼: 제출시각(0) 활동일자(1) 소속(2) 이름(3) 단체구분(4) 단체명(5) 제도(6) 활동목적(7) 활동방식(8) 내용(9) 점수(10)
+    const logRows = await fetchSheetCSV(cfg.logGid);
+    let activities = [];
+    if (logRows && logRows.length > 1) {
+      activities = logRows.slice(1).map(r => ({
+        submitTime: r[0],
+        actDate:    r[1],
+        week:       getWeekStr(r[1]),
+        org:        r[2] || '',
+        name:       r[3] || '',
+        category:   r[4] || '',
+        orgName:    r[5] || '',
+        scheme:     r[6] || '',
+        purpose:    r[7] || '',
+        method:     r[8] || '',
+        content:    r[9] || '',
+        score:      parseFloat(r[10]) || 0,
+        role:       rosterMap[r[3]]?.role || '',
+      })).filter(r => r.name && r.actDate);
+    }
+    allLogData = activities;
+
+    // 3. 주차 목록
+    const weekSet = new Set(activities.map(a => a.week).filter(Boolean));
+    const currentWeek = getWeekStr(todayStr());
+    weekSet.add(currentWeek);
+    weeks = [...weekSet].sort().reverse();
+
+    // 4. 주간요약 계산 (주간요약 시트 대체)
+    allData = buildWeeklySummary(activities, roster, weeks, currentWeek);
+
     buildWeekSelect();
     populateAttNames();
     renderAll();
+    populateLogFilters();
+    applyLogFilter();
+
     const now = new Date().toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' });
     document.getElementById('sync-status').textContent = `${now} 업데이트`;
     setLoading(false);
@@ -875,50 +911,29 @@ async function loadData() {
   }
 }
 
-// ── 활동원장 데이터 로드 ──
-async function loadLogData() {
-  const cfg = getConfig();
-  if (!cfg.logGid) {
-    alert('설정 탭에서 활동원장 탭 GID를 입력해 주세요.');
-    return;
-  }
-  if (!cfg.sheetId) {
-    alert('설정 탭에서 스프레드시트 ID를 입력해 주세요.');
-    return;
-  }
-  if (currentView === 'log') setLoading(true, '활동원장 불러오는 중...');
-  try {
-    const rows = await fetchSheetCSV(cfg.logGid);
-    if (!rows || rows.length < 2) throw new Error('데이터 없음');
-    const header = rows[0].map(h => h.trim());
-    const isNew = header[0] === '행ID' || header.some(h => h === '활동목적');
-    allLogData = rows.slice(1).map(r => {
-      if (isNew) {
-        return {
-          rowId: r[0], submitTime: r[1], actDate: r[2], week: r[3],
-          org: r[4], name: r[5], role: r[6],
-          purpose: r[7], method: r[8], orgName: r[9],
-          contact: r[10], content: r[11],
-          score: parseFloat(r[12]) || 0,
-        };
-      } else {
-        return {
-          rowId: '', submitTime: r[0], actDate: r[1], week: r[2],
-          org: r[3], name: r[4], role: r[5],
-          purpose: r[6], method: '—', orgName: '—', contact: '—', content: r[10] || '',
-          score: parseFloat(r[9]) || 0,
-        };
-      }
-    }).filter(r => r.name);
-    populateLogFilters();
-    applyLogFilter();
-    if (currentView === 'log') setLoading(false);
-    return true;
-  } catch(e) {
-    if (currentView === 'log') setLoading(false);
-    console.error(e);
-    return false;
-  }
+// ── 주간요약 계산 (활동원장에서 실시간) ──
+function buildWeeklySummary(activities, roster, weekList, currentWeek) {
+  const result = [];
+  weekList.forEach(week => {
+    const weekActs = activities.filter(a => a.week === week);
+    const activePeople = new Set(weekActs.map(a => a.name));
+    // 현재 주차: 전체 팀원 표시 / 과거 주차: 활동 제출자만
+    const members = week === currentWeek
+      ? roster
+      : roster.filter(m => activePeople.has(m.name));
+    members.forEach(member => {
+      const acts = weekActs.filter(a => a.name === member.name);
+      result.push({
+        week, org: member.org, name: member.name, role: member.role,
+        score:  acts.reduce((s, a) => s + a.score, 0),
+        target: TARGET_BASE,
+        new_:   acts.filter(a => a.purpose === '신규발굴').length,
+        fund:   acts.filter(a => a.purpose === '펀드상담').length,
+        mgmt:   acts.filter(a => a.purpose === '단체관리').length,
+      });
+    });
+  });
+  return result;
 }
 
 // ── 로그 필터 옵션 ──
@@ -933,6 +948,7 @@ function populateLogFilters() {
 
 function setSelectOptions(id, values, placeholder) {
   const sel = document.getElementById(id);
+  if (!sel) return;
   const cur = sel.value;
   sel.innerHTML = `<option value="">${placeholder}</option>` +
     values.map(v => `<option value="${v}" ${v === cur ? 'selected' : ''}>${v}</option>`).join('');
@@ -953,7 +969,7 @@ function applyLogFilter() {
     if (purpose && r.purpose !== purpose) return false;
     if (method  && r.method  !== method)  return false;
     if (search) {
-      const hay = `${r.orgName} ${r.contact} ${r.content}`.toLowerCase();
+      const hay = `${r.orgName} ${r.scheme} ${r.content}`.toLowerCase();
       if (!hay.includes(search)) return false;
     }
     return true;
@@ -994,7 +1010,7 @@ function renderLogTable() {
   const page  = filteredLog.slice(start, start + LOG_PAGE_SIZE);
   const tbody = document.getElementById('log-table');
   if (!page.length) {
-    tbody.innerHTML = `<tr><td colspan="10"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">데이터가 없습니다</div></div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="11"><div class="empty-state"><div class="empty-state-icon">📭</div><div class="empty-state-text">데이터가 없습니다</div></div></td></tr>`;
     return;
   }
   tbody.innerHTML = page.map(r => `
@@ -1003,13 +1019,71 @@ function renderLogTable() {
       <td style="white-space:nowrap">${r.actDate}</td>
       <td class="td-muted">${r.org}</td>
       <td class="td-name">${r.name}</td>
+      <td>${r.category ? `<span class="badge badge-method">${esc(r.category)}</span>` : '—'}</td>
+      <td>${r.scheme   ? `<span class="badge badge-method">${esc(r.scheme)}</span>`   : '—'}</td>
+      <td>${esc(r.orgName) || '—'}</td>
       <td><span class="badge ${PBMAP[r.purpose] || ''}">${r.purpose || '—'}</span></td>
       <td><span class="badge badge-method">${r.method || '—'}</span></td>
-      <td>${esc(r.orgName) || '—'}</td>
-      <td>${esc(r.contact) || '—'}</td>
       <td class="td-content" title="${esc(r.content)}" onclick="showContentModal(this.title, '${esc(r.name)}', '${esc(r.actDate)}')">${esc(r.content) || '—'}</td>
       <td style="font-weight:600;color:var(--blue);white-space:nowrap">+${r.score}점</td>
     </tr>`).join('');
+}
+
+// ── 단체별현황 ──
+function computeOrgSummary() {
+  const map = {};
+  allLogData.forEach(a => {
+    if (!a.orgName) return;
+    if (!map[a.orgName]) map[a.orgName] = {
+      orgName: a.orgName, total: 0, new_: 0, fund: 0, mgmt: 0,
+      visit: 0, lunch: 0, dinner: 0, etc: 0,
+      managers: new Set(), lastDate: ''
+    };
+    const d = map[a.orgName];
+    d.total++;
+    if (a.purpose === '신규발굴')      d.new_++;
+    else if (a.purpose === '펀드상담') d.fund++;
+    else if (a.purpose === '단체관리') d.mgmt++;
+    if (a.method === '방문')      d.visit++;
+    else if (a.method === '중식') d.lunch++;
+    else if (a.method === '석식') d.dinner++;
+    else if (a.method === '기타') d.etc++;
+    if (a.name) d.managers.add(a.name);
+    if (a.actDate > d.lastDate) d.lastDate = a.actDate;
+  });
+  return Object.values(map).sort((a, b) => b.total - a.total);
+}
+
+function renderOrgTable() {
+  const tbody = document.getElementById('org-table');
+  if (!tbody) return;
+  const orgs = computeOrgSummary();
+  if (!orgs.length) {
+    tbody.innerHTML = `<tr><td colspan="11" style="text-align:center;padding:28px;color:var(--text3)">단체 활동 데이터 없음</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = orgs.map(d => `
+    <tr>
+      <td class="td-name">${esc(d.orgName)}</td>
+      <td style="font-weight:600;text-align:center">${d.total}</td>
+      <td style="text-align:center;color:var(--blue)">${d.new_}</td>
+      <td style="text-align:center;color:var(--green)">${d.fund}</td>
+      <td style="text-align:center;color:var(--amber)">${d.mgmt}</td>
+      <td style="text-align:center">${d.visit}</td>
+      <td style="text-align:center">${d.lunch}</td>
+      <td style="text-align:center">${d.dinner}</td>
+      <td style="text-align:center">${d.etc}</td>
+      <td class="td-muted" style="font-size:12px">${[...d.managers].join(', ')}</td>
+      <td style="white-space:nowrap">${d.lastDate || '—'}</td>
+    </tr>`).join('');
+}
+
+function exportOrgCSV() {
+  const orgs = computeOrgSummary();
+  if (!orgs.length) { alert('데이터가 없습니다.'); return; }
+  const header = ['단체명','총활동','신규발굴','펀드상담','단체관리','방문','중식','석식','기타','영업팀장','최근활동일'];
+  const rows = orgs.map(d => [d.orgName, d.total, d.new_, d.fund, d.mgmt, d.visit, d.lunch, d.dinner, d.etc, [...d.managers].join(', '), d.lastDate]);
+  exportCSV(header, rows, `단체별현황_${new Date().toLocaleDateString('sv')}.csv`);
 }
 
 function renderLogPagination() {
@@ -1051,8 +1125,8 @@ function exportCSV(header, rows, filename) {
 
 function exportLogCSV() {
   if (!filteredLog.length) { alert('다운로드할 데이터가 없습니다.'); return; }
-  const header = ['주차', '날짜', '소속', '이름', '직책', '활동목적', '활동방식', '단체명', '담당자', '내용', '점수'];
-  const rows = filteredLog.map(r => [r.week, r.actDate, r.org, r.name, r.role, r.purpose, r.method, r.orgName, r.contact, r.content, r.score]);
+  const header = ['주차','날짜','소속','이름','단체구분','제도','단체명','활동목적','활동방식','내용','점수'];
+  const rows = filteredLog.map(r => [r.week, r.actDate, r.org, r.name, r.category, r.scheme, r.orgName, r.purpose, r.method, r.content, r.score]);
   exportCSV(header, rows, `활동일지_${new Date().toLocaleDateString('sv')}.csv`);
 }
 
@@ -1418,7 +1492,7 @@ function switchDetailTab(tab, el) {
 }
 
 // ── 뷰 전환 ──
-const VIEW_TITLES = { overview: '현황 개요', table: '상세 테이블', log: '활동일지', attendance: '근태 관리', config: '설정' };
+const VIEW_TITLES = { overview: '현황 개요', table: '상세 테이블', log: '활동일지', orgs: '단체별현황', attendance: '근태 관리', config: '설정' };
 
 function switchView(view, from) {
   currentView = view;
@@ -1438,19 +1512,14 @@ function switchView(view, from) {
   document.getElementById('view-' + view).classList.add('active');
   document.getElementById('page-title').textContent = VIEW_TITLES[view];
 
-  // 메트릭 숨기기 (설정 뷰)
-  document.getElementById('metrics-row').style.display = view === 'config' ? 'none' : 'grid';
+  // 메트릭 숨기기 (설정·단체현황 뷰)
+  document.getElementById('metrics-row').style.display = (view === 'config' || view === 'orgs') ? 'none' : 'grid';
 
-  if (view === 'overview') setTimeout(() => renderChart(getCurrentData()), 50);
-  if (view === 'table') renderMainTable(getCurrentData());
+  if (view === 'overview')   setTimeout(() => renderChart(getCurrentData()), 50);
+  if (view === 'table')      renderMainTable(getCurrentData());
   if (view === 'attendance') { populateAttNames(); renderAttCards(); }
-  if (view === 'log') {
-    if (!allLogData.length) {
-      loadLogData();
-    } else {
-      applyLogFilter();
-    }
-  }
+  if (view === 'log')        applyLogFilter();
+  if (view === 'orgs')       renderOrgTable();
 }
 
 // ── 전체 렌더 ──
@@ -1466,6 +1535,8 @@ function renderAll() {
   } else if (currentView === 'attendance') {
     populateAttNames();
     renderAttCards();
+  } else if (currentView === 'orgs') {
+    renderOrgTable();
   }
 }
 
