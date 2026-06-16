@@ -561,6 +561,8 @@ function editActivity(data) {
   document.getElementById('content').value  = data.content  || '';
 
   // 수정 모드 UI
+  document.getElementById('form-view').style.display = 'block';
+  document.getElementById('success-view').style.display = 'none';
   document.getElementById('edit-banner').style.display = 'flex';
   document.getElementById('submit-btn').innerHTML = '✅ 수정 저장';
   document.getElementById('submit-hint').textContent = '변경된 내용으로 기록이 업데이트됩니다';
@@ -593,6 +595,7 @@ async function deleteActivity(rowId, weekStr) {
 // ── 내 기록 탭 ──
 let cachedRows = null;
 let viewWeekOffset = 0; // 0 = 이번주, -1 = 저번주, ...
+const rowCache = new Map(); // rowId → 행 데이터 (수정 버튼용)
 
 function getOffsetWeekStr(offset) {
   const d = new Date();
@@ -659,6 +662,7 @@ async function loadRecords() {
     const reached = total >= target;
 
     // 활동 목록 (최신순)
+    rowCache.clear();
     const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
     const itemsHTML = [...myRows].reverse().map(r => {
       const rowId   = isNew ? r[0] : '';
@@ -671,10 +675,10 @@ async function loadRecords() {
       const score   = parseFloat(isNew ? r[12] : r[9]) || 0;
       const extras  = [orgName, contact, cont].filter(v => v && v !== '—').join(' · ');
 
-      // 수정 버튼용 데이터 (JSON에서 특수문자 이스케이프)
-      const editDataAttr = isNew
-        ? `data-edit='${JSON.stringify({rowId,actDate:date,purpose,method,orgName,contact,content:cont,score}).replace(/'/g,"&apos;")}'`
-        : '';
+      // rowCache에 저장 (JSON-in-attribute 방식 대신)
+      if (isNew && rowId) {
+        rowCache.set(rowId, {rowId, actDate:date, purpose, method, orgName, contact, content:cont, score});
+      }
 
       return `<div class="act-item">
         <div class="act-item-top">
@@ -687,8 +691,8 @@ async function loadRecords() {
         </div>
         ${extras ? `<div class="act-detail">📌 ${extras}</div>` : ''}
         ${isNew && rowId ? `<div class="act-actions">
-          <button class="btn-edit" ${editDataAttr} onclick="editActivity(JSON.parse(this.dataset.edit))">✏️ 수정</button>
-          <button class="btn-del-act" onclick="deleteActivity('${rowId.replace(/'/g,"\\'")}','${weekStr}')">🗑️ 삭제</button>
+          <button class="btn-edit" data-rowid="${rowId}" onclick="editActivity(rowCache.get(this.dataset.rowid))">✏️ 수정</button>
+          <button class="btn-del-act" data-rowid="${rowId}" data-week="${weekStr}" onclick="deleteActivity(this.dataset.rowid, this.dataset.week)">🗑️ 삭제</button>
         </div>` : ''}
       </div>`;
     }).join('') || `<div class="no-data"><div class="no-icon">📭</div>이 주에 기록된 활동이 없습니다</div>`;
