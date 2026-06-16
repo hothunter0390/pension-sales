@@ -3,7 +3,15 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>활동 포털 | 한화생명 법인사업부</title>
+<title>법인사업부 활동</title>
+<!-- PWA -->
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="법인사업부 활동">
+<meta name="theme-color" content="#1E3A8A">
+<link rel="apple-touch-icon" href="icon-192.png">
+<link rel="manifest" id="pwa-manifest">
 <style>
   :root {
     --blue: #1E3A8A;
@@ -930,6 +938,26 @@ function parseCSV(text) {
 
 // 페이지 로드 시 내 기록 탭이면 바로 로드
 if (params.get('tab') === 'records') switchTab('records');
+
+// ── PWA 동적 매니페스트 (개인별 start_url 자동 설정) ──
+(function() {
+  const manifest = {
+    name: '법인사업부 활동',
+    short_name: (NAME || '법인활동'),
+    description: '한화생명 법인사업부 영업활동 입력',
+    start_url: location.href,
+    display: 'standalone',
+    background_color: '#ffffff',
+    theme_color: '#1E3A8A',
+    orientation: 'portrait',
+    icons: [
+      { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
+      { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
+})();
 </script>
 </body>
 </html>
