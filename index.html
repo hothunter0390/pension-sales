@@ -1246,7 +1246,7 @@ function getCurrentData() {
 function renderMetrics(data) {
   const targets = data.filter(d => d.role === '팀장');
   const pass = targets.filter(d => d.pass).length;
-  document.getElementById('m-total').textContent = data.length + '명';
+  document.getElementById('m-total').textContent = targets.length + '명';
   document.getElementById('m-pass').textContent  = pass + '명';
   document.getElementById('m-fail').textContent  = (targets.length - pass) + '명';
   document.getElementById('m-avg').textContent   = targets.length
