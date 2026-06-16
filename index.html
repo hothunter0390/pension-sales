@@ -172,7 +172,28 @@
   tbody tr:hover td { background: var(--surface2); }
   .td-name { font-weight: 500; white-space: nowrap; }
   .td-muted { color: var(--text2); }
-  .td-content { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .td-content { max-width: 160px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; cursor: pointer; color: var(--blue); text-decoration: underline dotted; }
+  .td-content:hover { opacity: 0.75; }
+
+  /* ── 내용 전체보기 모달 ── */
+  .content-modal-bg {
+    display: none; position: fixed; inset: 0;
+    background: rgba(0,0,0,0.45); z-index: 9999;
+    align-items: center; justify-content: center; padding: 24px;
+  }
+  .content-modal-bg.open { display: flex; }
+  .content-modal {
+    background: var(--surface); border-radius: var(--radius);
+    padding: 20px 22px; max-width: 480px; width: 100%;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.18); position: relative;
+  }
+  .content-modal-title { font-size: 13px; font-weight: 700; color: var(--text2); margin-bottom: 10px; }
+  .content-modal-body { font-size: 14px; line-height: 1.7; white-space: pre-wrap; word-break: break-all; }
+  .content-modal-close {
+    position: absolute; top: 14px; right: 16px;
+    background: none; border: none; font-size: 20px; cursor: pointer;
+    color: var(--text3); line-height: 1;
+  }
 
   /* ── 배지 ── */
   .badge { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 20px; font-weight: 500; white-space: nowrap; }
@@ -986,7 +1007,7 @@ function renderLogTable() {
       <td><span class="badge badge-method">${r.method || '—'}</span></td>
       <td>${esc(r.orgName) || '—'}</td>
       <td>${esc(r.contact) || '—'}</td>
-      <td class="td-content" title="${esc(r.content)}">${esc(r.content) || '—'}</td>
+      <td class="td-content" title="${esc(r.content)}" onclick="showContentModal(this.title, '${esc(r.name)}', '${esc(r.actDate)}')">${esc(r.content) || '—'}</td>
       <td style="font-weight:600;color:var(--blue);white-space:nowrap">+${r.score}점</td>
     </tr>`).join('');
 }
@@ -1470,6 +1491,33 @@ window.addEventListener('resize', handleResize);
 loadConfig();
 handleResize();
 loadData();
+
+// ── 내용 전체보기 모달 ──
+function showContentModal(content, name, date) {
+  if (!content) return;
+  document.getElementById('modal-subtitle').textContent = `${name} · ${date}`;
+  document.getElementById('modal-body').textContent = content;
+  document.getElementById('content-modal-bg').classList.add('open');
+}
+function closeContentModal() {
+  document.getElementById('content-modal-bg').classList.remove('open');
+}
+// 배경 클릭 시 닫기
+document.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('content-modal-bg').addEventListener('click', function(e) {
+    if (e.target === this) closeContentModal();
+  });
+});
 </script>
+
+<!-- 내용 전체보기 모달 -->
+<div id="content-modal-bg" class="content-modal-bg">
+  <div class="content-modal">
+    <button class="content-modal-close" onclick="closeContentModal()">✕</button>
+    <div class="content-modal-title" id="modal-subtitle"></div>
+    <div class="content-modal-body" id="modal-body"></div>
+  </div>
+</div>
+
 </body>
 </html>
