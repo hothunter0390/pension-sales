@@ -528,8 +528,9 @@
         </div>
         <div class="section">
           <div class="section-header">
-            <span class="section-title">미달자 현황</span>
-            <button class="btn-csv" onclick="exportOverviewCSV()">⬇ 미달자 CSV</button>
+            <span class="section-title">활동 현황</span>
+            <span class="section-sub" id="overview-week-label"></span>
+            <button class="btn-csv" onclick="exportOverviewCSV()">⬇ CSV</button>
           </div>
           <div class="table-wrap">
             <table>
@@ -545,13 +546,14 @@
     <div id="view-table" class="view">
       <div class="section">
         <div class="section-header">
-          <span class="section-title">전체 인원 현황</span>
+          <span class="section-title">팀장 현황</span>
+          <span class="section-sub" id="table-week-label"></span>
           <button class="btn-csv" onclick="exportTableCSV()">⬇ CSV 다운로드</button>
         </div>
         <div class="tab-row">
           <button class="tab active" onclick="switchDetailTab('all',this)">전체</button>
-          <button class="tab" onclick="switchDetailTab('fail',this)">미달자</button>
           <button class="tab" onclick="switchDetailTab('pass',this)">달성자</button>
+          <button class="tab" onclick="switchDetailTab('fail',this)">미달자</button>
         </div>
         <div class="table-wrap">
           <table>
@@ -574,6 +576,7 @@
       <div class="section">
         <div class="section-header">
           <span class="section-title">활동 내역</span>
+          <span class="section-sub" id="log-week-label"></span>
           <button class="btn-csv" onclick="exportLogCSV()">⬇ 전체 CSV</button>
         </div>
 
@@ -948,7 +951,11 @@ function populateLogFilters() {
   const logWeeks = [...new Set(allLogData.map(r => r.week))].sort().reverse();
   const logOrgs  = [...new Set(allLogData.map(r => r.org))].sort();
   const logNames = [...new Set(allLogData.map(r => r.name))].sort();
-  setSelectOptions('lf-week', logWeeks, '전체 주차');
+  // 주차는 값은 "26-25" 유지, 표시는 "26년 6월 3주차"
+  const sel = document.getElementById('lf-week');
+  const cur = sel ? sel.value : '';
+  if (sel) sel.innerHTML = `<option value="">전체 주차</option>` +
+    logWeeks.map(w => `<option value="${w}" ${w === cur ? 'selected' : ''}>${weekStrToLabel(w)}</option>`).join('');
   setSelectOptions('lf-org',  logOrgs,  '전체 사업단');
   setSelectOptions('lf-name', logNames, '전체 이름');
 }
@@ -1022,7 +1029,7 @@ function renderLogTable() {
   }
   tbody.innerHTML = page.map(r => `
     <tr>
-      <td>${r.week}</td>
+      <td style="white-space:nowrap">${weekStrToLabel(r.week)}</td>
       <td style="white-space:nowrap">${r.actDate}</td>
       <td class="td-muted" style="white-space:nowrap;overflow:hidden;max-width:70px;text-overflow:ellipsis">${r.org}</td>
       <td class="td-name">${r.name}</td>
@@ -1359,6 +1366,7 @@ function renderMobileOverview(data) {
         </div>
       </div>
       <div class="mfi-right">
+        <div style="font-size:11px;color:var(--text3);text-align:right;white-space:nowrap">목표 ${d.effectiveTarget}점</div>
         <div class="mfi-score" style="color:${scoreColor}">${d.rate}%</div>
         <input type="checkbox" ${interviews[key] ? 'checked' : ''} onchange="toggleInterview('${key}',this)" title="면담여부">
       </div>
@@ -1515,6 +1523,7 @@ function switchView(view, from) {
   document.getElementById('page-title').textContent = VIEW_TITLES[view];
 
   document.getElementById('metrics-row').style.display = (view === 'config' || view === 'orgs') ? 'none' : 'grid';
+  updateWeekLabels();
 
   if (view === 'overview')   setTimeout(() => renderChart(getCurrentData()), 50);
   if (view === 'table')      renderMainTable(getCurrentData());
@@ -1523,9 +1532,19 @@ function switchView(view, from) {
   if (view === 'orgs')       renderOrgTable();
 }
 
+// ── 주차 레이블 공통 업데이트 ──
+function updateWeekLabels() {
+  const label = weekStrToLabel(getCurrentWeek());
+  ['overview-week-label', 'table-week-label', 'log-week-label'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = label;
+  });
+}
+
 // ── 전체 렌더 ──
 function renderAll() {
   const data = getCurrentData();
+  updateWeekLabels();
   renderMetrics(data);
   if (currentView === 'overview') {
     renderMobileOverview(data);
