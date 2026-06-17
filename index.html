@@ -439,7 +439,7 @@
     </div>
     <div class="nav-section-label">메뉴</div>
     <div class="nav-item active" id="snav-overview" onclick="switchView('overview','sidebar')">
-      <span class="nav-icon">📊</span> 현황
+      <span class="nav-icon">📊</span> 요약
     </div>
     <div class="nav-item" id="snav-table" onclick="switchView('table','sidebar')">
       <span class="nav-icon">📋</span> 팀장 현황
@@ -448,10 +448,10 @@
       <span class="nav-icon">📒</span> 활동일지
     </div>
     <div class="nav-item" id="snav-orgs" onclick="switchView('orgs','sidebar')">
-      <span class="nav-icon">🏢</span> 단체별현황
+      <span class="nav-icon">🏢</span> 단체 현황
     </div>
     <div class="nav-item" id="snav-attendance" onclick="switchView('attendance','sidebar')">
-      <span class="nav-icon">📅</span> 근태 관리
+      <span class="nav-icon">📅</span> 근태
     </div>
     <div class="nav-item" id="snav-config" onclick="switchView('config','sidebar')">
       <span class="nav-icon">⚙️</span> 설정
@@ -744,6 +744,7 @@
   <button class="bottom-nav-btn" id="bnav-attendance" onclick="switchView('attendance','bottom')">
     <span class="bn-icon">📅</span><span>근태</span>
   </button>
+
   <button class="bottom-nav-btn" id="bnav-config" onclick="switchView('config','bottom')">
     <span class="bn-icon">⚙️</span><span>설정</span>
   </button>
@@ -1504,7 +1505,7 @@ function switchDetailTab(tab, el) {
 }
 
 // ── 뷰 전환 ──
-const VIEW_TITLES = { overview: '요약', table: '팀장 현황', log: '활동일지', orgs: '단체별현황', attendance: '근태 관리', config: '설정' };
+const VIEW_TITLES = { overview: '요약', table: '팀장 현황', log: '활동일지', orgs: '단체 현황', attendance: '근태', config: '설정' };
 
 function switchView(view, from) {
   currentView = view;
