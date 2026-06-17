@@ -770,6 +770,7 @@ const TARGET_BASE = 20;
 const DEFAULT_SHEET_ID   = '13BHBgMAko9jNZoPIwOe5EqML8n56RCPl4gHhrIrMU0U';
 const DEFAULT_LOG_GID    = '785851831';
 const DEFAULT_ROSTER_GID = '310906424';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxIYOlk1xXVCuGZAstkjSApzPSB4fo9RCGi0ABtBQ5GTSxkcdnkKPFd2dAzOHKIoN9d/exec';
 
 // ── 주차 계산 ──
 function getWeekStr(dateStr) {
@@ -810,7 +811,6 @@ function loadConfig() {
   document.getElementById('cfg-sheet-id').value   = cfg.sheetId    || DEFAULT_SHEET_ID;
   document.getElementById('cfg-log-gid').value    = cfg.logGid     || DEFAULT_LOG_GID;
   document.getElementById('cfg-roster-gid').value = cfg.rosterGid  || DEFAULT_ROSTER_GID;
-  attendance = JSON.parse(localStorage.getItem('dashboard_attendance') || '{}');
   interviews = JSON.parse(localStorage.getItem('dashboard_interviews') || '{}');
 }
 
@@ -912,6 +912,7 @@ async function loadData() {
 
     allData = buildWeeklySummary(activities, roster, weeks, currentWeek);
 
+    await fetchAttendance();
     buildWeekSelect();
     populateAttNames();
     renderAll();
@@ -1243,6 +1244,25 @@ function getCurrentWeek() {
   return weeks[parseInt(document.getElementById('week-select').value) || 0] || '';
 }
 
+// ── 근태 Google Sheets 동기화 ──
+async function fetchAttendance() {
+  try {
+    const res = await fetch(SCRIPT_URL + '?action=getAttendance&t=' + Date.now());
+    const rows = await res.json();
+    attendance = {};
+    rows.forEach(r => {
+      const key = r.name + '_' + r.week;
+      if (!attendance[key]) attendance[key] = [];
+      attendance[key].push({ date: String(r.date), deduct: Number(r.deduct), label: String(r.label) });
+    });
+    localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
+  } catch(e) {
+    // API 실패 시 localStorage 캐시 사용
+    attendance = JSON.parse(localStorage.getItem('dashboard_attendance') || '{}');
+    console.warn('근태 API 실패, 로컬 캐시 사용:', e);
+  }
+}
+
 // ── 근태 차감 ──
 function getDeduct(name, week) {
   const key = name + '_' + week;
@@ -1481,13 +1501,29 @@ function addAttendance() {
   if (!attendance[key]) attendance[key] = [];
   attendance[key].push({ date, deduct, label });
   localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
+  // Google Sheets 동기화
+  fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ action: 'addAttendance', name, week, date, label, deduct: String(deduct) })
+  }).catch(e => console.warn('근태 저장 동기화 실패:', e));
   renderAll();
 }
 
 function removeAtt(key, idx) {
+  const item = attendance[key][idx];
   attendance[key].splice(idx, 1);
   if (!attendance[key].length) delete attendance[key];
   localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
+  // Google Sheets 동기화
+  const sep = key.indexOf('_');
+  const rName = key.substring(0, sep);
+  const rWeek = key.substring(sep + 1);
+  fetch(SCRIPT_URL, {
+    method: 'POST', mode: 'no-cors',
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: new URLSearchParams({ action: 'removeAttendance', name: rName, week: rWeek, date: item.date, label: item.label })
+  }).catch(e => console.warn('근태 삭제 동기화 실패:', e));
   renderAll();
 }
 
