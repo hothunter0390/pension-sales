@@ -345,6 +345,14 @@
   .org-stat { font-size: 12px; color: var(--text2); }
   .org-bar-bg { background: var(--surface2); border-radius: 100px; height: 6px; overflow: hidden; }
   .org-bar-fill { height: 6px; border-radius: 100px; transition: width 0.4s; }
+  .rm-group { margin-bottom: 14px; }
+  .rm-label {
+    font-size: 11px; font-weight: 700; color: var(--text3);
+    letter-spacing: 0.5px; text-transform: uppercase;
+    margin-bottom: 8px; padding-bottom: 5px;
+    border-bottom: 1px solid var(--border);
+  }
+  .desktop-org-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 20px; }
 
   .mobile-fail-list { }
   .mobile-fail-item {
@@ -531,6 +539,12 @@
           <div id="chart-container" style="position:relative;width:100%;height:260px">
             <canvas id="barChart" role="img" aria-label="팀장별 주간 점수 막대 차트"></canvas>
           </div>
+        </div>
+        <div class="section">
+          <div class="section-header" style="margin-bottom:12px">
+            <span class="section-title">사업단별 달성 현황</span>
+          </div>
+          <div class="desktop-org-grid" id="desktop-org-summary"></div>
         </div>
         <div class="section">
           <div class="section-header">
@@ -1334,6 +1348,38 @@ function renderChart(data) {
   document.getElementById('chart-week-label').textContent = weekStrToLabel(getCurrentWeek());
 }
 
+// ── RM별 사업단 현황 공통 렌더 ──
+function renderOrgByRM(data, containerId, useGrid) {
+  const targets = data.filter(d => d.role === '팀장');
+  const orgStats = {};
+  targets.forEach(d => {
+    if (!orgStats[d.org]) orgStats[d.org] = { pass: 0, total: 0, rm: rosterMap[d.name]?.rm || '기타' };
+    orgStats[d.org].total++;
+    if (d.pass) orgStats[d.org].pass++;
+  });
+  const rmGroups = {};
+  Object.entries(orgStats).forEach(([org, v]) => {
+    if (!rmGroups[v.rm]) rmGroups[v.rm] = [];
+    rmGroups[v.rm].push({ org, ...v });
+  });
+  const rmOrder = ['1RM', '2RM', '기타'];
+  const orgRowHtml = ({ org, pass, total }) => {
+    const pct = Math.round(pass / total * 100);
+    const color = pct === 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
+    return `<div class="org-row">
+      <div class="org-row-top">
+        <span class="org-name">${org}</span>
+        <span class="org-stat" style="color:${color};font-weight:600">${pass}/${total}명 달성</span>
+      </div>
+      <div class="org-bar-bg"><div class="org-bar-fill" style="width:${pct}%;background:${color}"></div></div>
+    </div>`;
+  };
+  document.getElementById(containerId).innerHTML = rmOrder
+    .filter(rm => rmGroups[rm]?.length)
+    .map(rm => `<div class="rm-group"><div class="rm-label">${rm}</div>${rmGroups[rm].map(orgRowHtml).join('')}</div>`)
+    .join('');
+}
+
 // ── 모바일 hero + 사업단 요약 + 팀장 활동 현황 ──
 function renderMobileOverview(data) {
   const targets = data.filter(d => d.role === '팀장');
@@ -1347,27 +1393,8 @@ function renderMobileOverview(data) {
   document.getElementById('hero-total').textContent = targets.length;
   document.getElementById('mobile-week-label').textContent = weekStrToLabel(week);
 
-  // 사업단별 달성 현황
-  const orgs = {};
-  targets.forEach(d => {
-    if (!orgs[d.org]) orgs[d.org] = { pass: 0, total: 0 };
-    orgs[d.org].total++;
-    if (d.pass) orgs[d.org].pass++;
-  });
-  const orgEl = document.getElementById('org-summary');
-  orgEl.innerHTML = Object.entries(orgs).map(([org, v]) => {
-    const pct = Math.round(v.pass / v.total * 100);
-    const color = pct === 100 ? 'var(--green)' : pct >= 60 ? 'var(--amber)' : 'var(--red)';
-    return `<div class="org-row">
-      <div class="org-row-top">
-        <span class="org-name">${org}</span>
-        <span class="org-stat" style="color:${color};font-weight:600">${v.pass}/${v.total}명 달성</span>
-      </div>
-      <div class="org-bar-bg">
-        <div class="org-bar-fill" style="width:${pct}%;background:${color}"></div>
-      </div>
-    </div>`;
-  }).join('');
+  // 사업단별 달성 현황 (RM 구분)
+  renderOrgByRM(data, 'org-summary');
 
   // 팀장 활동 현황 - 전체 팀장 로스터 순서로 표시
   const mfl = document.getElementById('mobile-fail-list');
@@ -1565,6 +1592,7 @@ function switchView(view, from) {
     const d = getCurrentData();
     renderMobileOverview(d);
     renderFailTable(d);
+    renderOrgByRM(d, 'desktop-org-summary');
     setTimeout(() => renderChart(d), 50);
   }
   if (view === 'table')      renderMainTable(getCurrentData());
@@ -1591,6 +1619,7 @@ function renderAll() {
     renderMobileOverview(data);
     renderChart(data);
     renderFailTable(data);
+    renderOrgByRM(data, 'desktop-org-summary');
   } else if (currentView === 'table') {
     renderMainTable(data);
   } else if (currentView === 'attendance') {
