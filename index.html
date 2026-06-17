@@ -1525,7 +1525,12 @@ function switchView(view, from) {
   document.getElementById('metrics-row').style.display = (view === 'config' || view === 'orgs') ? 'none' : 'grid';
   updateWeekLabels();
 
-  if (view === 'overview')   setTimeout(() => renderChart(getCurrentData()), 50);
+  if (view === 'overview') {
+    const d = getCurrentData();
+    renderMobileOverview(d);
+    renderFailTable(d);
+    setTimeout(() => renderChart(d), 50);
+  }
   if (view === 'table')      renderMainTable(getCurrentData());
   if (view === 'attendance') { populateAttNames(); renderAttCards(); }
   if (view === 'log')        applyLogFilter();
