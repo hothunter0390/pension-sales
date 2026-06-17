@@ -1467,6 +1467,17 @@ function renderMainTable(data) {
       }).join('');
 }
 
+// ── 날짜 포맷 (260617 수) ──
+function fmtAttDate(dateStr) {
+  const d = new Date(dateStr + 'T00:00:00');
+  if (isNaN(d)) return dateStr;
+  const yy = String(d.getFullYear()).slice(2);
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const dd = String(d.getDate()).padStart(2, '0');
+  const days = ['일','월','화','수','목','금','토'];
+  return yy + mm + dd + ' ' + days[d.getDay()];
+}
+
 // ── 근태 카드 ──
 function renderAttCards() {
   const week = getCurrentWeek();
@@ -1493,7 +1504,7 @@ function renderAttCards() {
       </div>
       ${items.map((a, i) => `
         <div class="att-item">
-          <span class="att-item-label">${a.date} · ${a.label}</span>
+          <span class="att-item-label">${fmtAttDate(a.date)} · ${a.label}</span>
           <div class="att-item-right">
             <span class="att-deduct">−${a.deduct}점</span>
             <button class="btn-del" onclick="removeAtt('${key}',${i})">삭제</button>
