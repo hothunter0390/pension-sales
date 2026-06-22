@@ -898,23 +898,24 @@ async function loadData() {
     rosterMap = {};
     roster.forEach(m => { rosterMap[m.name] = m; });
 
-    const logRows = await fetchSheetCSV(cfg.logGid);
+    const logJson = await fetch(SCRIPT_URL + '?action=getActivityLog&t=' + Date.now())
+      .then(r => r.json()).catch(() => []);
     let activities = [];
-    if (logRows && logRows.length > 1) {
-      activities = logRows.slice(1).map(r => ({
-        submitTime: r[0],
-        actDate:    r[1],
-        week:       getWeekStr(r[1]),
-        org:        r[2] || '',
-        name:       r[3] || '',
-        category:   r[4] || '',
-        orgName:    r[5] || '',
-        scheme:     r[6] || '',
-        purpose:    r[7] || '',
-        method:     r[8] || '',
-        content:    r[9] || '',
-        score:      parseFloat(r[10]) || 0,
-        role:       rosterMap[r[3]]?.role || '',
+    if (Array.isArray(logJson) && logJson.length > 0) {
+      activities = logJson.map(r => ({
+        submitTime: r.submitTime,
+        actDate:    r.actDate,
+        week:       getWeekStr(r.actDate),
+        org:        r.org || '',
+        name:       r.name || '',
+        category:   r.category || '',
+        orgName:    r.orgName || '',
+        scheme:     r.scheme || '',
+        purpose:    r.purpose || '',
+        method:     r.method || '',
+        content:    r.content || '',
+        score:      r.score || 0,
+        role:       rosterMap[r.name]?.role || '',
       })).filter(r => r.name && r.actDate);
     }
     allLogData = activities;
