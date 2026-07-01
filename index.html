@@ -472,9 +472,6 @@
     <div class="nav-item" id="snav-attendance" onclick="switchView('attendance','sidebar')">
       <span class="nav-icon">📅</span> 근태
     </div>
-    <div class="nav-item" id="snav-unsubmitted" onclick="switchView('unsubmitted','sidebar')">
-      <span class="nav-icon">🚨</span> 미제출자
-    </div>
     <div class="nav-item" id="snav-config" onclick="switchView('config','sidebar')">
       <span class="nav-icon">⚙️</span> 설정
     </div>
@@ -760,16 +757,6 @@
       </div>
     </div>
 
-    <!-- ── 미제출자 뷰 ── -->
-    <div id="view-unsubmitted" class="view">
-      <div class="section">
-        <div class="section-header">
-          <span class="section-title">미제출자 현황</span>
-          <span class="section-sub" id="unsubmitted-week-label"></span>
-        </div>
-        <div id="unsubmitted-content"></div>
-      </div>
-    </div>
   </main>
 </div>
 
@@ -1645,7 +1632,7 @@ function switchDetailTab(tab, el) {
 }
 
 // ── 뷰 전환 ──
-const VIEW_TITLES = { overview: '요약', table: '팀장 현황', log: '활동일지', orgs: '단체 현황', attendance: '근태', unsubmitted: '미제출자 현황', config: '설정' };
+const VIEW_TITLES = { overview: '요약', table: '팀장 현황', log: '활동일지', orgs: '단체 현황', attendance: '근태', config: '설정' };
 
 function switchView(view, from) {
   currentView = view;
@@ -1662,7 +1649,7 @@ function switchView(view, from) {
   document.getElementById('view-' + view).classList.add('active');
   document.getElementById('page-title').textContent = VIEW_TITLES[view];
 
-  document.getElementById('metrics-row').style.display = (view === 'config' || view === 'orgs' || view === 'unsubmitted') ? 'none' : 'grid';
+  document.getElementById('metrics-row').style.display = (view === 'config' || view === 'orgs') ? 'none' : 'grid';
   updateWeekLabels();
 
   if (view === 'overview') {
@@ -1673,81 +1660,18 @@ function switchView(view, from) {
     setTimeout(() => renderChart(d), 50);
   }
   if (view === 'table')      renderMainTable(getCurrentData());
-  if (view === 'attendance')   { populateAttNames(); renderAttCards(); }
-  if (view === 'log')          applyLogFilter();
-  if (view === 'orgs')         renderOrgTable();
-  if (view === 'unsubmitted')  renderUnsubmitted();
+  if (view === 'attendance') { populateAttNames(); renderAttCards(); }
+  if (view === 'log')        applyLogFilter();
+  if (view === 'orgs')       renderOrgTable();
 }
 
 // ── 주차 레이블 공통 업데이트 ──
 function updateWeekLabels() {
   const label = weekStrToLabel(getCurrentWeek());
-  ['overview-week-label', 'table-week-label', 'log-week-label', 'unsubmitted-week-label'].forEach(id => {
+  ['overview-week-label', 'table-week-label', 'log-week-label'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.textContent = label;
   });
-}
-
-// ── 미제출자 렌더 ──
-function renderUnsubmitted() {
-  const week  = getCurrentWeek();
-  const label = weekStrToLabel(week);
-  document.getElementById('unsubmitted-week-label').textContent = label;
-
-  const el = document.getElementById('unsubmitted-content');
-
-  // rosterMap 기준으로 전체 팀장 목록 (한 번도 제출 안 한 사람 포함)
-  const allLeaders = Object.entries(rosterMap)
-    .filter(([, info]) => info.role === '팀장')
-    .map(([name, info]) => ({ name, org: info.org || '' }));
-
-  // 이번 주 제출자 (score > 0)
-  const weekData = allData.filter(r => r.week === week);
-  const submittedNames = new Set(weekData.filter(r => r.score > 0).map(r => r.name));
-  const unsubmitted = allLeaders.filter(r => !submittedNames.has(r.name));
-  const submitted   = allLeaders.filter(r =>  submittedNames.has(r.name));
-
-  if (!allLeaders.length) {
-    el.innerHTML = `<div class="att-empty">팀원 명단 데이터가 없습니다</div>`;
-    return;
-  }
-
-  // 사업단별 그룹
-  const byOrg = {};
-  unsubmitted.forEach(r => {
-    if (!byOrg[r.org]) byOrg[r.org] = [];
-    byOrg[r.org].push(r);
-  });
-
-  const unsubHTML = Object.keys(byOrg).sort().map(org => `
-    <div style="margin-bottom:18px">
-      <div style="font-size:11px;font-weight:600;color:var(--text2);letter-spacing:0.05em;margin-bottom:8px">📍 ${org}</div>
-      ${byOrg[org].map(r => `
-        <div style="display:flex;justify-content:space-between;align-items:center;padding:10px 14px;background:var(--red-bg);border:1px solid #fca5a5;border-radius:var(--radius);margin-bottom:6px">
-          <span style="font-size:13px;font-weight:600;color:var(--red)">${r.name}</span>
-          <span style="font-size:11px;font-weight:700;color:var(--red);background:#fff;padding:2px 8px;border-radius:100px">0점</span>
-        </div>`).join('')}
-    </div>`).join('');
-
-  el.innerHTML = `
-    <div style="display:flex;gap:10px;margin-bottom:20px">
-      <div style="flex:1;background:var(--red-bg);border:1px solid #fca5a5;border-radius:var(--radius);padding:14px 16px;text-align:center">
-        <div style="font-size:28px;font-weight:800;color:var(--red)">${unsubmitted.length}</div>
-        <div style="font-size:12px;color:var(--red);margin-top:2px">미제출</div>
-      </div>
-      <div style="flex:1;background:var(--green-bg);border:1px solid #6ee7b7;border-radius:var(--radius);padding:14px 16px;text-align:center">
-        <div style="font-size:28px;font-weight:800;color:var(--green)">${submitted.length}</div>
-        <div style="font-size:12px;color:var(--green);margin-top:2px">제출완료</div>
-      </div>
-      <div style="flex:1;background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center">
-        <div style="font-size:28px;font-weight:800;color:var(--text)">${allLeaders.length}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:2px">전체</div>
-      </div>
-    </div>
-    ${unsubmitted.length === 0
-      ? `<div style="text-align:center;padding:32px;color:var(--green);font-size:15px;font-weight:600">✅ 전원 제출 완료!</div>`
-      : unsubHTML
-    }`;
 }
 
 // ── 전체 렌더 ──
