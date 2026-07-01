@@ -37,10 +37,8 @@
     background: #F8FAFC;
     color: var(--text);
     min-height: 100dvh;
-    padding-bottom: 72px; /* 하단 탭 높이 */
+    padding-bottom: 72px;
   }
-
-  /* ── 헤더 ── */
   .header {
     background: var(--blue);
     color: #fff;
@@ -51,8 +49,6 @@
   }
   .header-logo { font-size: 16px; font-weight: 700; }
   .header-sub  { font-size: 11px; opacity: 0.7; margin-top: 2px; }
-
-  /* ── 신원 바 ── */
   .identity-bar {
     background: #fff;
     border-bottom: 1px solid var(--border);
@@ -65,8 +61,6 @@
   .chip { display:inline-flex; align-items:center; background:var(--blue-bg); color:var(--blue); border-radius:100px; padding:3px 10px; font-size:12px; font-weight:600; }
   .chip-name { background:var(--blue); color:#fff; font-size:13px; }
   .id-missing { font-size:13px; color:var(--red); background:var(--red-bg); border-radius:8px; padding:8px 14px; }
-
-  /* ── 하단 탭 바 ── */
   .tab-bar {
     position: fixed;
     bottom: 0; left: 0; right: 0;
@@ -99,20 +93,14 @@
   .tab-btn.active { color: var(--blue); }
   .tab-btn.active .tab-indicator { background: var(--blue); }
   .tab-indicator { width: 32px; height: 3px; border-radius: 2px; background: transparent; position: absolute; top: 0; transition: background 0.15s; }
-
-  /* ── 공통 컨테이너 ── */
   .page { display: none; padding: 16px 16px 24px; max-width: 480px; margin: 0 auto; }
   .page.active { display: block; }
-
-  /* ── 섹션 ── */
   .section { margin-bottom: 18px; }
   .section-label {
     font-size: 11px; font-weight: 700; color: var(--gray);
     text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;
   }
   .section-label span { text-transform:none; letter-spacing:0; font-weight:400; }
-
-  /* ── 입력 요소 ── */
   .date-input, .text-input, .text-area {
     width: 100%; border: 2px solid var(--border); border-radius: var(--radius);
     padding: 12px 14px; font-size: 15px; font-family: inherit;
@@ -121,8 +109,6 @@
   .date-input:focus, .text-input:focus, .text-area:focus { border-color: var(--blue-light); }
   .text-area { resize: none; min-height: 80px; }
   ::placeholder { color: #C9CDD4; }
-
-  /* ── 버튼 그룹 ── */
   .btn-group { display: flex; gap: 8px; flex-wrap: wrap; }
   .btn-select {
     flex: 1; min-width: 60px; padding: 12px 6px;
@@ -137,22 +123,23 @@
   .btn-select.ap1 { background:var(--green-bg); border-color:var(--green); color:var(--green); }
   .btn-select.ap2 { background:var(--amber-bg); border-color:#D97706; color:var(--amber); }
   .btn-select.am  { background:var(--purple-bg); border-color:#7C3AED; color:var(--purple); }
-
-  /* ── 점수 프리뷰 ── */
+  .btn-select.sel-vac { background:var(--red-bg); border-color:var(--red); color:var(--red); }
+  .btn-select.sel-trip { background:var(--blue-bg); border-color:var(--blue); color:var(--blue); }
   .score-preview {
     border-radius: var(--radius); padding: 14px 18px;
     display: flex; align-items: center; justify-content: space-between;
     background: var(--gray-bg); transition: background 0.2s;
   }
   .score-preview.active { background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%); }
+  .score-preview.active-red { background: linear-gradient(135deg, #991B1B 0%, #DC2626 100%); }
   .sp-label { font-size: 13px; color: var(--gray); }
-  .score-preview.active .sp-label { color: rgba(255,255,255,0.8); }
+  .score-preview.active .sp-label,
+  .score-preview.active-red .sp-label { color: rgba(255,255,255,0.8); }
   .sp-val { font-size: 30px; font-weight: 800; color: var(--gray); display:flex;align-items:baseline;gap:4px; }
-  .score-preview.active .sp-val { color: #fff; }
+  .score-preview.active .sp-val,
+  .score-preview.active-red .sp-val { color: #fff; }
   .sp-val span { font-size:14px; font-weight:400; }
   .sp-icon { font-size: 28px; }
-
-  /* ── 제출 버튼 ── */
   .btn-submit {
     width: 100%; padding: 15px;
     background: var(--blue); color: #fff;
@@ -166,8 +153,6 @@
   .btn-submit:disabled { background: #9CA3AF; cursor: not-allowed; }
   .spinner { width:18px;height:18px;border:2px solid rgba(255,255,255,0.4);border-top-color:#fff;border-radius:50%;animation:spin 0.7s linear infinite; }
   @keyframes spin { to { transform:rotate(360deg); } }
-
-  /* ── 성공 뷰 ── */
   #success-view { display:none; }
   .success-card { background:var(--green-bg);border:2px solid var(--green);border-radius:var(--radius);padding:20px;text-align:center;margin-bottom:16px; }
   .success-icon { font-size:36px;margin-bottom:6px; }
@@ -175,18 +160,12 @@
   .success-sub { font-size:13px;color:var(--gray); }
   .btn-more { width:100%;padding:13px;background:#fff;color:var(--blue);border:2px solid var(--blue);border-radius:var(--radius);font-size:15px;font-weight:700;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent; }
   .btn-more:active { transform:scale(0.98); }
-
-  /* ── 카드 공통 ── */
   .card { background:#fff;border-radius:var(--radius);border:1px solid var(--border);overflow:hidden;margin-bottom:14px; }
   .card-header { padding:12px 16px;font-size:13px;font-weight:700;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border); }
-
-  /* ── 내 기록 탭 ── */
   .week-nav { display:flex;align-items:center;justify-content:space-between;margin-bottom:14px; }
   .week-nav-btn { background:none;border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--gray);cursor:pointer;font-family:inherit; }
   .week-nav-btn:active { background:var(--gray-bg); }
   .week-nav-label { font-size:14px;font-weight:700;color:var(--text); }
-
-  /* 주간 점수 카드 */
   .score-card {
     background: linear-gradient(135deg, var(--blue) 0%, var(--blue-light) 100%);
     border-radius: var(--radius);
@@ -203,8 +182,6 @@
   .prog-bg { background:rgba(255,255,255,0.25);border-radius:100px;height:8px;overflow:hidden; }
   .prog-fill { height:8px;border-radius:100px;background:#fff;transition:width 0.5s; }
   .prog-label { font-size:11px;opacity:0.7;margin-top:5px;text-align:right; }
-
-  /* 활동 통계 */
   .stat-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px; }
   .stat-item { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:10px 12px;text-align:center; }
   .stat-val { font-size:22px;font-weight:800;margin-bottom:2px; }
@@ -212,9 +189,6 @@
   .stat-item.blue .stat-val { color:var(--blue); }
   .stat-item.green .stat-val { color:var(--green); }
   .stat-item.amber .stat-val { color:var(--amber); }
-
-  /* 활동 목록 */
-  .act-list { }
   .act-item { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:12px 14px;margin-bottom:8px; }
   .act-item-top { display:flex;justify-content:space-between;align-items:center;margin-bottom:6px; }
   .act-date { font-size:12px;color:var(--gray); }
@@ -231,28 +205,40 @@
   .btn-edit:active { opacity:0.8; }
   .btn-del-act { flex:1;padding:7px;background:var(--red-bg);color:var(--red);border:1px solid var(--red);border-radius:8px;font-size:12px;font-weight:700;font-family:inherit;cursor:pointer;-webkit-tap-highlight-color:transparent; }
   .btn-del-act:active { opacity:0.8; }
-  /* 수정 모드 배너 */
   .edit-mode-banner { background:var(--amber-bg);border:1.5px solid #D97706;border-radius:var(--radius);padding:10px 14px;margin-bottom:14px;display:none;font-size:13px;color:var(--amber);font-weight:600;display:flex;justify-content:space-between;align-items:center; }
   .btn-cancel-edit { background:none;border:1px solid var(--amber);border-radius:6px;padding:4px 10px;font-size:12px;color:var(--amber);cursor:pointer;font-family:inherit;font-weight:600; }
   .no-data { text-align:center;padding:32px 20px;color:var(--gray);font-size:13px; }
   .no-data .no-icon { font-size:32px;margin-bottom:8px; }
-
-  /* 로딩 */
   .loading-wrap { text-align:center;padding:32px;color:var(--gray);font-size:13px; }
   .ls { display:inline-block;width:20px;height:20px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin 0.7s linear infinite;margin-bottom:8px; }
-
-  /* 방금 제출 상세 */
   .detail-card { background:#fff;border-radius:var(--radius);border:1px solid var(--border);padding:14px 16px;margin-bottom:14px; }
   .detail-card h3 { font-size:11px;color:var(--gray);font-weight:700;margin-bottom:10px;text-transform:uppercase;letter-spacing:0.4px; }
   .detail-row { display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--border);font-size:14px; }
   .detail-row:last-child { border-bottom:none; }
   .dk { color:var(--gray); }
   .dv { font-weight:600; }
+
+  /* ── 근태 탭 ── */
+  .att-group-label {
+    font-size: 11px; font-weight: 700; color: var(--gray);
+    letter-spacing: 0.5px; margin-bottom: 8px; margin-top: 4px;
+  }
+  .att-item {
+    background: #fff; border-radius: var(--radius);
+    border: 1px solid var(--border); padding: 12px 14px; margin-bottom: 8px;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .att-item-left { display: flex; flex-direction: column; gap: 3px; }
+  .att-item-date { font-size: 12px; color: var(--gray); }
+  .att-item-label { font-size: 14px; font-weight: 700; }
+  .att-item-label.vac { color: var(--red); }
+  .att-item-label.trip { color: var(--blue); }
+  .att-deduct { font-size: 13px; font-weight: 700; color: var(--red); }
+  .att-deduct.none { color: var(--blue); }
 </style>
 </head>
 <body>
 
-<!-- 헤더 -->
 <div class="header">
   <div>
     <div class="header-logo">🏢 법인사업부 활동 포털</div>
@@ -260,15 +246,11 @@
   </div>
 </div>
 
-<!-- 신원 바 -->
 <div id="identity-bar" class="identity-bar"></div>
 
 <!-- ── 탭 1: 입력 ── -->
 <div id="page-input" class="page active">
-
-  <!-- 입력 폼 -->
   <div id="form-view">
-    <!-- 수정 모드 배너 -->
     <div class="edit-mode-banner" id="edit-banner" style="display:none">
       <span>✏️ 수정 모드 — 내용 변경 후 저장하세요</span>
       <button class="btn-cancel-edit" onclick="cancelEdit()">취소</button>
@@ -337,8 +319,6 @@
     <button class="btn-submit" id="submit-btn" onclick="submitForm()" disabled>제출하기</button>
     <div style="font-size:11px;color:var(--gray);text-align:center;margin-top:8px" id="submit-hint">1건씩 제출 · 제출 후 추가 입력 가능</div>
   </div>
-
-  <!-- 성공 뷰 -->
   <div id="success-view">
     <div class="success-card">
       <div class="success-icon">✅</div>
@@ -370,6 +350,49 @@
   </div>
 </div>
 
+<!-- ── 탭 3: 근태 ── -->
+<div id="page-att" class="page">
+  <div id="att-form-view">
+    <div class="section">
+      <div class="section-label">📅 날짜</div>
+      <input type="date" id="att-date" class="date-input">
+    </div>
+    <div class="section">
+      <div class="att-group-label">🏖 휴가</div>
+      <div class="btn-group" style="flex-wrap:wrap">
+        <button class="btn-select" data-att="1일 휴가"    data-deduct="4" data-group="vac" onclick="selectAttType(this)">1일 휴가<span class="btn-sub">−4점</span></button>
+        <button class="btn-select" data-att="오전 반차"   data-deduct="2" data-group="vac" onclick="selectAttType(this)">오전 반차<span class="btn-sub">−2점</span></button>
+        <button class="btn-select" data-att="오후 반차"   data-deduct="2" data-group="vac" onclick="selectAttType(this)">오후 반차<span class="btn-sub">−2점</span></button>
+        <button class="btn-select" data-att="오전 반반차" data-deduct="1" data-group="vac" onclick="selectAttType(this)">오전 반반차<span class="btn-sub">−1점</span></button>
+        <button class="btn-select" data-att="오후 반반차" data-deduct="1" data-group="vac" onclick="selectAttType(this)">오후 반반차<span class="btn-sub">−1점</span></button>
+      </div>
+    </div>
+    <div class="section">
+      <div class="att-group-label">✈️ 출장</div>
+      <div class="btn-group" style="flex-wrap:wrap">
+        <button class="btn-select" data-att="1일 출장"  data-deduct="0" data-group="trip" onclick="selectAttType(this)">1일 출장<span class="btn-sub">기록만</span></button>
+        <button class="btn-select" data-att="오전 출장" data-deduct="0" data-group="trip" onclick="selectAttType(this)">오전 출장<span class="btn-sub">기록만</span></button>
+        <button class="btn-select" data-att="오후 출장" data-deduct="0" data-group="trip" onclick="selectAttType(this)">오후 출장<span class="btn-sub">기록만</span></button>
+      </div>
+    </div>
+    <div class="section">
+      <div id="att-preview" class="score-preview">
+        <div>
+          <div class="sp-label">이 항목의 영향</div>
+          <div class="sp-val"><span id="att-preview-val">-</span></div>
+        </div>
+        <div class="sp-icon" id="att-preview-icon">📋</div>
+      </div>
+    </div>
+    <button class="btn-submit" id="att-submit-btn" onclick="submitAtt()" disabled>근태 등록</button>
+  </div>
+
+  <div style="margin-top:24px">
+    <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:8px">이번 주 근태 기록</div>
+    <div id="att-records"></div>
+  </div>
+</div>
+
 <!-- ── 하단 탭 바 ── -->
 <div class="tab-bar">
   <button class="tab-btn active" id="tab-input" onclick="switchTab('input')">
@@ -381,6 +404,11 @@
     <div class="tab-indicator"></div>
     <span class="icon">📋</span>
     <span>내 기록</span>
+  </button>
+  <button class="tab-btn" id="tab-att" onclick="switchTab('att')">
+    <div class="tab-indicator"></div>
+    <span class="icon">🏖</span>
+    <span>근태</span>
   </button>
 </div>
 
@@ -394,7 +422,6 @@ const NAME = decodeURIComponent(params.get('name') || '');
 const ORG  = decodeURIComponent(params.get('org')  || '');
 const ROLE = decodeURIComponent(params.get('role') || '');
 
-// 신원 바
 const bar = document.getElementById('identity-bar');
 if (!NAME) {
   bar.innerHTML = '<span class="id-missing">⚠️ 개인 링크로 접속해 주세요</span>';
@@ -402,11 +429,10 @@ if (!NAME) {
   bar.innerHTML = `<span class="chip chip-name">👤 ${NAME}</span><span class="chip">${ORG}</span><span class="chip">${ROLE}</span>`;
 }
 
-// 날짜
 function todayStr() { return new Date().toLocaleDateString('sv'); }
 document.getElementById('act-date').value = todayStr();
+document.getElementById('att-date').value = todayStr();
 
-// 주차 계산
 function getWeekStr(dateStr) {
   const d    = new Date(dateStr + 'T00:00:00');
   const jan1 = new Date(d.getFullYear(), 0, 1);
@@ -417,18 +443,18 @@ function getWeekStr(dateStr) {
 }
 function currentWeekStr() { return getWeekStr(todayStr()); }
 
-// 탭 전환
 let currentTab = 'input';
 function switchTab(tab) {
   currentTab = tab;
-  document.getElementById('page-input').classList.toggle('active', tab === 'input');
-  document.getElementById('page-records').classList.toggle('active', tab === 'records');
-  document.getElementById('tab-input').classList.toggle('active', tab === 'input');
-  document.getElementById('tab-records').classList.toggle('active', tab === 'records');
+  ['input','records','att'].forEach(t => {
+    document.getElementById('page-' + t).classList.toggle('active', t === tab);
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+  });
   if (tab === 'records') loadRecords();
+  if (tab === 'att') loadAttRecords();
 }
 
-// ── 입력 폼 ──
+// ── 활동 입력 ──
 let selPurpose = null, selScore = 0, selIdx = -1, selMethod = null;
 let selCategory = null, selScheme = null;
 const ICONS = ['🎯','💼','🏢'];
@@ -472,12 +498,9 @@ function updateScore() {
 function checkReady() {
   document.getElementById('submit-btn').disabled = !(NAME && selPurpose && selMethod);
 }
-function genId() { return Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
 
 // ── 단체명 자동완성 ──
-let orgNames = [];       // 활동원장에서 불러온 단체명 목록
-let orgFocusIdx = -1;
-
+let orgNames = [], orgFocusIdx = -1;
 async function loadOrgNames() {
   try {
     const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`);
@@ -485,22 +508,19 @@ async function loadOrgNames() {
     const rows = parseCSV(text);
     if (rows.length < 2) { orgNames = []; return; }
     const hdr = rows[0].map(h => h.trim());
-    const orgCol = hdr[0] === '제출시각' ? 5 : 9; // v3=F(5), v2=J(9)
+    const orgCol = hdr[0] === '제출시각' ? 5 : 9;
     const set = new Set();
     rows.slice(1).forEach(r => { const v = (r[orgCol] || '').trim(); if (v) set.add(v); });
     orgNames = [...set].sort((a,b) => a.localeCompare(b, 'ko'));
   } catch(e) { orgNames = []; }
 }
-
 function onOrgInput() {
-  const q   = document.getElementById('org-name').value.trim();
+  const q = document.getElementById('org-name').value.trim();
   const box = document.getElementById('org-dropdown');
-  const matches = q
-    ? orgNames.filter(n => n.includes(q)).slice(0, 8)
-    : orgNames.slice(0, 8);
+  const matches = q ? orgNames.filter(n => n.includes(q)).slice(0,8) : orgNames.slice(0,8);
   if (!matches.length) { box.style.display = 'none'; return; }
   orgFocusIdx = -1;
-  box.innerHTML = matches.map((n, i) => {
+  box.innerHTML = matches.map((n,i) => {
     const hi = q ? n.replace(q, `<strong style="color:var(--blue)">${q}</strong>`) : n;
     return `<div data-idx="${i}" data-val="${n.replace(/"/g,'&quot;')}"
       style="padding:10px 14px;font-size:14px;cursor:pointer;border-bottom:1px solid var(--border)"
@@ -508,78 +528,48 @@ function onOrgInput() {
   }).join('');
   box.style.display = 'block';
 }
-
 function selectOrg(val) {
   document.getElementById('org-name').value = val;
   document.getElementById('org-dropdown').style.display = 'none';
 }
-
 function onOrgBlur() {
   setTimeout(() => { document.getElementById('org-dropdown').style.display = 'none'; }, 150);
 }
-
 function onOrgKey(e) {
-  const box   = document.getElementById('org-dropdown');
+  const box = document.getElementById('org-dropdown');
   const items = box.querySelectorAll('[data-idx]');
   if (!items.length) return;
-  if (e.key === 'ArrowDown') {
-    orgFocusIdx = Math.min(orgFocusIdx + 1, items.length - 1);
-    items.forEach((el, i) => el.style.background = i === orgFocusIdx ? 'var(--blue-bg)' : '');
-    e.preventDefault();
-  } else if (e.key === 'ArrowUp') {
-    orgFocusIdx = Math.max(orgFocusIdx - 1, 0);
-    items.forEach((el, i) => el.style.background = i === orgFocusIdx ? 'var(--blue-bg)' : '');
-    e.preventDefault();
-  } else if (e.key === 'Enter' && orgFocusIdx >= 0) {
-    selectOrg(items[orgFocusIdx].dataset.val);
-    e.preventDefault();
-  } else if (e.key === 'Escape') {
-    box.style.display = 'none';
-  }
+  if (e.key === 'ArrowDown') { orgFocusIdx = Math.min(orgFocusIdx+1, items.length-1); items.forEach((el,i) => el.style.background = i===orgFocusIdx?'var(--blue-bg)':''); e.preventDefault(); }
+  else if (e.key === 'ArrowUp') { orgFocusIdx = Math.max(orgFocusIdx-1,0); items.forEach((el,i) => el.style.background = i===orgFocusIdx?'var(--blue-bg)':''); e.preventDefault(); }
+  else if (e.key === 'Enter' && orgFocusIdx >= 0) { selectOrg(items[orgFocusIdx].dataset.val); e.preventDefault(); }
+  else if (e.key === 'Escape') { box.style.display = 'none'; }
 }
-
-// 페이지 로드 시 단체명 미리 로드
 loadOrgNames();
 
-let lastPayload = null;
-let editMode        = false;
-let editSubmitTime  = null; // 수정 시 원본 제출시각(행 식별자)
+let lastPayload = null, editMode = false, editSubmitTime = null;
 
 async function submitForm() {
   if (!NAME || !selPurpose || !selMethod) return;
   const btn = document.getElementById('submit-btn');
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> ' + (editMode ? '저장 중...' : '제출 중...');
-
-  const dateStr      = document.getElementById('act-date').value || todayStr();
+  const dateStr = document.getElementById('act-date').value || todayStr();
   const newSubmitTime = new Date().toLocaleString('ko-KR', {timeZone:'Asia/Seoul'});
   const payload = {
-    type:               editMode ? 'activity_update' : 'activity_v2',
-    submitTime:         newSubmitTime,
+    type: editMode ? 'activity_update' : 'activity_v2',
+    submitTime: newSubmitTime,
     originalSubmitTime: editMode ? editSubmitTime : null,
-    actDate:            dateStr,
-    org:                ORG,
-    name:               NAME,
-    role:               ROLE,
-    purpose:            selPurpose,
-    method:             selMethod,
-    orgName:            document.getElementById('org-name').value.trim(),
-    contact:            document.getElementById('contact').value.trim(),
-    content:            document.getElementById('content').value.trim(),
-    score:              selScore,
-    category:           selCategory || '',
-    scheme:             selScheme   || ''
+    actDate: dateStr, org: ORG, name: NAME, role: ROLE,
+    purpose: selPurpose, method: selMethod,
+    orgName: document.getElementById('org-name').value.trim(),
+    contact: document.getElementById('contact').value.trim(),
+    content: document.getElementById('content').value.trim(),
+    score: selScore, category: selCategory || '', scheme: selScheme || ''
   };
   lastPayload = payload;
-
   try {
-    await fetch(SCRIPT_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify(payload)
-    });
-    editMode       = false;
-    editSubmitTime = null;
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    editMode = false; editSubmitTime = null;
     showSuccess();
   } catch(e) {
     btn.disabled = false;
@@ -597,26 +587,19 @@ function showSuccess() {
   document.getElementById('submitted-rows').innerHTML = [
     ['활동목적', `<span class="pb ${pbC[selIdx]}">${d.purpose}</span>`],
     ['활동방식', `<span class="mb">${d.method}</span>`],
-    ['단체명',   d.orgName  || '—'],
-    ['담당자',   d.contact  || '—'],
-    ['내용',     d.content  || '—'],
-    ['점수',     `<strong>+${d.score}점</strong>`],
+    ['단체명', d.orgName || '—'], ['담당자', d.contact || '—'],
+    ['내용', d.content || '—'], ['점수', `<strong>+${d.score}점</strong>`],
   ].map(([k,v]) => `<div class="detail-row"><span class="dk">${k}</span><span class="dv">${v}</span></div>`).join('');
-  // 캐시 무효화 (새 데이터 반영)
   cachedRows = null;
 }
 
 function resetForm() {
-  // 수정 모드 초기화
-  editMode       = false;
-  editSubmitTime = null;
+  editMode = false; editSubmitTime = null;
   document.getElementById('edit-banner').style.display = 'none';
   document.getElementById('submit-btn').innerHTML = '제출하기';
   document.getElementById('submit-hint').textContent = '1건씩 제출 · 제출 후 추가 입력 가능';
-
-  selPurpose = null; selScore = 0; selIdx = -1; selMethod = null;
-  selCategory = null; selScheme = null;
-  document.querySelectorAll('.btn-select').forEach(b => b.classList.remove('ap0','ap1','ap2','am'));
+  selPurpose = null; selScore = 0; selIdx = -1; selMethod = null; selCategory = null; selScheme = null;
+  document.querySelectorAll('[data-purpose],[data-method],[data-category],[data-scheme]').forEach(b => b.classList.remove('ap0','ap1','ap2','am'));
   document.getElementById('org-name').value = '';
   document.getElementById('contact').value = '';
   document.getElementById('content').value = '';
@@ -627,113 +610,55 @@ function resetForm() {
   document.getElementById('success-view').style.display = 'none';
   window.scrollTo({top:0,behavior:'smooth'});
 }
+function cancelEdit() { resetForm(); }
 
-function cancelEdit() {
-  resetForm();
-}
-
-// ── 수정 / 삭제 ──
 function editActivity(data) {
-  // 폼에 기존 값 채우기
-  editMode       = true;
-  editSubmitTime = data.submitTime; // 원본 제출시각으로 행 식별
-
-  // 날짜
+  editMode = true; editSubmitTime = data.submitTime;
   document.getElementById('act-date').value = data.actDate || todayStr();
-
-  // 활동목적
   selPurpose = null; selScore = 0; selIdx = -1;
   document.querySelectorAll('[data-purpose]').forEach(b => {
     b.classList.remove('ap0','ap1','ap2');
-    if (b.dataset.purpose === data.purpose) {
-      selPurpose = data.purpose;
-      selScore   = +b.dataset.score;
-      selIdx     = +b.dataset.idx;
-      b.classList.add('ap' + selIdx);
-    }
+    if (b.dataset.purpose === data.purpose) { selPurpose = data.purpose; selScore = +b.dataset.score; selIdx = +b.dataset.idx; b.classList.add('ap'+selIdx); }
   });
-
-  // 활동방식
   selMethod = null;
-  document.querySelectorAll('[data-method]').forEach(b => {
-    b.classList.remove('am');
-    if (b.dataset.method === data.method) {
-      selMethod = data.method;
-      b.classList.add('am');
-    }
-  });
-
-  // 단체구분
+  document.querySelectorAll('[data-method]').forEach(b => { b.classList.remove('am'); if (b.dataset.method === data.method) { selMethod = data.method; b.classList.add('am'); } });
   selCategory = null;
-  document.querySelectorAll('[data-category]').forEach(b => {
-    b.classList.remove('am');
-    if (b.dataset.category === data.category) {
-      selCategory = data.category;
-      b.classList.add('am');
-    }
-  });
-
-  // 제도
+  document.querySelectorAll('[data-category]').forEach(b => { b.classList.remove('am'); if (b.dataset.category === data.category) { selCategory = data.category; b.classList.add('am'); } });
   selScheme = null;
-  document.querySelectorAll('[data-scheme]').forEach(b => {
-    b.classList.remove('am');
-    if (b.dataset.scheme === data.scheme) {
-      selScheme = data.scheme;
-      b.classList.add('am');
-    }
-  });
-
-  // 텍스트
+  document.querySelectorAll('[data-scheme]').forEach(b => { b.classList.remove('am'); if (b.dataset.scheme === data.scheme) { selScheme = data.scheme; b.classList.add('am'); } });
   document.getElementById('org-name').value = data.orgName || '';
   document.getElementById('contact').value  = data.contact  || '';
   document.getElementById('content').value  = data.content  || '';
-
-  // 수정 모드 UI
   document.getElementById('form-view').style.display = 'block';
   document.getElementById('success-view').style.display = 'none';
   document.getElementById('edit-banner').style.display = 'flex';
   document.getElementById('submit-btn').innerHTML = '✅ 수정 저장';
   document.getElementById('submit-hint').textContent = '변경된 내용으로 기록이 업데이트됩니다';
-
-  updateScore();
-  checkReady();
-
-  // 입력 탭으로 이동
+  updateScore(); checkReady();
   switchTab('input');
   window.scrollTo({top:0,behavior:'smooth'});
 }
 
 async function deleteActivity(submitTime) {
   if (!confirm('이 활동 기록을 삭제하시겠습니까?')) return;
-
   try {
-    await fetch(SCRIPT_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({ type: 'activity_delete', submitTime, name: NAME, org: ORG })
-    });
-    cachedRows = null; // 캐시 무효화
+    await fetch(SCRIPT_URL, { method:'POST', mode:'no-cors', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ type:'activity_delete', submitTime, name:NAME, org:ORG }) });
+    cachedRows = null;
     loadRecords();
     alert('삭제되었습니다.');
-  } catch(e) {
-    alert('삭제 중 오류가 발생했습니다. 다시 시도해 주세요.');
-  }
+  } catch(e) { alert('삭제 중 오류가 발생했습니다.'); }
 }
 
 // ── 내 기록 탭 ──
-let cachedRows = null;
-let viewWeekOffset = 0; // 0 = 이번주, -1 = 저번주, ...
-const rowCache = new Map(); // rowId → 행 데이터 (수정 버튼용)
+let cachedRows = null, viewWeekOffset = 0;
+const rowCache = new Map();
 
 function getOffsetWeekStr(offset) {
-  const d = new Date();
-  d.setDate(d.getDate() + offset * 7);
+  const d = new Date(); d.setDate(d.getDate() + offset * 7);
   return getWeekStr(d.toLocaleDateString('sv'));
 }
-
 function changeWeek(dir) {
   viewWeekOffset += dir;
-  // 미래는 막기
   if (viewWeekOffset > 0) { viewWeekOffset = 0; return; }
   document.getElementById('next-week-btn').disabled = viewWeekOffset >= 0;
   loadRecords();
@@ -744,218 +669,230 @@ async function loadRecords() {
   const label = viewWeekOffset === 0 ? '이번 주' : viewWeekOffset === -1 ? '지난 주' : `${weekStr}주`;
   document.getElementById('week-nav-label').textContent = label;
   document.getElementById('next-week-btn').disabled = viewWeekOffset >= 0;
-
   const el = document.getElementById('records-content');
   el.innerHTML = '<div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>';
-
-  if (!NAME) {
-    el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>개인 링크로 접속해 주세요</div>';
-    return;
-  }
-
+  if (!NAME) { el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>개인 링크로 접속해 주세요</div>'; return; }
   try {
     if (!cachedRows) {
       const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`);
-      const text = await resp.text();
-      cachedRows = parseCSV(text);
+      cachedRows = parseCSV(await resp.text());
     }
-
-    const rows  = cachedRows;
+    const rows = cachedRows;
     if (rows.length < 2) { el.innerHTML = noDataHTML(); return; }
-
     const header = rows[0].map(h => h.trim());
-    // format 감지: v3=새형식(제출시각 first), v2=구형식(행ID first), legacy=그외
     const fmt = header[0] === '제출시각' ? 'v3' : header[0] === '행ID' ? 'v2' : 'legacy';
-
-    // v3 컬럼: A:제출시각(0) B:활동일자(1) C:소속(2) D:이름(3) E:단체구분(4) F:단체명(5) G:제도(6) H:활동목적(7) I:활동방식(8) J:내용(9) K:점수(10)
-    // v2 컬럼: A:행ID(0) B:제출시각(1) C:활동일자(2) D:주차(3) E:소속(4) F:이름(5) G:직책(6) H:활동목적(7) I:활동방식(8) J:단체명(9) K:담당자(10) L:내용(11) M:점수(12)
-
     let myRows;
-    if (fmt === 'v3') {
-      myRows = rows.slice(1).filter(r => r[3] === NAME && getWeekStr(r[1]) === weekStr);
-    } else if (fmt === 'v2') {
-      myRows = rows.slice(1).filter(r => r[5] === NAME && r[3] === weekStr);
-    } else {
-      myRows = rows.slice(1).filter(r => r[4] === NAME && r[2] === weekStr);
-    }
-
-    // 점수 집계
+    if (fmt === 'v3') myRows = rows.slice(1).filter(r => r[3] === NAME && getWeekStr(r[1]) === weekStr);
+    else if (fmt === 'v2') myRows = rows.slice(1).filter(r => r[5] === NAME && r[3] === weekStr);
+    else myRows = rows.slice(1).filter(r => r[4] === NAME && r[2] === weekStr);
     let total = 0, 신규 = 0, 펀드 = 0, 단체 = 0;
     myRows.forEach(r => {
-      const score   = parseFloat(fmt === 'v3' ? r[10] : fmt === 'v2' ? r[12] : r[9]) || 0;
-      const purpose = fmt === 'v3' ? r[7] : fmt === 'v2' ? r[7] : r[6];
+      const score = parseFloat(fmt==='v3'?r[10]:fmt==='v2'?r[12]:r[9]) || 0;
+      const purpose = fmt==='v3'?r[7]:fmt==='v2'?r[7]:r[6];
       total += score;
-      if (purpose === '신규발굴') 신규++;
-      else if (purpose === '펀드상담') 펀드++;
-      else if (purpose === '단체관리') 단체++;
+      if (purpose==='신규발굴') 신규++; else if (purpose==='펀드상담') 펀드++; else if (purpose==='단체관리') 단체++;
     });
-
-    const target = 20;
-    const pct    = Math.min(100, Math.round(total / target * 100));
-    const reached = total >= target;
-
-    // 활동 목록 (최신순)
+    const target = 20, pct = Math.min(100, Math.round(total/target*100)), reached = total >= target;
     rowCache.clear();
     const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
     const itemsHTML = [...myRows].reverse().map(r => {
       let submitTime, date, purpose, method, category, orgName, scheme, content, score, canEdit;
-
-      if (fmt === 'v3') {
-        submitTime = r[0]; date = r[1]; category = r[4]; orgName = r[5];
-        scheme     = r[6]; purpose = r[7]; method = r[8]; content = r[9];
-        score      = parseFloat(r[10]) || 0;
-        canEdit    = true;
-        // rowCache에 저장 (수정 버튼용)
-        rowCache.set(submitTime, {submitTime, actDate:date, category, orgName, scheme, purpose, method, content, score});
-      } else if (fmt === 'v2') {
-        submitTime = r[1]; date = r[2]; purpose = r[7]; method = r[8];
-        orgName    = r[9]; content = r[11]; score = parseFloat(r[12]) || 0;
-        category   = ''; scheme = '';
-        canEdit    = false; // 구형 데이터는 시트에서 직접 수정
+      if (fmt==='v3') {
+        submitTime=r[0]; date=r[1]; category=r[4]; orgName=r[5]; scheme=r[6]; purpose=r[7]; method=r[8]; content=r[9]; score=parseFloat(r[10])||0; canEdit=true;
+        rowCache.set(submitTime, {submitTime,actDate:date,category,orgName,scheme,purpose,method,content,score});
+      } else if (fmt==='v2') {
+        submitTime=r[1]; date=r[2]; purpose=r[7]; method=r[8]; orgName=r[9]; content=r[11]; score=parseFloat(r[12])||0; category=''; scheme=''; canEdit=false;
       } else {
-        date = r[1]; purpose = r[6]; score = parseFloat(r[9]) || 0;
-        method = '—'; orgName = '—'; content = '—'; category = ''; scheme = '';
-        canEdit = false;
+        date=r[1]; purpose=r[6]; score=parseFloat(r[9])||0; method='—'; orgName='—'; content='—'; category=''; scheme=''; canEdit=false;
       }
-
-      const extras = [
-        orgName && orgName !== '—' ? `🏢 ${orgName}` : '',
-        category ? `[${category}]` : '',
-        scheme   ? `[${scheme}]`   : '',
-        content  && content !== '—' ? content : ''
-      ].filter(Boolean).join('  ');
-
+      const extras = [orgName&&orgName!=='—'?`🏢 ${orgName}`:'', category?`[${category}]`:'', scheme?`[${scheme}]`:'', content&&content!=='—'?content:''].filter(Boolean).join('  ');
       return `<div class="act-item">
-        <div class="act-item-top">
-          <span class="act-date">📅 ${date}</span>
-          <span class="act-score">+${score}점</span>
-        </div>
-        <div class="act-badges">
-          <span class="pb ${pbMap[purpose]||''}">${purpose||'—'}</span>
-          ${method && method !== '—' ? `<span class="mb">${method}</span>` : ''}
-        </div>
-        ${extras ? `<div class="act-detail">${extras}</div>` : ''}
-        ${canEdit ? `<div class="act-actions">
+        <div class="act-item-top"><span class="act-date">📅 ${date}</span><span class="act-score">+${score}점</span></div>
+        <div class="act-badges"><span class="pb ${pbMap[purpose]||''}">${purpose||'—'}</span>${method&&method!=='—'?`<span class="mb">${method}</span>`:''}</div>
+        ${extras?`<div class="act-detail">${extras}</div>`:''}
+        ${canEdit?`<div class="act-actions">
           <button class="btn-edit" data-key="${encodeURIComponent(submitTime)}" onclick="editActivity(rowCache.get(decodeURIComponent(this.dataset.key)))">✏️ 수정</button>
           <button class="btn-del-act" data-key="${encodeURIComponent(submitTime)}" onclick="deleteActivity(decodeURIComponent(this.dataset.key))">🗑️ 삭제</button>
-        </div>` : ''}
+        </div>`:''}
       </div>`;
     }).join('') || `<div class="no-data"><div class="no-icon">📭</div>이 주에 기록된 활동이 없습니다</div>`;
-
     el.innerHTML = `
       <div class="score-card">
         <div class="score-card-top">
-          <div>
-            <div class="score-card-label">주간 합산 점수</div>
-            <div class="score-card-value">${total}<span style="font-size:16px;font-weight:400;opacity:0.7"> / ${target}점</span></div>
-          </div>
-          <span class="score-card-badge ${reached ? 'reached' : ''}">${reached ? '✅ 달성' : `${pct}%`}</span>
+          <div><div class="score-card-label">주간 합산 점수</div><div class="score-card-value">${total}<span style="font-size:16px;font-weight:400;opacity:0.7"> / ${target}점</span></div></div>
+          <span class="score-card-badge ${reached?'reached':''}">${reached?'✅ 달성':`${pct}%`}</span>
         </div>
         <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
         <div class="prog-label">목표 ${target}점 중 ${total}점 달성</div>
       </div>
-
       <div class="stat-grid">
         <div class="stat-item blue"><div class="stat-val">${신규}</div><div class="stat-label">신규발굴</div></div>
         <div class="stat-item green"><div class="stat-val">${펀드}</div><div class="stat-label">펀드상담</div></div>
         <div class="stat-item amber"><div class="stat-val">${단체}</div><div class="stat-label">단체관리</div></div>
       </div>
-
       <div style="font-size:12px;font-weight:700;color:var(--gray);margin-bottom:8px">활동 내역 (${myRows.length}건)</div>
-      <div class="act-list">${itemsHTML}</div>
-    `;
-
+      <div class="act-list">${itemsHTML}</div>`;
   } catch(e) {
     el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>데이터를 불러오지 못했습니다<br><small>잠시 후 다시 시도해 주세요</small></div>';
   }
 }
 
-function downloadMyCSV(scope) {
-  if (!cachedRows || cachedRows.length < 2) {
-    alert('먼저 기록을 불러온 후 다운로드해 주세요.');
+// ── 근태 탭 ──
+let selAttLabel = null, selAttDeduct = 0, selAttGroup = null;
+
+function selectAttType(btn) {
+  document.querySelectorAll('[data-att]').forEach(b => b.classList.remove('sel-vac','sel-trip'));
+  selAttLabel  = btn.dataset.att;
+  selAttDeduct = Number(btn.dataset.deduct);
+  selAttGroup  = btn.dataset.group;
+  btn.classList.add(selAttGroup === 'vac' ? 'sel-vac' : 'sel-trip');
+  updateAttPreview();
+  document.getElementById('att-submit-btn').disabled = !NAME;
+}
+
+function updateAttPreview() {
+  const el   = document.getElementById('att-preview');
+  const val  = document.getElementById('att-preview-val');
+  const icon = document.getElementById('att-preview-icon');
+  if (!selAttLabel) {
+    el.className = 'score-preview';
+    val.textContent = '-'; icon.textContent = '📋';
     return;
   }
-  const header  = cachedRows[0].map(h => h.trim());
-  const fmt     = header[0] === '제출시각' ? 'v3' : header[0] === '행ID' ? 'v2' : 'legacy';
+  if (selAttGroup === 'vac') {
+    el.className = 'score-preview active-red';
+    val.innerHTML = `<span style="font-size:20px">−${selAttDeduct}점 차감</span>`;
+    icon.textContent = '🏖';
+  } else {
+    el.className = 'score-preview active';
+    val.innerHTML = `<span style="font-size:16px">기록만 (차감 없음)</span>`;
+    icon.textContent = '✈️';
+  }
+}
+
+async function submitAtt() {
+  if (!NAME || !selAttLabel) return;
+  const btn  = document.getElementById('att-submit-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<div class="spinner"></div> 등록 중...';
+  const date = document.getElementById('att-date').value || todayStr();
+  const week = getWeekStr(date);
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ action:'addAttendance', name:NAME, week, date, label:selAttLabel, deduct:String(selAttDeduct) })
+    });
+    btn.innerHTML = '✅ 등록되었습니다';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.innerHTML = '근태 등록';
+      // 선택 초기화
+      document.querySelectorAll('[data-att]').forEach(b => b.classList.remove('sel-vac','sel-trip'));
+      selAttLabel = null; selAttDeduct = 0; selAttGroup = null;
+      updateAttPreview();
+      document.getElementById('att-submit-btn').disabled = true;
+      document.getElementById('att-date').value = todayStr();
+    }, 1500);
+    loadAttRecords();
+  } catch(e) {
+    btn.disabled = false;
+    btn.innerHTML = '근태 등록';
+    alert('오류가 발생했습니다. 다시 시도해 주세요.');
+  }
+}
+
+async function loadAttRecords() {
+  const el = document.getElementById('att-records');
+  el.innerHTML = '<div class="loading-wrap"><div class="ls"></div></div>';
+  if (!NAME) { el.innerHTML = ''; return; }
+  try {
+    const res  = await fetch(SCRIPT_URL + '?action=getAttendance&t=' + Date.now());
+    const rows = await res.json();
+    const week = currentWeekStr();
+    const mine = rows.filter(r => r.name === NAME && r.week === week);
+    if (!mine.length) {
+      el.innerHTML = '<div class="no-data"><div class="no-icon">✅</div>이번 주 근태 기록 없음</div>';
+      return;
+    }
+    el.innerHTML = mine.map(r => {
+      const isVac = Number(r.deduct) > 0;
+      return `<div class="att-item">
+        <div class="att-item-left">
+          <span class="att-item-date">📅 ${r.date}</span>
+          <span class="att-item-label ${isVac?'vac':'trip'}">${r.label}</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <span class="att-deduct ${isVac?'':'none'}">${isVac?`−${r.deduct}점`:'기록만'}</span>
+          <button class="btn-del-act" style="width:auto;padding:5px 10px"
+            onclick="deleteAtt('${r.date}','${r.label}','${r.week}')">삭제</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>불러오기 실패</div>'; }
+}
+
+async function deleteAtt(date, label, week) {
+  if (!confirm(`'${label}' 기록을 삭제할까요?`)) return;
+  try {
+    await fetch(SCRIPT_URL, {
+      method: 'POST', mode: 'no-cors',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({ action:'removeAttendance', name:NAME, week, date, label })
+    });
+    loadAttRecords();
+  } catch(e) { alert('삭제 중 오류가 발생했습니다.'); }
+}
+
+function downloadMyCSV(scope) {
+  if (!cachedRows || cachedRows.length < 2) { alert('먼저 기록을 불러온 후 다운로드해 주세요.'); return; }
+  const header = cachedRows[0].map(h => h.trim());
+  const fmt    = header[0]==='제출시각'?'v3':header[0]==='행ID'?'v2':'legacy';
   const weekStr = getOffsetWeekStr(viewWeekOffset);
-
   let rows;
-  if (fmt === 'v3') {
-    rows = cachedRows.slice(1).filter(r => r[3] === NAME);
-    if (scope === 'week') rows = rows.filter(r => getWeekStr(r[1]) === weekStr);
-  } else if (fmt === 'v2') {
-    rows = cachedRows.slice(1).filter(r => r[5] === NAME);
-    if (scope === 'week') rows = rows.filter(r => r[3] === weekStr);
-  } else {
-    rows = cachedRows.slice(1).filter(r => r[4] === NAME);
-    if (scope === 'week') rows = rows.filter(r => r[2] === weekStr);
-  }
-
+  if (fmt==='v3') { rows = cachedRows.slice(1).filter(r => r[3]===NAME); if (scope==='week') rows = rows.filter(r => getWeekStr(r[1])===weekStr); }
+  else if (fmt==='v2') { rows = cachedRows.slice(1).filter(r => r[5]===NAME); if (scope==='week') rows = rows.filter(r => r[3]===weekStr); }
+  else { rows = cachedRows.slice(1).filter(r => r[4]===NAME); if (scope==='week') rows = rows.filter(r => r[2]===weekStr); }
   if (!rows.length) { alert('다운로드할 데이터가 없습니다.'); return; }
-
   let csvHeader, csvRows;
-  if (fmt === 'v3') {
-    csvHeader = ['활동일자','소속','이름','단체구분','단체명','제도','활동목적','활동방식','내용','점수'];
-    csvRows   = rows.map(r => [r[1], r[2], r[3], r[4], r[5], r[6], r[7], r[8], r[9], r[10]]);
-  } else if (fmt === 'v2') {
-    csvHeader = ['활동일자','주차','소속','이름','활동목적','활동방식','단체명','담당자','내용','점수'];
-    csvRows   = rows.map(r => [r[2], r[3], r[4], r[5], r[7], r[8], r[9], r[10], r[11], r[12]]);
-  } else {
-    csvHeader = ['활동일자','소속','이름','활동목적','점수'];
-    csvRows   = rows.map(r => [r[1], r[3], r[4], r[6], r[9]]);
-  }
-
-  const csv  = [csvHeader, ...csvRows].map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
-  const blob = new Blob(['﻿' + csv], { type: 'text/csv;charset=utf-8' });
-  const a    = document.createElement('a');
-  a.href     = URL.createObjectURL(blob);
-  a.download = scope === 'week'
-    ? `${NAME}_활동기록_${weekStr}주.csv`
-    : `${NAME}_활동기록_전체.csv`;
+  if (fmt==='v3') { csvHeader=['활동일자','소속','이름','단체구분','단체명','제도','활동목적','활동방식','내용','점수']; csvRows=rows.map(r=>[r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10]]); }
+  else if (fmt==='v2') { csvHeader=['활동일자','주차','소속','이름','활동목적','활동방식','단체명','담당자','내용','점수']; csvRows=rows.map(r=>[r[2],r[3],r[4],r[5],r[7],r[8],r[9],r[10],r[11],r[12]]); }
+  else { csvHeader=['활동일자','소속','이름','활동목적','점수']; csvRows=rows.map(r=>[r[1],r[3],r[4],r[6],r[9]]); }
+  const csv  = [csvHeader,...csvRows].map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = scope==='week' ? `${NAME}_활동기록_${weekStr}주.csv` : `${NAME}_활동기록_전체.csv`;
   a.click();
 }
 
-function noDataHTML() {
-  return '<div class="no-data"><div class="no-icon">📭</div>기록된 활동이 없습니다</div>';
-}
+function noDataHTML() { return '<div class="no-data"><div class="no-icon">📭</div>기록된 활동이 없습니다</div>'; }
 
 function parseCSV(text) {
   const rows = []; let row = [], cell = '', inQ = false;
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
-    if (c === '"') { inQ = !inQ; continue; }
-    if (c === ',' && !inQ) { row.push(cell); cell = ''; continue; }
-    if ((c === '\n' || c === '\r') && !inQ) {
-      row.push(cell); rows.push(row); row = []; cell = '';
-      if (c === '\r' && text[i+1] === '\n') i++;
-      continue;
-    }
+    if (c==='"') { inQ=!inQ; continue; }
+    if (c===','&&!inQ) { row.push(cell); cell=''; continue; }
+    if ((c==='\n'||c==='\r')&&!inQ) { row.push(cell); rows.push(row); row=[]; cell=''; if(c==='\r'&&text[i+1]==='\n') i++; continue; }
     cell += c;
   }
-  if (cell || row.length) { row.push(cell); rows.push(row); }
+  if (cell||row.length) { row.push(cell); rows.push(row); }
   return rows.filter(r => r.some(c => c.trim()));
 }
 
-// 페이지 로드 시 내 기록 탭이면 바로 로드
 if (params.get('tab') === 'records') switchTab('records');
+if (params.get('tab') === 'att') switchTab('att');
 
-// ── PWA 동적 매니페스트 (개인별 start_url 자동 설정) ──
 (function() {
   const manifest = {
-    name: '법인사업부 활동',
-    short_name: (NAME || '법인활동'),
+    name: '법인사업부 활동', short_name: (NAME||'법인활동'),
     description: '한화생명 법인사업부 영업활동 입력',
-    start_url: location.href,
-    display: 'standalone',
-    background_color: '#ffffff',
-    theme_color: '#1E3A8A',
-    orientation: 'portrait',
-    icons: [
-      { src: 'icon-192.png', sizes: '192x192', type: 'image/png' },
-      { src: 'icon-512.png', sizes: '512x512', type: 'image/png' }
-    ]
+    start_url: location.href, display: 'standalone',
+    background_color: '#ffffff', theme_color: '#1E3A8A', orientation: 'portrait',
+    icons: [{ src:'icon-192.png', sizes:'192x192', type:'image/png' }, { src:'icon-512.png', sizes:'512x512', type:'image/png' }]
   };
-  const blob = new Blob([JSON.stringify(manifest)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
   document.getElementById('pwa-manifest').href = URL.createObjectURL(blob);
 })();
 </script>
