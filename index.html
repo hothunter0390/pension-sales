@@ -1277,6 +1277,21 @@ function getCurrentWeek() {
   return weeks[parseInt(document.getElementById('week-select').value) || 0] || '';
 }
 
+// ── 주차 레이블 → 내부 포맷 (26년 7월 1주차 → 26-27) ──
+function labelToWeekStr(label) {
+  const m = label.match(/(\d+)년 (\d+)월 (\d+)주차/);
+  if (!m) return label;
+  const yy = parseInt(m[1]), month = parseInt(m[2]), weekOfMonth = parseInt(m[3]);
+  const year = 2000 + yy;
+  const firstOfMonth = new Date(year, month - 1, 1);
+  const daysToThu = (4 - firstOfMonth.getDay() + 7) % 7;
+  const targetThu = new Date(year, month - 1, 1 + daysToThu + (weekOfMonth - 1) * 7);
+  const jan4 = new Date(year, 0, 4);
+  const week1Mon = new Date(jan4.getTime() - ((jan4.getDay() + 6) % 7) * 86400000);
+  const ww = Math.round((targetThu - week1Mon) / (7 * 86400000)) + 1;
+  return yy + '-' + String(ww).padStart(2, '0');
+}
+
 // ── 근태 API 조회 ──
 async function fetchAttendance() {
   try {
@@ -1284,9 +1299,11 @@ async function fetchAttendance() {
     const rows = await res.json();
     attendance = {};
     rows.forEach(r => {
-      const key = r.name + '_' + r.week;
+      // 시트에 "26년 7월 1주차" 또는 "26-27" 둘 다 처리
+      const wk = r.week.includes('주차') ? labelToWeekStr(r.week) : r.week;
+      const key = r.name + '_' + wk;
       if (!attendance[key]) attendance[key] = [];
-      attendance[key].push({ date: String(r.date), deduct: Number(r.deduct), label: String(r.label) });
+      attendance[key].push({ date: String(r.date), deduct: Number(r.deduct), label: String(r.label), sheetWeek: String(r.week) });
     });
   } catch(e) {
     console.warn('근태 API 실패:', e);
@@ -1589,13 +1606,13 @@ async function addAttendance() {
   // 즉시 UI 반영
   const key = name + '_' + week;
   if (!attendance[key]) attendance[key] = [];
-  attendance[key].push({ date, deduct, label });
+  attendance[key].push({ date, deduct, label, sheetWeek: weekStrToLabel(week) });
   renderAll();
   // API 저장 후 재조회로 동기화
   fetch(SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({ action: 'addAttendance', name, week, date, label, deduct: String(deduct) })
+    body: new URLSearchParams({ action: 'addAttendance', name, week: weekStrToLabel(week), date, label, deduct: String(deduct) })
   }).then(() => setTimeout(async () => { await fetchAttendance(); renderAll(); }, 1500))
     .catch(e => console.warn('근태 저장 실패:', e));
 }
@@ -1606,10 +1623,12 @@ async function removeAtt(key, idx) {
   attendance[key].splice(idx, 1);
   if (!attendance[key].length) delete attendance[key];
   renderAll();
-  // API 삭제 후 재조회로 동기화 (key = "이름_YY-WW")
+  // API 삭제 후 재조회로 동기화
+  // sheetWeek: 시트에 실제 저장된 주차 문자열 (신규: "26년 7월 1주차", 구형: "26-27")
   const weekMatch = key.match(/_(\d{2}-\d{2})$/);
-  const rWeek = weekMatch ? weekMatch[1] : '';
-  const rName = rWeek ? key.slice(0, -(rWeek.length + 1)) : key;
+  const rWeekInternal = weekMatch ? weekMatch[1] : '';
+  const rName = rWeekInternal ? key.slice(0, -(rWeekInternal.length + 1)) : key;
+  const rWeek = item.sheetWeek || weekStrToLabel(rWeekInternal);
   fetch(SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
