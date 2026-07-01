@@ -1277,7 +1277,7 @@ function getCurrentWeek() {
   return weeks[parseInt(document.getElementById('week-select').value) || 0] || '';
 }
 
-// ── 근태 Google Sheets 동기화 ──
+// ── 근태 API 조회 ──
 async function fetchAttendance() {
   try {
     const res = await fetch(SCRIPT_URL + '?action=getAttendance&t=' + Date.now());
@@ -1288,11 +1288,8 @@ async function fetchAttendance() {
       if (!attendance[key]) attendance[key] = [];
       attendance[key].push({ date: String(r.date), deduct: Number(r.deduct), label: String(r.label) });
     });
-    localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
   } catch(e) {
-    // API 실패 시 localStorage 캐시 사용
-    attendance = JSON.parse(localStorage.getItem('dashboard_attendance') || '{}');
-    console.warn('근태 API 실패, 로컬 캐시 사용:', e);
+    console.warn('근태 API 실패:', e);
   }
 }
 
@@ -1581,7 +1578,7 @@ function populateAttNames() {
     }).join('');
 }
 
-function addAttendance() {
+async function addAttendance() {
   const name = document.getElementById('att-name').value;
   const typeEl = document.getElementById('att-type');
   const [deductStr, label] = typeEl.value.split('|');
@@ -1589,34 +1586,36 @@ function addAttendance() {
   const date = document.getElementById('att-date').value;
   if (!name || !date) { alert('이름과 날짜를 모두 입력해주세요'); return; }
   const week = getCurrentWeek();
+  // 즉시 UI 반영
   const key = name + '_' + week;
   if (!attendance[key]) attendance[key] = [];
   attendance[key].push({ date, deduct, label });
-  localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
-  // Google Sheets 동기화
+  renderAll();
+  // API 저장 후 재조회로 동기화
   fetch(SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ action: 'addAttendance', name, week, date, label, deduct: String(deduct) })
-  }).catch(e => console.warn('근태 저장 동기화 실패:', e));
-  renderAll();
+  }).then(() => setTimeout(async () => { await fetchAttendance(); renderAll(); }, 1500))
+    .catch(e => console.warn('근태 저장 실패:', e));
 }
 
-function removeAtt(key, idx) {
+async function removeAtt(key, idx) {
   const item = attendance[key][idx];
+  // 즉시 UI 반영
   attendance[key].splice(idx, 1);
   if (!attendance[key].length) delete attendance[key];
-  localStorage.setItem('dashboard_attendance', JSON.stringify(attendance));
-  // Google Sheets 동기화
-  const sep = key.indexOf('_');
-  const rName = key.substring(0, sep);
-  const rWeek = key.substring(sep + 1);
+  renderAll();
+  // API 삭제 후 재조회로 동기화 (key = "이름_YY-WW")
+  const weekMatch = key.match(/_(\d{2}-\d{2})$/);
+  const rWeek = weekMatch ? weekMatch[1] : '';
+  const rName = rWeek ? key.slice(0, -(rWeek.length + 1)) : key;
   fetch(SCRIPT_URL, {
     method: 'POST', mode: 'no-cors',
     headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
     body: new URLSearchParams({ action: 'removeAttendance', name: rName, week: rWeek, date: item.date, label: item.label })
-  }).catch(e => console.warn('근태 삭제 동기화 실패:', e));
-  renderAll();
+  }).then(() => setTimeout(async () => { await fetchAttendance(); renderAll(); }, 1500))
+    .catch(e => console.warn('근태 삭제 실패:', e));
 }
 
 function toggleInterview(key, el) {
