@@ -790,9 +790,6 @@
   <button class="bottom-nav-btn" id="bnav-attendance" onclick="switchView('attendance','bottom')">
     <span class="bn-icon">📅</span><span>근태</span>
   </button>
-  <button class="bottom-nav-btn" id="bnav-unsubmitted" onclick="switchView('unsubmitted','bottom')">
-    <span class="bn-icon">🚨</span><span>미제출</span>
-  </button>
   <button class="bottom-nav-btn" id="bnav-config" onclick="switchView('config','bottom')">
     <span class="bn-icon">⚙️</span><span>설정</span>
   </button>
@@ -1698,10 +1695,13 @@ function renderUnsubmitted() {
   document.getElementById('unsubmitted-week-label').textContent = label;
 
   const el = document.getElementById('unsubmitted-content');
-  const allLeaders = [...new Map(
-    allData.filter(r => r.role === '팀장').map(r => [r.name, r])
-  ).values()];
 
+  // rosterMap 기준으로 전체 팀장 목록 (한 번도 제출 안 한 사람 포함)
+  const allLeaders = Object.entries(rosterMap)
+    .filter(([, info]) => info.role === '팀장')
+    .map(([name, info]) => ({ name, org: info.org || '' }));
+
+  // 이번 주 제출자 (score > 0)
   const weekData = allData.filter(r => r.week === week);
   const submittedNames = new Set(weekData.filter(r => r.score > 0).map(r => r.name));
   const unsubmitted = allLeaders.filter(r => !submittedNames.has(r.name));
