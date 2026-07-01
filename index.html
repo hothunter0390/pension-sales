@@ -249,27 +249,38 @@
     padding: 14px 16px; background: var(--surface2);
     border-radius: var(--radius-sm); margin-bottom: 16px; flex-wrap: wrap;
   }
-  .att-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .att-cards { display: flex; flex-direction: column; gap: 16px; }
+  .att-org-group {}
+  .att-org-label {
+    font-size: 11px; font-weight: 600; color: var(--text3);
+    text-transform: uppercase; letter-spacing: 0.06em;
+    padding: 0 2px; margin-bottom: 8px;
+  }
+  .att-org-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
   .att-card {
     border: 1px solid var(--border); border-radius: var(--radius);
-    padding: 14px 16px; background: var(--surface);
+    padding: 12px 14px; background: var(--surface);
   }
-  .att-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .att-card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
   .att-card-name { font-size: 13px; font-weight: 600; }
   .att-card-org { font-size: 11px; color: var(--text3); margin-left: 6px; font-weight: 400; }
-  .att-target { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: var(--amber-bg); color: var(--amber); font-weight: 500; }
-  .att-item { display: flex; justify-content: space-between; align-items: center; padding: 5px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+  .att-target { font-size: 11px; padding: 2px 8px; border-radius: 20px; background: var(--amber-bg); color: var(--amber); font-weight: 500; }
+  .att-section-divider { font-size: 10px; font-weight: 600; color: var(--text3); margin: 6px 0 4px; letter-spacing: 0.04em; }
+  .att-item { display: flex; justify-content: space-between; align-items: center; padding: 4px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
   .att-item:last-child { border-bottom: none; }
   .att-item-label { color: var(--text2); }
-  .att-item-right { display: flex; align-items: center; gap: 8px; }
-  .att-deduct { color: var(--red); font-weight: 500; }
+  .att-item-vac .att-item-label { color: var(--red); }
+  .att-item-trip .att-item-label { color: var(--blue); }
+  .att-item-right { display: flex; align-items: center; gap: 6px; }
+  .att-deduct { color: var(--red); font-weight: 600; font-size: 11px; }
+  .att-record-only { color: var(--blue); font-weight: 600; font-size: 11px; background: var(--blue-bg); padding: 1px 6px; border-radius: 4px; }
   .btn-del {
     font-size: 11px; padding: 2px 8px; border-radius: 4px;
     border: 1px solid var(--border); background: var(--surface);
     color: var(--text3); cursor: pointer; font-family: inherit;
   }
   .btn-del:hover { background: var(--red-bg); color: var(--red); border-color: var(--red); }
-  .att-empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; grid-column: 1/-1; }
+  .att-empty { text-align: center; padding: 32px; color: var(--text3); font-size: 13px; }
 
   /* ── 기준표 ── */
   .ref-table td, .ref-table th { font-size: 12px; }
@@ -681,11 +692,18 @@
         <div class="att-form-row">
           <select id="att-name"><option value="">이름 선택</option></select>
           <select id="att-type">
-            <option value="4">연차 (1일) −4점</option>
-            <option value="2">반차 (4시간) −2점</option>
-            <option value="1">반반차 (2시간) −1점</option>
-            <option value="4_biz">출장 (1일) −4점</option>
-            <option value="2_biz">출장 반일 −2점</option>
+            <optgroup label="🏖 휴가">
+              <option value="4|1일 휴가">1일 휴가 −4점</option>
+              <option value="2|오전 반차">오전 반차 −2점</option>
+              <option value="2|오후 반차">오후 반차 −2점</option>
+              <option value="1|오전 반반차">오전 반반차 −1점</option>
+              <option value="1|오후 반반차">오후 반반차 −1점</option>
+            </optgroup>
+            <optgroup label="✈️ 출장">
+              <option value="0|1일 출장">1일 출장 (기록만)</option>
+              <option value="0|오전 출장">오전 출장 (기록만)</option>
+              <option value="0|오후 출장">오후 출장 (기록만)</option>
+            </optgroup>
           </select>
           <input type="date" id="att-date">
           <button class="btn-primary" onclick="addAttendance()">+ 추가</button>
@@ -700,11 +718,11 @@
           <table class="ref-table">
             <thead><tr><th>유형</th><th>차감</th><th>산출 기준</th></tr></thead>
             <tbody>
-              <tr><td>연차 (1일)</td><td style="color:var(--red);font-weight:500">−4점</td><td class="td-muted">4점/일 × 1일</td></tr>
-              <tr><td>반차 (4시간)</td><td style="color:var(--red);font-weight:500">−2점</td><td class="td-muted">4점/일 × 0.5일</td></tr>
-              <tr><td>반반차 (2시간)</td><td style="color:var(--red);font-weight:500">−1점</td><td class="td-muted">4점/일 × 0.25일</td></tr>
-              <tr><td>출장 (1일)</td><td style="color:var(--red);font-weight:500">−4점</td><td class="td-muted">동일 적용</td></tr>
-              <tr><td>출장 반일</td><td style="color:var(--red);font-weight:500">−2점</td><td class="td-muted">동일 적용</td></tr>
+              <tr><td>1일 휴가</td><td style="color:var(--red);font-weight:500">−4점</td><td class="td-muted">4점/일 × 1일</td></tr>
+              <tr><td>오전/오후 반차</td><td style="color:var(--red);font-weight:500">−2점</td><td class="td-muted">4점/일 × 0.5일</td></tr>
+              <tr><td>오전/오후 반반차</td><td style="color:var(--red);font-weight:500">−1점</td><td class="td-muted">4점/일 × 0.25일</td></tr>
+              <tr><td>1일 출장</td><td style="color:var(--blue);font-weight:500">0점</td><td class="td-muted">기록만 (차감 없음)</td></tr>
+              <tr><td>오전/오후 출장</td><td style="color:var(--blue);font-weight:500">0점</td><td class="td-muted">기록만 (차감 없음)</td></tr>
             </tbody>
           </table>
         </div>
@@ -1482,37 +1500,72 @@ function fmtAttDate(dateStr) {
 // ── 근태 카드 ──
 function renderAttCards() {
   const week = getCurrentWeek();
-  const withAtt = [...new Set(allData.filter(r => r.week === week).map(r => r.name))]
-    .filter(name => {
-      const key = name + '_' + week;
-      return attendance[key] && attendance[key].length > 0;
-    });
+  // 근태 기록 있는 이름 전체 수집
+  const allAttNames = [...new Set(
+    Object.keys(attendance)
+      .filter(k => k.endsWith('_' + week))
+      .map(k => k.slice(0, -(week.length + 1)))
+  )];
   const container = document.getElementById('att-cards');
-  if (!withAtt.length) {
+  if (!allAttNames.length) {
     container.innerHTML = `<div class="att-empty">이번 주 등록된 근태 없음</div>`;
     return;
   }
-  container.innerHTML = withAtt.map(name => {
-    const r = allData.find(d => d.name === name && d.week === week) || {};
-    const key = name + '_' + week;
-    const items = attendance[key] || [];
-    const total = items.reduce((s, a) => s + a.deduct, 0);
-    const effTarget = Math.max(0, (r.target || TARGET_BASE) - total);
-    return `<div class="att-card">
-      <div class="att-card-head">
-        <div><span class="att-card-name">${name}</span><span class="att-card-org">${r.org || ''}</span></div>
-        <span class="att-target">목표 ${effTarget}점</span>
+  // 사업단 → 이름 순 정렬
+  allAttNames.sort((a, b) => {
+    const ra = allData.find(d => d.name === a) || {};
+    const rb = allData.find(d => d.name === b) || {};
+    return (ra.org || '').localeCompare(rb.org || '', 'ko') || a.localeCompare(b, 'ko');
+  });
+  // 사업단별 그룹화
+  const byOrg = {};
+  allAttNames.forEach(name => {
+    const r = allData.find(d => d.name === name) || {};
+    const org = r.org || '기타';
+    if (!byOrg[org]) byOrg[org] = [];
+    byOrg[org].push(name);
+  });
+  container.innerHTML = Object.entries(byOrg).map(([org, names]) => `
+    <div class="att-org-group">
+      <div class="att-org-label">📍 ${org}</div>
+      <div class="att-org-cards">
+        ${names.map(name => {
+          const r = allData.find(d => d.name === name && d.week === week) || {};
+          const key = name + '_' + week;
+          const items = attendance[key] || [];
+          const vacItems  = items.map((a,i) => ({...a, _i: i})).filter(a => a.deduct > 0);
+          const tripItems = items.map((a,i) => ({...a, _i: i})).filter(a => a.deduct === 0);
+          const totalDeduct = items.reduce((s, a) => s + a.deduct, 0);
+          const effTarget = Math.max(0, (r.target || TARGET_BASE) - totalDeduct);
+          return `<div class="att-card">
+            <div class="att-card-head">
+              <span class="att-card-name">${name}</span>
+              ${totalDeduct > 0 ? `<span class="att-target">보정목표 ${effTarget}점</span>` : '<span class="att-target" style="background:var(--blue-bg);color:var(--blue)">출장만</span>'}
+            </div>
+            ${vacItems.length ? `
+              <div class="att-section-divider">🏖 휴가</div>
+              ${vacItems.map(a => `
+                <div class="att-item att-item-vac">
+                  <span class="att-item-label">${fmtAttDate(a.date)} · ${a.label}</span>
+                  <div class="att-item-right">
+                    <span class="att-deduct">−${a.deduct}점</span>
+                    <button class="btn-del" onclick="removeAtt('${key}',${a._i})">삭제</button>
+                  </div>
+                </div>`).join('')}` : ''}
+            ${tripItems.length ? `
+              <div class="att-section-divider">✈️ 출장</div>
+              ${tripItems.map(a => `
+                <div class="att-item att-item-trip">
+                  <span class="att-item-label">${fmtAttDate(a.date)} · ${a.label}</span>
+                  <div class="att-item-right">
+                    <span class="att-record-only">기록</span>
+                    <button class="btn-del" onclick="removeAtt('${key}',${a._i})">삭제</button>
+                  </div>
+                </div>`).join('')}` : ''}
+          </div>`;
+        }).join('')}
       </div>
-      ${items.map((a, i) => `
-        <div class="att-item">
-          <span class="att-item-label">${fmtAttDate(a.date)} · ${a.label}</span>
-          <div class="att-item-right">
-            <span class="att-deduct">−${a.deduct}점</span>
-            <button class="btn-del" onclick="removeAtt('${key}',${i})">삭제</button>
-          </div>
-        </div>`).join('')}
-    </div>`;
-  }).join('');
+    </div>`).join('');
 }
 
 // ── 근태 추가/삭제/면담 ──
@@ -1531,8 +1584,8 @@ function populateAttNames() {
 function addAttendance() {
   const name = document.getElementById('att-name').value;
   const typeEl = document.getElementById('att-type');
-  const deduct = parseInt(typeEl.value);
-  const label = typeEl.options[typeEl.selectedIndex].text.split(' (')[0];
+  const [deductStr, label] = typeEl.value.split('|');
+  const deduct = parseInt(deductStr);
   const date = document.getElementById('att-date').value;
   if (!name || !date) { alert('이름과 날짜를 모두 입력해주세요'); return; }
   const week = getCurrentWeek();
