@@ -442,6 +442,20 @@ function getWeekStr(dateStr) {
   return String(d.getFullYear()).slice(2) + '-' + String(wk).padStart(2,'0');
 }
 function currentWeekStr() { return getWeekStr(todayStr()); }
+// "26-27" → "26년 7월 1주차" (시트 저장 형식)
+function weekStrToLabel(wkStr) {
+  const [yy, ww] = wkStr.split('-').map(Number);
+  const year = 2000 + yy;
+  const jan4 = new Date(year, 0, 4);
+  const week1Mon = new Date(jan4.getTime() - ((jan4.getDay() + 6) % 7) * 86400000);
+  const mon = new Date(week1Mon.getTime() + (ww - 1) * 7 * 86400000);
+  const thu = new Date(mon.getTime() + 3 * 86400000);
+  const month = thu.getMonth() + 1;
+  const firstOfMonth = new Date(thu.getFullYear(), thu.getMonth(), 1);
+  const firstThu = new Date(firstOfMonth.getTime() + ((4 - firstOfMonth.getDay() + 7) % 7) * 86400000);
+  const weekOfMonth = Math.floor((thu - firstThu) / (7 * 86400000)) + 1;
+  return `${yy}년 ${month}월 ${weekOfMonth}주차`;
+}
 
 let currentTab = 'input';
 function switchTab(tab) {
@@ -677,7 +691,8 @@ async function loadRecords() {
     let deduct = 0;
     try {
       const attData = await fetch(SCRIPT_URL + '?action=getAttendance&t=' + Date.now()).then(r => r.json());
-      deduct = attData.filter(r => r.name === NAME && r.week === weekStr).reduce((s, r) => s + Number(r.deduct), 0);
+      const weekLabel = weekStrToLabel(weekStr); // "26년 7월 1주차"
+      deduct = attData.filter(r => r.name === NAME && (r.week === weekLabel || r.week === weekStr)).reduce((s, r) => s + Number(r.deduct), 0);
     } catch(e) {}
 
     let total = 0, 신규 = 0, 펀드 = 0, 단체 = 0;
@@ -786,7 +801,7 @@ async function submitAtt() {
   btn.disabled = true;
   btn.innerHTML = '<div class="spinner"></div> 등록 중...';
   const date = document.getElementById('att-date').value || todayStr();
-  const week = getWeekStr(date);
+  const week = weekStrToLabel(getWeekStr(date)); // "26년 7월 1주차" 형식으로 저장
   try {
     await fetch(SCRIPT_URL, {
       method: 'POST', mode: 'no-cors',
@@ -819,8 +834,10 @@ async function loadAttRecords() {
   try {
     const res  = await fetch(SCRIPT_URL + '?action=getAttendance&t=' + Date.now());
     const rows = await res.json();
-    const week = currentWeekStr();
-    const mine = rows.filter(r => r.name === NAME && r.week === week);
+    const weekInternal = currentWeekStr();          // "26-27"
+    const weekLabel    = weekStrToLabel(weekInternal); // "26년 7월 1주차"
+    // 신규(라벨 형식) & 구형("26-27") 모두 매칭
+    const mine = rows.filter(r => r.name === NAME && (r.week === weekLabel || r.week === weekInternal));
     if (!mine.length) {
       el.innerHTML = '<div class="no-data"><div class="no-icon">✅</div>이번 주 근태 기록 없음</div>';
       return;
