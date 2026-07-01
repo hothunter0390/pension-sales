@@ -503,14 +503,9 @@ function checkReady() {
 let orgNames = [], orgFocusIdx = -1;
 async function loadOrgNames() {
   try {
-    const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`);
-    const text = await resp.text();
-    const rows = parseCSV(text);
-    if (rows.length < 2) { orgNames = []; return; }
-    const hdr = rows[0].map(h => h.trim());
-    const orgCol = hdr[0] === '제출시각' ? 5 : 9;
+    const rows = await fetch(SCRIPT_URL + '?action=getActivityLog&t=' + Date.now()).then(r => r.json());
     const set = new Set();
-    rows.slice(1).forEach(r => { const v = (r[orgCol] || '').trim(); if (v) set.add(v); });
+    rows.forEach(r => { if (r.orgName) set.add(r.orgName); });
     orgNames = [...set].sort((a,b) => a.localeCompare(b, 'ko'));
   } catch(e) { orgNames = []; }
 }
@@ -673,57 +668,72 @@ async function loadRecords() {
   el.innerHTML = '<div class="loading-wrap"><div class="ls"></div><br>불러오는 중...</div>';
   if (!NAME) { el.innerHTML = '<div class="no-data"><div class="no-icon">⚠️</div>개인 링크로 접속해 주세요</div>'; return; }
   try {
-    if (!cachedRows) {
-      const resp = await fetch(`https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${LOG_GID}`);
-      cachedRows = parseCSV(await resp.text());
-    }
-    const rows = cachedRows;
-    if (rows.length < 2) { el.innerHTML = noDataHTML(); return; }
-    const header = rows[0].map(h => h.trim());
-    const fmt = header[0] === '제출시각' ? 'v3' : header[0] === '행ID' ? 'v2' : 'legacy';
-    let myRows;
-    if (fmt === 'v3') myRows = rows.slice(1).filter(r => r[3] === NAME && getWeekStr(r[1]) === weekStr);
-    else if (fmt === 'v2') myRows = rows.slice(1).filter(r => r[5] === NAME && r[3] === weekStr);
-    else myRows = rows.slice(1).filter(r => r[4] === NAME && r[2] === weekStr);
+    // API 실시간 조회 (캐시 없음 — 항상 최신)
+    cachedRows = await fetch(SCRIPT_URL + '?action=getActivityLog&t=' + Date.now()).then(r => r.json());
+    if (!Array.isArray(cachedRows) || !cachedRows.length) { el.innerHTML = noDataHTML(); return; }
+    const myRows = cachedRows.filter(r => r.name === NAME && getWeekStr(r.actDate) === weekStr);
+
+    // 근태 차감 조회
+    let deduct = 0;
+    try {
+      const attData = await fetch(SCRIPT_URL + '?action=getAttendance&t=' + Date.now()).then(r => r.json());
+      deduct = attData.filter(r => r.name === NAME && r.week === weekStr).reduce((s, r) => s + Number(r.deduct), 0);
+    } catch(e) {}
+
     let total = 0, 신규 = 0, 펀드 = 0, 단체 = 0;
     myRows.forEach(r => {
-      const score = parseFloat(fmt==='v3'?r[10]:fmt==='v2'?r[12]:r[9]) || 0;
-      const purpose = fmt==='v3'?r[7]:fmt==='v2'?r[7]:r[6];
-      total += score;
-      if (purpose==='신규발굴') 신규++; else if (purpose==='펀드상담') 펀드++; else if (purpose==='단체관리') 단체++;
+      total += r.score || 0;
+      if (r.purpose === '신규발굴') 신규++;
+      else if (r.purpose === '펀드상담') 펀드++;
+      else if (r.purpose === '단체관리') 단체++;
     });
-    const target = 20, pct = Math.min(100, Math.round(total/target*100)), reached = total >= target;
+
+    const TARGET_BASE = 20;
+    const effTarget = Math.max(0, TARGET_BASE - deduct);
+    const pct = effTarget > 0 ? Math.min(100, Math.round(total / effTarget * 100)) : 100;
+    const reached = total >= effTarget;
+
     rowCache.clear();
     const pbMap = {신규발굴:'pb0', 펀드상담:'pb1', 단체관리:'pb2'};
     const itemsHTML = [...myRows].reverse().map(r => {
-      let submitTime, date, purpose, method, category, orgName, scheme, content, score, canEdit;
-      if (fmt==='v3') {
-        submitTime=r[0]; date=r[1]; category=r[4]; orgName=r[5]; scheme=r[6]; purpose=r[7]; method=r[8]; content=r[9]; score=parseFloat(r[10])||0; canEdit=true;
-        rowCache.set(submitTime, {submitTime,actDate:date,category,orgName,scheme,purpose,method,content,score});
-      } else if (fmt==='v2') {
-        submitTime=r[1]; date=r[2]; purpose=r[7]; method=r[8]; orgName=r[9]; content=r[11]; score=parseFloat(r[12])||0; category=''; scheme=''; canEdit=false;
-      } else {
-        date=r[1]; purpose=r[6]; score=parseFloat(r[9])||0; method='—'; orgName='—'; content='—'; category=''; scheme=''; canEdit=false;
-      }
-      const extras = [orgName&&orgName!=='—'?`🏢 ${orgName}`:'', category?`[${category}]`:'', scheme?`[${scheme}]`:'', content&&content!=='—'?content:''].filter(Boolean).join('  ');
+      rowCache.set(r.submitTime, {
+        submitTime: r.submitTime, actDate: r.actDate, category: r.category,
+        orgName: r.orgName, scheme: r.scheme, purpose: r.purpose,
+        method: r.method, content: r.content, score: r.score
+      });
+      const extras = [
+        r.orgName ? `🏢 ${r.orgName}` : '',
+        r.category ? `[${r.category}]` : '',
+        r.scheme ? `[${r.scheme}]` : '',
+        r.content || ''
+      ].filter(Boolean).join('  ');
       return `<div class="act-item">
-        <div class="act-item-top"><span class="act-date">📅 ${date}</span><span class="act-score">+${score}점</span></div>
-        <div class="act-badges"><span class="pb ${pbMap[purpose]||''}">${purpose||'—'}</span>${method&&method!=='—'?`<span class="mb">${method}</span>`:''}</div>
+        <div class="act-item-top"><span class="act-date">📅 ${r.actDate}</span><span class="act-score">+${r.score}점</span></div>
+        <div class="act-badges"><span class="pb ${pbMap[r.purpose]||''}">${r.purpose||'—'}</span>${r.method?`<span class="mb">${r.method}</span>`:''}</div>
         ${extras?`<div class="act-detail">${extras}</div>`:''}
-        ${canEdit?`<div class="act-actions">
-          <button class="btn-edit" data-key="${encodeURIComponent(submitTime)}" onclick="editActivity(rowCache.get(decodeURIComponent(this.dataset.key)))">✏️ 수정</button>
-          <button class="btn-del-act" data-key="${encodeURIComponent(submitTime)}" onclick="deleteActivity(decodeURIComponent(this.dataset.key))">🗑️ 삭제</button>
-        </div>`:''}
+        <div class="act-actions">
+          <button class="btn-edit" data-key="${encodeURIComponent(r.submitTime)}" onclick="editActivity(rowCache.get(decodeURIComponent(this.dataset.key)))">✏️ 수정</button>
+          <button class="btn-del-act" data-key="${encodeURIComponent(r.submitTime)}" onclick="deleteActivity(decodeURIComponent(this.dataset.key))">🗑️ 삭제</button>
+        </div>
       </div>`;
     }).join('') || `<div class="no-data"><div class="no-icon">📭</div>이 주에 기록된 활동이 없습니다</div>`;
+
+    const deductBadge = deduct > 0
+      ? `<div style="font-size:12px;color:rgba(255,255,255,0.75);margin-top:8px">🏖 근태 차감 −${deduct}점 · 보정목표 ${effTarget}점</div>`
+      : '';
+
     el.innerHTML = `
       <div class="score-card">
         <div class="score-card-top">
-          <div><div class="score-card-label">주간 합산 점수</div><div class="score-card-value">${total}<span style="font-size:16px;font-weight:400;opacity:0.7"> / ${target}점</span></div></div>
+          <div>
+            <div class="score-card-label">주간 합산 점수</div>
+            <div class="score-card-value">${total}<span style="font-size:16px;font-weight:400;opacity:0.7"> / ${effTarget}점</span></div>
+          </div>
           <span class="score-card-badge ${reached?'reached':''}">${reached?'✅ 달성':`${pct}%`}</span>
         </div>
         <div class="prog-bg"><div class="prog-fill" style="width:${pct}%"></div></div>
-        <div class="prog-label">목표 ${target}점 중 ${total}점 달성</div>
+        <div class="prog-label">목표 ${effTarget}점 중 ${total}점 달성</div>
+        ${deductBadge}
       </div>
       <div class="stat-grid">
         <div class="stat-item blue"><div class="stat-val">${신규}</div><div class="stat-label">신규발굴</div></div>
@@ -845,24 +855,18 @@ async function deleteAtt(date, label, week) {
 }
 
 function downloadMyCSV(scope) {
-  if (!cachedRows || cachedRows.length < 2) { alert('먼저 기록을 불러온 후 다운로드해 주세요.'); return; }
-  const header = cachedRows[0].map(h => h.trim());
-  const fmt    = header[0]==='제출시각'?'v3':header[0]==='행ID'?'v2':'legacy';
+  if (!cachedRows || !cachedRows.length) { alert('먼저 기록을 불러온 후 다운로드해 주세요.'); return; }
   const weekStr = getOffsetWeekStr(viewWeekOffset);
-  let rows;
-  if (fmt==='v3') { rows = cachedRows.slice(1).filter(r => r[3]===NAME); if (scope==='week') rows = rows.filter(r => getWeekStr(r[1])===weekStr); }
-  else if (fmt==='v2') { rows = cachedRows.slice(1).filter(r => r[5]===NAME); if (scope==='week') rows = rows.filter(r => r[3]===weekStr); }
-  else { rows = cachedRows.slice(1).filter(r => r[4]===NAME); if (scope==='week') rows = rows.filter(r => r[2]===weekStr); }
+  let rows = cachedRows.filter(r => r.name === NAME);
+  if (scope === 'week') rows = rows.filter(r => getWeekStr(r.actDate) === weekStr);
   if (!rows.length) { alert('다운로드할 데이터가 없습니다.'); return; }
-  let csvHeader, csvRows;
-  if (fmt==='v3') { csvHeader=['활동일자','소속','이름','단체구분','단체명','제도','활동목적','활동방식','내용','점수']; csvRows=rows.map(r=>[r[1],r[2],r[3],r[4],r[5],r[6],r[7],r[8],r[9],r[10]]); }
-  else if (fmt==='v2') { csvHeader=['활동일자','주차','소속','이름','활동목적','활동방식','단체명','담당자','내용','점수']; csvRows=rows.map(r=>[r[2],r[3],r[4],r[5],r[7],r[8],r[9],r[10],r[11],r[12]]); }
-  else { csvHeader=['활동일자','소속','이름','활동목적','점수']; csvRows=rows.map(r=>[r[1],r[3],r[4],r[6],r[9]]); }
+  const csvHeader = ['활동일자','소속','이름','단체구분','단체명','제도','활동목적','활동방식','내용','점수'];
+  const csvRows   = rows.map(r => [r.actDate, r.org, r.name, r.category, r.orgName, r.scheme, r.purpose, r.method, r.content, r.score]);
   const csv  = [csvHeader,...csvRows].map(r => r.map(c => `"${String(c||'').replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob = new Blob(['﻿'+csv], {type:'text/csv;charset=utf-8'});
   const a = document.createElement('a');
   a.href = URL.createObjectURL(blob);
-  a.download = scope==='week' ? `${NAME}_활동기록_${weekStr}주.csv` : `${NAME}_활동기록_전체.csv`;
+  a.download = scope === 'week' ? `${NAME}_활동기록_${weekStr}주.csv` : `${NAME}_활동기록_전체.csv`;
   a.click();
 }
 
